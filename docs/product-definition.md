@@ -260,3 +260,22 @@ implementation, not after it.
 | PWA + App Router service-worker quirks | Custom SW kept small; offline shell tested early, not at the end |
 | Tone drift toward "game" | Design principles + copy review against the unchangeable contract on every feature |
 | Solo-founder maintenance load (Next.js full-stack) | Thin data layer, small dependency list, no premature abstraction |
+
+---
+
+## 12. As-built notes (v1.0, 2026-10-05)
+
+Deviations from the spec above, made during implementation and documented
+for future maintainers:
+
+1. **Settings storage**: settings live in `localStorage` via Zustand, not a
+   Dexie table. Theme must resolve synchronously before first paint; the
+   Dexie store holds events and progress only.
+2. **Quest titles/descriptions are derived** (dhikr name + target) rather
+   than stored per tier - 17 quests, zero duplicated copy.
+3. **Review states**: `draft` -> `verified` (references cross-checked by an
+   automated research pass against archived sunnah.com pages and
+   independent databases) -> `reviewed` (human scholar; the production
+   gate). Only `reviewed` content ships in production builds.
+4. **Focus mode**: counter/completion/share hide the bottom nav via the
+   shell (`/quest/*/{count,complete,share}`), not route groups.

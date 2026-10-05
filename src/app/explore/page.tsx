@@ -1,10 +1,153 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  CATEGORIES,
+  dhikrForQuest,
+  publicQuests,
+  type CategoryId,
+} from "@/lib/content";
+import { getAllProgress, type QuestProgress } from "@/lib/db/events";
+
+type Filter = "all" | CategoryId;
+
+const FILTERS: Array<{ id: Filter; label: string }> = [
+  { id: "all", label: "All" },
+  ...CATEGORIES.map((category) => ({ id: category.id as Filter, label: category.name.en })),
+];
+
 export default function ExplorePage() {
+  const [filter, setFilter] = useState<Filter>("all");
+  const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAllProgress()
+      .then((map) => {
+        if (!cancelled) setProgress(map);
+      })
+      .catch(() => {
+        if (!cancelled) setProgress(new Map());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const quests = publicQuests().filter(
+    (quest) => filter === "all" || dhikrForQuest(quest).category === filter,
+  );
+
   return (
     <div className="flex flex-1 flex-col">
-      <h1 className="rise font-display text-[2rem] text-ink">Explore</h1>
-      <p className="rise mt-2 text-sm leading-relaxed text-ink-2 [animation-delay:80ms]">
-        Quests by category are landing in the next build.
-      </p>
+      <header className="rise">
+        <h1 className="font-display text-[2rem] text-ink">Explore</h1>
+        <p className="mt-1 text-sm text-ink-2">
+          Choose a quest at your own pace.
+        </p>
+      </header>
+
+      <div
+        className="rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms]"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <div className="flex w-max gap-2">
+          {FILTERS.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setFilter(id)}
+              aria-pressed={filter === id}
+              className={`h-9 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors ${
+                filter === id
+                  ? "border-accent bg-accent text-on-accent"
+                  : "border-line bg-surface text-ink-2 hover:text-ink"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {progress === null ? (
+        <div className="mt-5 space-y-3" aria-hidden="true">
+          {[0, 1, 2, 3].map((index) => (
+            <div key={index} className="h-[72px] animate-pulse rounded-2xl bg-surface" />
+          ))}
+        </div>
+      ) : (
+        <ul className="rise mt-5 space-y-3 [animation-delay:140ms]">
+          {quests.map((quest) => {
+            const dhikr = dhikrForQuest(quest);
+            const entry = progress.get(quest.id);
+            const complete = Boolean(entry?.completedAt);
+            const categoryName = CATEGORIES.find(
+              (category) => category.id === dhikr.category,
+            )?.name.en;
+            return (
+              <li key={quest.id}>
+                <Link
+                  href={`/quest/${quest.id}`}
+                  className="flex min-h-[72px] items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-accent-deep/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-[17px] text-ink">
+                      {dhikr.names.en}
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink-3">
+                      {quest.target.toLocaleString("en-US")}x
+                      {categoryName ? ` - ${categoryName}` : ""}
+                    </p>
+                  </div>
+                  {complete ? (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-jade">
+                      <CheckIcon />
+                      Complete
+                    </span>
+                  ) : entry && entry.count > 0 ? (
+                    <span className="text-xs font-medium text-ink-2">
+                      {entry.count.toLocaleString("en-US")} /{" "}
+                      {quest.target.toLocaleString("en-US")}
+                    </span>
+                  ) : (
+                    <ChevronIcon />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 8.5 6.5 11.5 12.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+      <path
+        d="M6 3.5 10.5 8 6 12.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="text-ink-3"
+      />
+    </svg>
   );
 }

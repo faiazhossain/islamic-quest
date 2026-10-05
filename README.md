@@ -1,40 +1,76 @@
-# islamic-quest
+# Amal Quest
 
-**Amal Quest** is a free, offline-first PWA that helps Muslims build a
-consistent personal dhikr practice through quests, milestones, and a visual
-journey. Choose a quest, count with a calm counter, and watch your journey of
-light grow.
+A free, offline-first PWA for Dhikr: choose a quest, count with intention,
+and grow a journey of light. Worship stays personal; rewards stay
+product-level.
+
+**The product contract** (see `docs/product-definition.md`):
+
+- Never claims to measure sawab, rank believers, or promise religious reward
+- No ads, no subscription, no paywalls; Hadiya never gates anything
+- Worship history is private by default; sharing is always explicit
+- Offline counting is non-negotiable
+- Religious content is cited and scholar-reviewed before public launch
+
+## Stack
+
+Next.js 16 (App Router) - TypeScript - Tailwind v4 - Dexie (IndexedDB) -
+Zustand - Auth.js v5 (optional) - Postgres via Neon (optional)
+
+Progress is event-sourced on-device: every tap appends an immutable event in
+IndexedDB; progress is a derived, rebuildable cache. Cloud sync, when
+configured, ships the same events to Postgres idempotently.
 
 ## Getting started
 
-```bash
+```sh
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The app is fully functional with no configuration. For optional cloud sync:
+
+```sh
+cp .env.example .env.local   # fill in what you have
+npm run db:push              # apply db/schema.sql to your Postgres
+```
+
+Env vars: `AUTH_SECRET`, `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` (Google
+sign-in), `AUTH_RESEND_KEY`/`EMAIL_FROM` (magic links), `DATABASE_URL`
+(Neon Postgres). Missing vars simply disable sync - never the app.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Create a production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | Run ESLint |
-| `npm run test` | Run Vitest |
-| `npm run icons` | Regenerate PWA icons from `scripts/icon-maskable.svg` |
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm run build` / `npm start` | Production build / serve |
+| `npm run validate` | Lint + tests + production build (runs after every phase) |
+| `npm test` | Vitest (event log, sync merge) |
+| `npm run icons` | Regenerate PWA icons from `src/app/icon.svg` |
+| `npm run db:push` | Apply `db/schema.sql` to `DATABASE_URL` |
 
-## Tech stack
+## Religious content
 
-- Next.js (App Router) and React
-- Tailwind CSS with design tokens defined in `src/app/globals.css`
-- Dexie (IndexedDB) for offline-first storage
-- Zustand for state management
-- Motion for animation
-- Vitest for unit tests
+Content lives in `src/lib/content/` as typed data - never fetched or
+generated at runtime. Each dhikr carries:
 
-## Documentation
+- `source` (collection + reference) and `review.status`:
+  - `draft` - initial entry
+  - `verified` - references cross-checked against public hadith databases
+  - `reviewed` - a human scholar has signed off
 
-- `docs/product-definition.md` — product summary, scope, and guardrails
-- `docs/tasks.md` — task breakdown and progress log
+Production builds show **only** `reviewed` content (`isQuestPublic()` in
+`src/lib/content/index.ts`). Launch is gated on the human scholar pass;
+references must never be filled from memory.
+
+## Deploying
+
+Any Next.js host (Vercel works as-is). Static assets and the app shell are
+served by the built-in service worker (`public/sw.js`) for offline use; API
+routes are never cached.
+
+## Docs
+
+- `docs/product-definition.md` - scope, flows, data model, architecture
+- `docs/tasks.md` - implementation tracker and progress log

@@ -16,7 +16,11 @@ export interface DhikrSource {
 }
 
 export interface ContentReview {
-  status: "draft" | "reviewed";
+  status: "draft" | "verified" | "reviewed";
+  /** Where the citation was cross-checked (automated research pass). */
+  verifiedSources?: string[];
+  verifiedAt?: string;
+  /** The human scholar who signed off (launch gate). */
   reviewer?: string;
   reviewedAt?: string;
 }

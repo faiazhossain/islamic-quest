@@ -18,8 +18,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "I seek Allah's forgiveness." },
     category: "istighfar",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "6307; 2702",
+      note: "Bukhari 6307 (Abu Huraira): more than seventy times a day. Muslim 2702 (al-Agharr al-Muzani): a hundred times a day.",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:6307", "sunnah.com/muslim:2702"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "sayyid-ul-istighfar",
@@ -33,8 +41,16 @@ export const DHIKR: Dhikr[] = [
     },
     category: "istighfar",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari",
+      reference: "6306",
+      note: "Narrator: Shaddad ibn Aws. Parallel: Jami at-Tirmidhi 3393 (Sahih, Darussalam grading).",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:6306", "sunnah.com/tirmidhi:3393"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "subhanallah",
@@ -44,8 +60,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "Glory be to Allah." },
     category: "tasbih",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "843; 596a; 5362",
+      note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "alhamdulillah",
@@ -55,8 +79,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "All praise is for Allah." },
     category: "tasbih",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "843; 596a; 5362",
+      note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "allahu-akbar",
@@ -66,8 +98,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "Allah is the Greatest." },
     category: "tasbih",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "843; 596a; 5362",
+      note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "la-ilaha-illallah",
@@ -77,8 +117,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "There is no god but Allah." },
     category: "dhikr",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Jami at-Tirmidhi",
+      reference: "3383",
+      note: "Jabir ibn Abdillah. Graded Hasan (Darussalam). Cited alone deliberately: no Bukhari/Muslim narration states this exact phrasing.",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/tirmidhi:3383"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "subhanallahi-wa-bihamdihi",
@@ -88,8 +136,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "Glory be to Allah, and praise is His." },
     category: "tasbih",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "6405; 2691",
+      note: "Abu Huraira. One hundred times a day. In Muslim 2691 this tasbih appears within a longer narration.",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:6405", "sunnah.com/muslim:2691"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "hawqala",
@@ -99,8 +155,16 @@ export const DHIKR: Dhikr[] = [
     meaning: { en: "There is no might nor power except with Allah." },
     category: "dhikr",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "6384; 2704",
+      note: "Abu Musa al-Ash'ari. Parallels: Bukhari 6610, 7386.",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:6384", "sunnah.com/muslim:2704"],
+      verifiedAt: "2026-10-05",
+    },
   },
   {
     id: "salawat-ibrahimiyya",
@@ -114,7 +178,15 @@ export const DHIKR: Dhikr[] = [
     },
     category: "salawat",
     practiceGuidance: { en: "Any time." },
-    source: { collection: "", reference: "" },
-    review: { status: "draft" },
+    source: {
+      collection: "Sahih al-Bukhari; Sahih Muslim",
+      reference: "3370; 406",
+      note: "Ka'b ibn Ujrah. Parallels: Bukhari 4797, 6357; Tirmidhi 483 (hasan sahih gharib).",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["sunnah.com/bukhari:3370", "sunnah.com/muslim:406"],
+      verifiedAt: "2026-10-05",
+    },
   },
 ];

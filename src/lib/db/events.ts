@@ -1,5 +1,7 @@
 import { db, type ProgressEvent, type QuestProgress } from "./db";
 
+export type { ProgressEvent, ProgressEventType, QuestProgress } from "./db";
+
 const newId = (): string => {
   if (typeof crypto === "undefined" || typeof crypto.randomUUID !== "function") {
     throw new Error("crypto.randomUUID is unavailable; a secure context is required");
@@ -88,3 +90,17 @@ export const getUnsyncedEvents = (): Promise<ProgressEvent[]> =>
 /** Returns the number of events flipped to synced. */
 export const markEventsSynced = (ids: string[]): Promise<number> =>
   db.events.where("id").anyOf(ids).modify({ synced: 1 });
+
+/** Recomputes the derived cache for every quest that has events. */
+export async function recomputeAllQuests(): Promise<void> {
+  const questIds = await db.events.orderBy("questId").uniqueKeys();
+  for (const questId of questIds) {
+    await recomputeProgress(String(questId));
+  }
+}
+
+/** Epoch ms of the earliest event, for the Journey "days practiced" stat. */
+export async function getFirstEventAt(): Promise<number | undefined> {
+  const first = await db.events.orderBy("at").first();
+  return first?.at;
+}

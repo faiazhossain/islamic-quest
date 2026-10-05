@@ -25,6 +25,7 @@
   --accent-deep: #c79b4e;
   --on-accent: #211905;
   --jade: #8ad6b5;
+  --danger: #e08a84;
   --glow: rgb(240 200 119 / 0.12);
   --lattice: rgb(240 200 119 / 0.055);
   --shadow-card: 0 24px 48px -28px rgb(3 6 18 / 0.9);
@@ -45,6 +46,7 @@
   --accent-deep: #c79b4e;
   --on-accent: #fff8ec;
   --jade: #2e7d5f;
+  --danger: #b04a44;
   --glow: rgb(169 120 47 / 0.11);
   --lattice: rgb(33 41 65 / 0.05);
   --shadow-card: 0 24px 44px -30px rgb(33 41 65 / 0.45);
@@ -64,6 +66,7 @@
   --color-accent-deep: var(--accent-deep);
   --color-on-accent: var(--on-accent);
   --color-jade: var(--jade);
+  --color-danger: var(--danger);
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-hanken), system-ui, sans-serif;
   --font-arabic: var(--font-amiri), serif;
@@ -140,6 +143,23 @@
 
 .bloom {
   animation: bloom 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Counter number feedback on each tap. Retriggered via key change. */
+@keyframes count-pulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.count-pulse {
+  animation: count-pulse 130ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
