@@ -13,17 +13,17 @@ can interleave unless a dependency says otherwise.
 
 | ID | Task | Depends on | Status |
 |---|---|---|---|
-| A1 | Scaffold Next.js (App Router, TS, Tailwind), git init | — | in_progress |
-| A2 | Design tokens + base styles (color, type, spacing, radius, motion, themes) | A1 | todo |
-| A3 | App shell: layout, bottom nav, safe-area, theme handling | A2 | todo |
-| A4 | PWA: manifest, icons, service worker, offline shell | A3 | todo |
-| A5 | Typed content model + quest data file structure (content fill gated on scholar review) | A1 | todo |
+| A1 | Scaffold Next.js (App Router, TS, Tailwind), git init | — | done |
+| A2 | Design tokens + base styles (color, type, spacing, radius, motion, themes) | A1 | done |
+| A3 | App shell: layout, bottom nav, safe-area, theme handling | A2 | done |
+| A4 | PWA: manifest, icons, service worker, offline shell | A3 | done |
+| A5 | Typed content model + quest data file structure (content fill gated on scholar review) | A1 | done |
 
 ## Phase B — Core loop
 
 | ID | Task | Depends on | Status |
 |---|---|---|---|
-| B1 | Dexie schema, event log, progress repositories + unit tests | A1 | todo |
+| B1 | Dexie schema, event log, progress repositories + unit tests | A1 | done |
 | B2 | Explore screen (categories, quest list) | A3, A5 | todo |
 | B3 | Quest detail screen (content, citation, start) | B2 | todo |
 | B4 | Counter: tap, undo, haptics, wake lock, derived milestones, persistence | B1, B2 | todo |
@@ -62,3 +62,9 @@ can interleave unless a dependency says otherwise.
 ## Progress log
 
 - 2026-10-05 — Product definition approved. A1 started.
+- 2026-10-05 — Phases A + B1 complete: design system tokens ("night before
+  dawn" identity, Fraunces / Hanken Grotesk / Amiri), app shell with bottom
+  nav + safe areas, PWA (manifest, generated icons, hand-rolled SW), typed
+  content model with a production review gate, Dexie event log with derived
+  progress + 7 passing tests. Build, lint, tests, and a prod-server smoke
+  test all green.

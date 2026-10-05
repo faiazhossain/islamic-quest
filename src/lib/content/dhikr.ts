@@ -1,0 +1,120 @@
+import type { Dhikr } from "./types";
+
+/**
+ * Draft catalog (2026-10-05). Text below is the widely memorized form of
+ * each dhikr; Arabic and translations still need a proofread pass.
+ *
+ * TODO(verify, task E1): fill source.collection and source.reference from
+ * the established compilation, then a scholar or student of knowledge
+ * flips review.status to "reviewed". Quests whose dhikr is not reviewed
+ * are excluded from production builds by isQuestPublic() in index.ts.
+ */
+export const DHIKR: Dhikr[] = [
+  {
+    id: "astaghfirullah",
+    names: { en: "Astaghfirullah" },
+    arabic: "أَسْتَغْفِرُ اللَّهَ",
+    transliteration: "Astaghfirullah",
+    meaning: { en: "I seek Allah's forgiveness." },
+    category: "istighfar",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "sayyid-ul-istighfar",
+    names: { en: "Sayyid al-Istighfar" },
+    arabic:
+      "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+    transliteration:
+      "Allahumma anta Rabbi, la ilaha illa anta, khalaqtani wa ana 'abduka, wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abu'u laka bini'matika 'alayya, wa abu'u bidhanbi, faghfir li, fa innahu la yaghfirudh-dhunuba illa anta.",
+    meaning: {
+      en: "O Allah, You are my Lord; there is no god but You. You created me and I am Your servant. I keep Your covenant and promise as much as I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favor upon me and I acknowledge my sin, so forgive me — none forgives sins but You.",
+    },
+    category: "istighfar",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "subhanallah",
+    names: { en: "Subhanallah" },
+    arabic: "سُبْحَانَ اللَّهِ",
+    transliteration: "Subhanallah",
+    meaning: { en: "Glory be to Allah." },
+    category: "tasbih",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "alhamdulillah",
+    names: { en: "Alhamdulillah" },
+    arabic: "الْحَمْدُ لِلَّهِ",
+    transliteration: "Alhamdulillah",
+    meaning: { en: "All praise is for Allah." },
+    category: "tasbih",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "allahu-akbar",
+    names: { en: "Allahu Akbar" },
+    arabic: "اللَّهُ أَكْبَرُ",
+    transliteration: "Allahu Akbar",
+    meaning: { en: "Allah is the Greatest." },
+    category: "tasbih",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "la-ilaha-illallah",
+    names: { en: "La ilaha illallah" },
+    arabic: "لَا إِلَهَ إِلَّا اللَّهُ",
+    transliteration: "La ilaha illallah",
+    meaning: { en: "There is no god but Allah." },
+    category: "dhikr",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "subhanallahi-wa-bihamdihi",
+    names: { en: "Subhanallahi wa bihamdih" },
+    arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+    transliteration: "Subhanallahi wa bihamdih",
+    meaning: { en: "Glory be to Allah, and praise is His." },
+    category: "tasbih",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "hawqala",
+    names: { en: "Hawqala" },
+    arabic: "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+    transliteration: "La hawla wa la quwwata illa billah",
+    meaning: { en: "There is no might nor power except with Allah." },
+    category: "dhikr",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+  {
+    id: "salawat-ibrahimiyya",
+    names: { en: "Salawat (Ibrahimiyya)" },
+    arabic:
+      "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ",
+    transliteration:
+      "Allahumma salli 'ala Muhammadin wa 'ala ali Muhammadin, kama sallayta 'ala Ibrahima wa 'ala ali Ibrahima, innaka Hamidum Majid. Allahumma barik 'ala Muhammadin wa 'ala ali Muhammadin, kama barakta 'ala Ibrahima wa 'ala ali Ibrahima, innaka Hamidum Majid.",
+    meaning: {
+      en: "O Allah, send blessings upon Muhammad and the family of Muhammad, as You sent blessings upon Ibrahim and the family of Ibrahim. You are Praiseworthy, Glorious. O Allah, bless Muhammad and the family of Muhammad, as You blessed Ibrahim and the family of Ibrahim. You are Praiseworthy, Glorious.",
+    },
+    category: "salawat",
+    practiceGuidance: { en: "Any time." },
+    source: { collection: "", reference: "" },
+    review: { status: "draft" },
+  },
+];
