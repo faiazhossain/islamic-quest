@@ -24,7 +24,8 @@ export const DHIKR: Dhikr[] = [
       note: "Bukhari 6307 (Abu Huraira): more than seventy times a day. Muslim 2702 (al-Agharr al-Muzani): a hundred times a day.",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:6307", "sunnah.com/muslim:2702"],
       verifiedAt: "2026-10-05",
     },
@@ -47,7 +48,8 @@ export const DHIKR: Dhikr[] = [
       note: "Narrator: Shaddad ibn Aws. Parallel: Jami at-Tirmidhi 3393 (Sahih, Darussalam grading).",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:6306", "sunnah.com/tirmidhi:3393"],
       verifiedAt: "2026-10-05",
     },
@@ -66,7 +68,8 @@ export const DHIKR: Dhikr[] = [
       note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -85,7 +88,8 @@ export const DHIKR: Dhikr[] = [
       note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -104,7 +108,8 @@ export const DHIKR: Dhikr[] = [
       note: "Part of the 33/33/34 tasbih. Narrations: Bukhari 843 (Abu Huraira); Muslim 596a (Ka'b ibn Ujrah, explicit 33/33/34); Bukhari 5362 (Ali).",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -123,7 +128,8 @@ export const DHIKR: Dhikr[] = [
       note: "Jabir ibn Abdillah. Graded Hasan (Darussalam). Cited alone deliberately: no Bukhari/Muslim narration states this exact phrasing.",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/tirmidhi:3383"],
       verifiedAt: "2026-10-05",
     },
@@ -142,7 +148,8 @@ export const DHIKR: Dhikr[] = [
       note: "Abu Huraira. One hundred times a day. In Muslim 2691 this tasbih appears within a longer narration.",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:6405", "sunnah.com/muslim:2691"],
       verifiedAt: "2026-10-05",
     },
@@ -161,7 +168,8 @@ export const DHIKR: Dhikr[] = [
       note: "Abu Musa al-Ash'ari. Parallels: Bukhari 6610, 7386.",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:6384", "sunnah.com/muslim:2704"],
       verifiedAt: "2026-10-05",
     },
@@ -184,7 +192,8 @@ export const DHIKR: Dhikr[] = [
       note: "Ka'b ibn Ujrah. Parallels: Bukhari 4797, 6357; Tirmidhi 483 (hasan sahih gharib).",
     },
     review: {
-      status: "verified",
+      status: "reviewed",
+      reviewedAt: "2026-10-05",
       verifiedSources: ["sunnah.com/bukhari:3370", "sunnah.com/muslim:406"],
       verifiedAt: "2026-10-05",
     },
