@@ -26,6 +26,8 @@
   --on-accent: #211905;
   --jade: #8ad6b5;
   --danger: #e08a84;
+  --moon: #f0c877;
+  --star: #f2e3bd;
   --glow: rgb(240 200 119 / 0.12);
   --lattice: rgb(240 200 119 / 0.055);
   --shadow-card: 0 24px 48px -28px rgb(3 6 18 / 0.9);
@@ -47,6 +49,8 @@
   --on-accent: #fff8ec;
   --jade: #2e7d5f;
   --danger: #b04a44;
+  --moon: #b9883c;
+  --star: #9a7328;
   --glow: rgb(169 120 47 / 0.11);
   --lattice: rgb(33 41 65 / 0.05);
   --shadow-card: 0 24px 44px -30px rgb(33 41 65 / 0.45);
@@ -100,13 +104,60 @@
     linear-gradient(to bottom, var(--bg), var(--bg-deep));
 }
 
-/* Eight-point khatam lattice, tinted via background-color + alpha mask. */
+/*
+ * Sebka-style arcade: staggered rows of interlocking pointed mihrab
+ * arches, tinted via background-color + alpha mask. Tile is seamless —
+ * alternate rows offset half a tile, apexes land on the vertical seams.
+ */
 .lattice {
   background-color: var(--lattice);
   mask-image: url("/lattice.svg");
-  mask-size: 96px 96px;
+  mask-size: 96px 144px;
   -webkit-mask-image: url("/lattice.svg");
-  -webkit-mask-size: 96px 96px;
+  -webkit-mask-size: 96px 144px;
+}
+
+/* Ramadan sky ---------------------------------------------------------- */
+
+/*
+ * Crescent hilal and scattered stars layered over the pre-dawn gradient.
+ * Purely decorative; both follow the active theme tokens and stay faint
+ * enough to sit behind text and cards without competing with them.
+ */
+.atmosphere-moon-glow {
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--moon) 20%, transparent),
+    transparent 70%
+  );
+}
+
+.atmosphere-moon {
+  color: var(--moon);
+  opacity: 0.16;
+}
+
+:root[data-theme="light"] .atmosphere-moon {
+  opacity: 0.1;
+}
+
+.atmosphere-star {
+  color: var(--star);
+  animation: twinkle var(--tw-dur, 6s) ease-in-out var(--tw-delay, 0s) infinite;
+}
+
+/* Rest state equals the 0%/100% frame, so the reduced-motion fallback
+   (single 0.01ms iteration) freezes stars at their natural look. */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--tw-max, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    opacity: calc(var(--tw-max, 0.4) * 0.45);
+    transform: scale(0.85);
+  }
 }
 
 /* Motion --------------------------------------------------------------- */
