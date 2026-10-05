@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
-import { dhikrForQuest, getQuest } from "@/lib/content";
+import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount } from "@/lib/format";
 import {
   getProgress,
@@ -40,7 +40,7 @@ type WakeLockNavigator = Navigator & {
 export default function CountPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const quest = getQuest(params.id);
+  const quest = getPublicQuest(params.id);
 
   const haptics = useSettings((state) => state.haptics);
   const sound = useSettings((state) => state.sound);
@@ -185,7 +185,11 @@ export default function CountPage() {
       </header>
 
       <button
-        onPointerDown={tap}
+        onPointerDown={(event) => {
+          // Only the primary pointer counts: a second simultaneous
+          // finger (or a resting palm) must not inflate the count.
+          if (event.isPrimary) tap();
+        }}
         onClick={(event) => {
           // Keyboard activation arrives as click with detail 0; pointer taps
           // are already handled above.
@@ -193,7 +197,7 @@ export default function CountPage() {
         }}
         disabled={!ready}
         aria-label={`Count one ${dhikr.names.en}. ${formatCount(count)} of ${formatCount(quest.target)}.`}
-        className="relative flex flex-1 select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
+        className="relative flex flex-1 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
         <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
           {dhikr.arabic}

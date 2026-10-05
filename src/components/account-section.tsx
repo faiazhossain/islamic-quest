@@ -126,7 +126,8 @@ export function AccountSection() {
         <p className="text-sm font-medium text-ink">{status.email}</p>
         <p className="mt-1 text-xs leading-relaxed text-ink-3">
           Your progress syncs automatically when online. Only event data
-          (counts and quests) is stored — never personal notes or content.
+          (counts and quests) is stored — under a pseudonymous id, never
+          your email — and never personal notes or content.
         </p>
       </div>
       <div className="flex gap-2">

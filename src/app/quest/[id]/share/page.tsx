@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
 import { Switch } from "@/components/switch";
-import { dhikrForQuest, getQuest } from "@/lib/content";
+import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
 import { getProgress } from "@/lib/db/events";
 
@@ -217,11 +217,13 @@ function downloadBlob(blob: Blob): void {
 
 export default function SharePage() {
   const params = useParams<{ id: string }>();
-  const quest = getQuest(params.id);
+  const quest = getPublicQuest(params.id);
   const [theme, setTheme] = useState<"night" | "dawn">("night");
   const [showCount, setShowCount] = useState(true);
   const [fontsReady, setFontsReady] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [completedAt, setCompletedAt] = useState<number | null>(null);
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -239,15 +241,19 @@ export default function SharePage() {
     };
   }, []);
 
-  const completedAt = useRef<number>(0);
   useEffect(() => {
     if (!quest) return;
     let cancelled = false;
     getProgress(quest.id)
       .then((entry) => {
-        if (!cancelled && entry?.completedAt) completedAt.current = entry.completedAt;
+        if (!cancelled) {
+          setCompletedAt(entry?.completedAt ?? null);
+          setProgressLoaded(true);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setProgressLoaded(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -255,17 +261,17 @@ export default function SharePage() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !fontsReady || !quest) return;
+    // The card never draws before the real completion date is known - it
+    // must not fall back to today for a quest completed on another day.
+    if (!canvas || !fontsReady || !quest || !completedAt) return;
     drawCard(canvas, {
       dhikrName: dhikrForQuest(quest).names.en,
       target: quest.target,
       showCount,
-      date: completedAt.current
-        ? formatShortDate(completedAt.current)
-        : formatShortDate(new Date().getTime()),
+      date: formatShortDate(completedAt),
       palette: PALETTES[theme],
     });
-  }, [fontsReady, theme, showCount, quest]);
+  }, [fontsReady, theme, showCount, quest, completedAt]);
 
   const share = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -302,6 +308,26 @@ export default function SharePage() {
 
   if (!quest) return <MissingQuest />;
   const dhikr = dhikrForQuest(quest);
+
+  // Deep link to an uncompleted quest: no milestone card to celebrate yet.
+  if (progressLoaded && !completedAt) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="font-display text-xl text-ink">
+          This quest isn&apos;t complete yet.
+        </p>
+        <p className="text-sm leading-relaxed text-ink-2">
+          Finish it first, and its milestone card will be waiting here.
+        </p>
+        <Link
+          href={`/quest/${quest.id}`}
+          className="mt-4 flex h-11 items-center justify-center rounded-2xl bg-accent px-6 font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+        >
+          Back to the quest
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div

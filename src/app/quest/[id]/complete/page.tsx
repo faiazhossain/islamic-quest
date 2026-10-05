@@ -5,13 +5,13 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
 import { StarMark } from "@/components/star-mark";
-import { dhikrForQuest, getQuest } from "@/lib/content";
+import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
 import { getProgress, recordQuestCompleted } from "@/lib/db/events";
 
 export default function CompletePage() {
   const params = useParams<{ id: string }>();
-  const quest = getQuest(params.id);
+  const quest = getPublicQuest(params.id);
   const [completedAt, setCompletedAt] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
 

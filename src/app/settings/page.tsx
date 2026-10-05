@@ -5,8 +5,9 @@ import { useRef, useState } from "react";
 import { AccountSection } from "@/components/account-section";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Switch } from "@/components/switch";
-import { db, type ProgressEvent } from "@/lib/db/db";
+import { db } from "@/lib/db/db";
 import { recomputeAllQuests } from "@/lib/db/events";
+import { parseEvents } from "@/lib/event-validation";
 import { useSettings, type ThemeChoice } from "@/lib/settings";
 
 const THEME_CHOICES: Array<{ id: ThemeChoice; label: string }> = [
@@ -54,28 +55,26 @@ export default function SettingsPage() {
       const data = JSON.parse(await file.text()) as {
         app?: string;
         version?: number;
-        events?: ProgressEvent[];
+        events?: unknown;
       };
       if (data.app !== "amal-quest" || typeof data.version !== "number") {
         throw new Error("That file is not an Amal Quest export.");
       }
-      const events = Array.isArray(data.events) ? data.events : [];
-      for (const event of events) {
-        if (
-          typeof event?.id !== "string" ||
-          typeof event?.type !== "string" ||
-          typeof event?.questId !== "string" ||
-          typeof event?.delta !== "number" ||
-          typeof event?.at !== "number"
-        ) {
-          throw new Error("The export contains malformed event data.");
-        }
+      // Same contract the sync server enforces, so an accepted import can
+      // never wedge syncing with a permanent 400.
+      const events = parseEvents(data.events);
+      if (events === null) {
+        throw new Error("The export contains events this app cannot accept.");
       }
+      // Force re-push: the server dedupes by event id, so replaying
+      // already-synced rows is safe, and the server copy of a restored
+      // backup never silently misses imported history.
+      const restored = events.map((event) => ({ ...event, synced: 0 as const }));
       await db.transaction("rw", db.events, async () => {
-        await db.events.bulkPut(events);
+        await db.events.bulkPut(restored);
       });
       await recomputeAllQuests();
-      setStatus(`Imported ${events.length} events. Progress rebuilt.`);
+      setStatus(`Imported ${restored.length} events. Progress rebuilt.`);
     } catch (error) {
       setStatus(
         error instanceof SyntaxError

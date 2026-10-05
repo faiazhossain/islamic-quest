@@ -41,6 +41,32 @@ export function getQuest(id: string): Quest | undefined {
   return QUESTS.find((quest) => quest.id === id);
 }
 
+/** A quest by id, but only when it is public in the current environment. */
+export function getPublicQuest(id: string): Quest | undefined {
+  const quest = getQuest(id);
+  return quest && isQuestPublic(quest) ? quest : undefined;
+}
+
+/**
+ * Build-time tripwire: refuses a production build while no quest has
+ * passed scholar review, so an empty catalog can never deploy silently.
+ * Deliberate staging builds can opt out with ALLOW_UNREVIEWED_BUILD=1.
+ */
+export function assertLaunchReady(): void {
+  if (
+    process.env.NODE_ENV === "production" &&
+    publicQuests().length === 0 &&
+    process.env.ALLOW_UNREVIEWED_BUILD !== "1"
+  ) {
+    throw new Error(
+      "Launch gate: every dhikr is still awaiting scholar review " +
+        "(review.status in src/lib/content/dhikr.ts). A production build " +
+        "would ship an empty catalog. Flip statuses after review, or set " +
+        "ALLOW_UNREVIEWED_BUILD=1 for a deliberate staging build.",
+    );
+  }
+}
+
 export function questTitle(quest: Quest): string {
   return `${dhikrForQuest(quest).names.en} × ${quest.target.toLocaleString("en-US")}`;
 }

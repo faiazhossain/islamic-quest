@@ -111,3 +111,31 @@ can interleave unless a dependency says otherwise.
   state: 9/9 status "verified"; human scholar sign-off (status "reviewed")
   remains the launch gate per the product contract. Final validate.sh:
   lint clean, 11/11 tests, production build green.
+- 2026-10-05 — QA review round (senior-SQA + content authenticity pass).
+  Content: all 9 primary citations re-checked and confirmed authentic;
+  transliteration corrected ("wa bihamdihi"); residual scholar-pass items
+  noted: Muslim 406 vs 408 numbering, secondary parallel numbers (Bukhari
+  6610/7386, Tirmidhi 483, Bukhari 4797/6357), sunnah timing note for
+  Sayyid al-Istighfar. Fixes shipped: launch tripwire (assertLaunchReady -
+  production build now FAILS while the catalog has no "reviewed" entries;
+  deliberate staging builds use ALLOW_UNREVIEWED_BUILD=1; verified the
+  failure and the override), deep links now respect the review gate
+  (getPublicQuest across quest detail/count/complete/share + public-only
+  generateStaticParams - verified: prod deep link renders "quest doesn't
+  exist", previously served unreviewed content), shared sync-event
+  validator (src/lib/event-validation.ts) used by both the API route and
+  settings import so an accepted import can never wedge sync with a
+  permanent 400; import now forces synced:0 so restored backups re-push
+  (server dedupes by uuid) and MAX_AGE widened to 10y so year-old backups
+  restore cleanly; today total clamped at zero (undo of a pre-today count
+  could show "Today: -1"); share card uses completion-date state (no more
+  race printing today's date) and refuses to render a milestone card for
+  an uncompleted deep-linked quest; counter rejects non-primary pointers
+  (palm/second finger) and sets touch-manipulation; ConfirmDialog restores
+  focus to its trigger on close; sync user_key is now an HMAC of the email
+  (pseudonymous - a DB leak can no longer pair identity with worship
+  history) with matching copy in the account section. Tests: 23 passing
+  (new: event-validation suite, content gate suite, negative-today
+  regression). Note: `npm run build`/validate.sh is intentionally red
+  until scholar review flips the 9 statuses or a staging build sets
+  ALLOW_UNREVIEWED_BUILD=1.

@@ -1,57 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth, authEnabled } from "@/auth";
-import { QUESTS } from "@/lib/content";
 import { getSql } from "@/lib/server/db";
 import { rateLimit } from "@/lib/server/rate-limit";
-import type { ProgressEventType } from "@/lib/db/db";
-import type { SyncEvent } from "@/lib/sync-merge";
-
-// The server trusts only validated events, never client-computed totals.
-const KNOWN_QUEST_IDS = new Set(QUESTS.map((quest) => quest.id));
-const KNOWN_TYPES: ProgressEventType[] = [
-  "quest_started",
-  "increment",
-  "undo",
-  "quest_completed",
-];
-const MAX_BATCH = 2000;
-const MAX_AGE_MS = 366 * 86_400_000;
-const CLOCK_SKEW_MS = 5 * 60_000;
-
-function parseEvents(raw: unknown): SyncEvent[] | null {
-  if (!Array.isArray(raw) || raw.length > MAX_BATCH) return null;
-  const events: SyncEvent[] = [];
-  const now = Date.now();
-  for (const item of raw) {
-    if (typeof item !== "object" || item === null) return null;
-    const candidate = item as Record<string, unknown>;
-    if (typeof candidate.id !== "string" || candidate.id.length === 0 || candidate.id.length > 64) {
-      return null;
-    }
-    if (!KNOWN_TYPES.includes(candidate.type as ProgressEventType)) return null;
-    if (typeof candidate.questId !== "string" || !KNOWN_QUEST_IDS.has(candidate.questId)) {
-      return null;
-    }
-    if (candidate.delta !== -1 && candidate.delta !== 0 && candidate.delta !== 1) return null;
-    if (
-      typeof candidate.at !== "number" ||
-      !Number.isFinite(candidate.at) ||
-      candidate.at < now - MAX_AGE_MS ||
-      candidate.at > now + CLOCK_SKEW_MS
-    ) {
-      return null;
-    }
-    events.push({
-      id: candidate.id,
-      // KNOWN_TYPES.includes above validates the value; the cast records it.
-      type: candidate.type as ProgressEventType,
-      questId: candidate.questId,
-      delta: candidate.delta,
-      at: candidate.at,
-    });
-  }
-  return events;
-}
+import { parseEvents } from "@/lib/event-validation";
 
 /** Sync capability probe used by the settings UI. */
 export async function GET() {
@@ -88,7 +39,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
-  const events = parseEvents((body as { events?: unknown } | null)?.events);
+  const events = parseEvents((body as { events?: unknown } | null)?.events, Date.now());
   if (events === null) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }

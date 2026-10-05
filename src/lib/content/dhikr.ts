@@ -130,9 +130,9 @@ export const DHIKR: Dhikr[] = [
   },
   {
     id: "subhanallahi-wa-bihamdihi",
-    names: { en: "Subhanallahi wa bihamdih" },
+    names: { en: "Subhanallahi wa bihamdihi" },
     arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-    transliteration: "Subhanallahi wa bihamdih",
+    transliteration: "Subhanallahi wa bihamdihi",
     meaning: { en: "Glory be to Allah, and praise is His." },
     category: "tasbih",
     practiceGuidance: { en: "Any time." },

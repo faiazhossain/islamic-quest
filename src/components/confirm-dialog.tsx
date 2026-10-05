@@ -35,7 +35,9 @@ export function ConfirmDialog({
 
   useEffect(() => {
     if (!open) return;
-    // Safe default focus: the cancel button.
+    // Safe default focus: the cancel button. On close, focus returns to
+    // whatever triggered the dialog so keyboard flow is never dropped.
+    const previousFocus = document.activeElement as HTMLElement | null;
     cancelRef.current?.focus();
     // Lock background scrolling so the dialog stays anchored.
     const previousOverflow = document.body.style.overflow;
@@ -65,6 +67,7 @@ export function ConfirmDialog({
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
     };
   }, [open, onCancel]);
 

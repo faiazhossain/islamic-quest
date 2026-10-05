@@ -78,10 +78,13 @@ export async function getAllProgress(): Promise<Map<string, QuestProgress>> {
   return new Map(rows.map((row) => [row.questId, row]));
 }
 
-/** Sum of event deltas since dayStart (home screen "today" line). */
+/** Net event deltas since dayStart (home screen "today" line), never negative. */
 export async function getTodayTotal(dayStart: number): Promise<number> {
   const events = await db.events.where("at").aboveOrEqual(dayStart).toArray();
-  return events.reduce((sum, event) => sum + event.delta, 0);
+  const total = events.reduce((sum, event) => sum + event.delta, 0);
+  // An undo may correct a count made before day start; today's own
+  // total still cannot meaningfully go below zero.
+  return Math.max(0, total);
 }
 
 export const getUnsyncedEvents = (): Promise<ProgressEvent[]> =>

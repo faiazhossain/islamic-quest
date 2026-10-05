@@ -7,7 +7,7 @@ import { MissingQuest } from "@/components/missing-quest";
 import {
   CATEGORIES,
   dhikrForQuest,
-  getQuest,
+  getPublicQuest,
 } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
 import {
@@ -28,7 +28,7 @@ const REVIEW_LABEL: Record<string, string> = {
 
 export function QuestDetail({ questId }: { questId: string }) {
   const router = useRouter();
-  const quest = getQuest(questId);
+  const quest = getPublicQuest(questId);
   const [progress, setProgress] = useState<QuestProgress | null>(null);
   const [loaded, setLoaded] = useState(false);
 

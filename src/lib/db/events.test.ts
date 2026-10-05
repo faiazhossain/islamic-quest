@@ -89,4 +89,21 @@ describe("event log", () => {
     const total = await getTodayTotal(now - 60_000);
     expect(total).toBe(1);
   });
+
+  it("never reports a negative total for today", async () => {
+    const yesterday = Date.now() - 24 * 60 * 60 * 1000;
+    await db.events.add({
+      id: "old-1",
+      type: "increment",
+      questId: "q1",
+      delta: 1,
+      at: yesterday,
+      synced: 1,
+    });
+    // Today's undo corrects yesterday's count; today still shows zero.
+    await recordUndo("q1");
+
+    const total = await getTodayTotal(Date.now() - 60_000);
+    expect(total).toBe(0);
+  });
 });
