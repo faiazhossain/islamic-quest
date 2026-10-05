@@ -167,7 +167,7 @@ export default function CountPage() {
         <button
           onClick={() => router.push(`/quest/${quest.id}`)}
           aria-label="Leave counter (progress is saved)"
-          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90"
         >
           <CloseIcon />
         </button>
@@ -178,7 +178,7 @@ export default function CountPage() {
           onClick={undo}
           disabled={count <= 0}
           aria-label="Undo one count"
-          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink disabled:opacity-30"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90 disabled:opacity-30"
         >
           <UndoIcon />
         </button>
@@ -193,7 +193,7 @@ export default function CountPage() {
         }}
         disabled={!ready}
         aria-label={`Count one ${dhikr.names.en}. ${formatCount(count)} of ${formatCount(quest.target)}.`}
-        className="relative flex flex-1 select-none flex-col items-center justify-center gap-5 px-6 outline-none"
+        className="relative flex flex-1 select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
         <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
           {dhikr.arabic}
@@ -224,17 +224,32 @@ export default function CountPage() {
           />
         </div>
         {note && (
-          <span className="rise absolute bottom-24 text-sm font-medium text-accent">
+          <span
+            aria-hidden="true"
+            className="rise absolute bottom-24 text-sm font-medium text-accent"
+          >
             {note}
           </span>
         )}
       </button>
 
+      {/* Persistent live region so milestone messages reach screen readers. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {note ?? ""}
+      </span>
+
       <footer
         className="pb-6 pt-2 text-center"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 26px)" }}
       >
-        <p className="text-xs text-ink-3">Tap anywhere to count</p>
+        <p
+          className={`text-xs text-ink-3 transition-opacity duration-500 ${
+            count > 0 ? "opacity-0" : "opacity-100"
+          }`}
+          aria-hidden={count > 0}
+        >
+          Tap anywhere to count
+        </p>
       </footer>
     </div>
   );

@@ -49,8 +49,9 @@ export default function ExplorePage() {
       </header>
 
       <div
-        className="rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms]"
-        style={{ scrollbarWidth: "none" }}
+        role="group"
+        aria-label="Filter quests by category"
+        className="no-scrollbar rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms]"
       >
         <div className="flex w-max gap-2">
           {FILTERS.map(({ id, label }) => (
@@ -58,7 +59,7 @@ export default function ExplorePage() {
               key={id}
               onClick={() => setFilter(id)}
               aria-pressed={filter === id}
-              className={`h-9 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors ${
+              className={`h-9 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors active:opacity-70 ${
                 filter === id
                   ? "border-accent bg-accent text-on-accent"
                   : "border-line bg-surface text-ink-2 hover:text-ink"
@@ -82,6 +83,12 @@ export default function ExplorePage() {
             const dhikr = dhikrForQuest(quest);
             const entry = progress.get(quest.id);
             const complete = Boolean(entry?.completedAt);
+            const entryCount = entry?.count ?? 0;
+            const inProgress = !complete && entryCount > 0;
+            const percent = Math.min(
+              Math.round((entryCount / quest.target) * 100),
+              100,
+            );
             const categoryName = CATEGORIES.find(
               (category) => category.id === dhikr.category,
             )?.name.en;
@@ -89,7 +96,7 @@ export default function ExplorePage() {
               <li key={quest.id}>
                 <Link
                   href={`/quest/${quest.id}`}
-                  className="flex min-h-[72px] items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-accent-deep/50"
+                  className="flex min-h-[72px] items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-accent-deep/50 active:bg-surface-2"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-[17px] text-ink">
@@ -99,15 +106,26 @@ export default function ExplorePage() {
                       {quest.target.toLocaleString("en-US")}x
                       {categoryName ? ` - ${categoryName}` : ""}
                     </p>
+                    {inProgress && (
+                      <div
+                        className="mt-1.5 h-1 w-24 overflow-hidden rounded-full bg-surface-2"
+                        aria-hidden="true"
+                      >
+                        <div
+                          className="h-full rounded-full bg-accent"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                   {complete ? (
                     <span className="flex items-center gap-1.5 text-xs font-semibold text-jade">
                       <CheckIcon />
                       Complete
                     </span>
-                  ) : entry && entry.count > 0 ? (
+                  ) : inProgress ? (
                     <span className="text-xs font-medium text-ink-2">
-                      {entry.count.toLocaleString("en-US")} /{" "}
+                      {entryCount.toLocaleString("en-US")} /{" "}
                       {quest.target.toLocaleString("en-US")}
                     </span>
                   ) : (

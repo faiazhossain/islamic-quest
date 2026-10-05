@@ -162,6 +162,15 @@
   animation: count-pulse 130ms ease-out;
 }
 
+/* Hidden scrollbars for horizontal chip rails (Firefox handled inline). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

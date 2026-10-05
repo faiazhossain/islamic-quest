@@ -27,7 +27,17 @@ const PROMISES = [
 export default function AboutPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="rise">
+      <div className="rise">
+        <Link
+          href="/settings"
+          className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 text-sm text-ink-3 transition-colors hover:text-ink-2 active:opacity-60"
+        >
+          <BackChevron />
+          Settings
+        </Link>
+      </div>
+
+      <header className="rise mt-2">
         <h1 className="font-display text-[2rem] leading-tight text-ink">
           About &amp; privacy
         </h1>
@@ -52,7 +62,7 @@ export default function AboutPage() {
 
       <Link
         href="/support"
-        className="rise mt-6 flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover [animation-delay:160ms]"
+        className="rise mt-6 flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px [animation-delay:160ms]"
       >
         Support Amal Quest
       </Link>
@@ -61,5 +71,19 @@ export default function AboutPage() {
         Amal Quest v{APP_VERSION} - made with care for the Ummah.
       </p>
     </div>
+  );
+}
+
+function BackChevron() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+      <path
+        d="M10 3.5 5.5 8 10 12.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

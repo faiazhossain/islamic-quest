@@ -8,7 +8,7 @@ export function Switch({ on }: SwitchProps) {
     <span
       aria-hidden="true"
       className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors ${
-        on ? "bg-accent" : "border border-line bg-surface-2"
+        on ? "bg-accent" : "border border-line bg-ink-3/30"
       }`}
     >
       <span

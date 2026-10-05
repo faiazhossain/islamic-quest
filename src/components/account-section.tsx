@@ -2,6 +2,7 @@
 
 import { signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { fetchSyncStatus, syncNow, type SyncStatus } from "@/lib/sync";
 
 /**
@@ -13,6 +14,7 @@ export function AccountSection() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +66,7 @@ export function AccountSection() {
         </p>
         <button
           onClick={() => void signIn("google")}
-          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2"
+          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
         >
           Continue with Google
         </button>
@@ -75,12 +77,13 @@ export function AccountSection() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="h-12 min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+            // 16px minimum: smaller inputs trigger iOS Safari's focus zoom.
+            className="h-12 min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 text-base text-ink outline-none placeholder:text-ink-3 focus:border-accent"
           />
           <button
             onClick={sendMagicLink}
             disabled={busy}
-            className="h-12 shrink-0 rounded-2xl bg-accent px-4 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-50"
+            className="h-12 shrink-0 rounded-2xl bg-accent px-4 text-sm font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px disabled:opacity-50"
           >
             Send link
           </button>
@@ -91,9 +94,7 @@ export function AccountSection() {
   }
 
   const deleteServerCopy = async () => {
-    if (!window.confirm("Delete your synced copy on the server? Local progress stays on this device.")) {
-      return;
-    }
+    setConfirmDelete(false);
     setBusy(true);
     try {
       const response = await fetch("/api/sync", { method: "DELETE" });
@@ -132,25 +133,37 @@ export function AccountSection() {
         <button
           onClick={syncNowClick}
           disabled={busy}
-          className="h-11 flex-1 rounded-2xl border border-line bg-surface text-sm font-medium text-ink transition-colors hover:bg-surface-2 disabled:opacity-50"
+          className="h-11 flex-1 rounded-2xl border border-line bg-surface text-sm font-medium text-ink transition-colors hover:bg-surface-2 active:bg-surface-2 disabled:opacity-50"
         >
           Sync now
         </button>
         <button
           onClick={() => void signOut()}
-          className="h-11 flex-1 rounded-2xl border border-line bg-surface text-sm font-medium text-ink transition-colors hover:bg-surface-2"
+          className="h-11 flex-1 rounded-2xl border border-line bg-surface text-sm font-medium text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
         >
           Sign out
         </button>
       </div>
       <button
-        onClick={deleteServerCopy}
+        onClick={() => setConfirmDelete(true)}
         disabled={busy}
-        className="h-11 w-full rounded-2xl border border-line bg-surface text-sm text-danger transition-colors hover:bg-surface-2 disabled:opacity-50"
+        className="h-11 w-full rounded-2xl border border-line bg-surface text-sm text-danger transition-colors hover:bg-surface-2 active:bg-surface-2 disabled:opacity-50"
       >
         Delete my server copy
       </button>
       {message && <p className="text-xs text-ink-3">{message}</p>}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={deleteServerCopy}
+        title="Delete your server copy?"
+        description="Your synced events are removed from the server. Progress on this device stays untouched."
+        confirmLabel="Delete server copy"
+        cancelLabel="Keep it"
+        danger
+        busy={busy}
+      />
     </div>
   );
 }

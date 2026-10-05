@@ -35,12 +35,19 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium transition-colors ${
+              className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] transition-colors active:opacity-60 ${
                 active
-                  ? "text-accent"
-                  : "text-ink-3 hover:text-ink-2 focus-visible:text-ink"
+                  ? "font-semibold text-accent"
+                  : "font-medium text-ink-3 hover:text-ink-2 focus-visible:text-ink"
               }`}
             >
+              {/* Shape cue for the active tab; color alone is not enough. */}
+              <span
+                aria-hidden="true"
+                className={`absolute -top-1.5 h-[3px] w-6 rounded-full bg-accent transition-opacity ${
+                  active ? "opacity-100" : "opacity-0"
+                }`}
+              />
               <Icon active={active} />
               {label}
             </Link>

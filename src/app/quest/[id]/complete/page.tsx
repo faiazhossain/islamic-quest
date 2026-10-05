@@ -71,13 +71,13 @@ export default function CompletePage() {
       <div className="rise mt-12 w-full max-w-xs space-y-3 [animation-delay:420ms]">
         <Link
           href={`/quest/${quest.id}/share`}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           Share this milestone
         </Link>
         <Link
           href="/"
-          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2"
+          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
         >
           Back home
         </Link>

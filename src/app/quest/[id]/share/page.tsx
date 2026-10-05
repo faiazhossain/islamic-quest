@@ -95,9 +95,19 @@ function drawCard(canvas: HTMLCanvasElement, input: CardInput): void {
     ctx.fillText("COMPLETED", W / 2, 920);
   }
 
+  // Long names must never clip at the card edge: shrink to fit, then wrap
+  // onto two balanced lines as a last resort.
   ctx.fillStyle = palette.ink;
-  ctx.font = '700 84px "Hanken Grotesk", system-ui, sans-serif';
-  ctx.fillText(input.dhikrName.toUpperCase(), W / 2, input.showCount ? 1064 : 820);
+  const nameY = input.showCount ? 1064 : 820;
+  const fitted = fitLines(ctx, input.dhikrName.toUpperCase(), W - 160, 84, 56);
+  ctx.font = `700 ${fitted.size}px "Hanken Grotesk", system-ui, sans-serif`;
+  if (fitted.lines.length === 1) {
+    ctx.fillText(fitted.lines[0], W / 2, nameY);
+  } else {
+    const lineHeight = fitted.size * 1.15;
+    ctx.fillText(fitted.lines[0], W / 2, nameY - lineHeight / 2);
+    ctx.fillText(fitted.lines[1], W / 2, nameY + lineHeight / 2);
+  }
 
   ctx.fillStyle = palette.accent;
   ctx.font = 'italic 500 92px Fraunces, Georgia, serif';
@@ -119,6 +129,48 @@ function drawCard(canvas: HTMLCanvasElement, input: CardInput): void {
   setLetterSpacing(ctx, "10px");
   ctx.fillText("AMAL QUEST", W / 2, 1724);
   setLetterSpacing(ctx, "0px");
+}
+
+/**
+ * Finds the largest font size (down to minSize) at which text fits the
+ * given width; past that, splits at the most balanced space onto two lines.
+ */
+function fitLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxSize: number,
+  minSize: number,
+): { size: number; lines: string[] } {
+  const font = (size: number) =>
+    `700 ${size}px "Hanken Grotesk", system-ui, sans-serif`;
+  for (let size = maxSize; size >= minSize; size -= 4) {
+    ctx.font = font(size);
+    if (ctx.measureText(text).width <= maxWidth) {
+      return { size, lines: [text] };
+    }
+  }
+  const words = text.split(" ");
+  if (words.length < 2) return { size: minSize, lines: [text] };
+  ctx.font = font(minSize);
+  let splitAt = 1;
+  let bestWidth = Infinity;
+  for (let i = 1; i < words.length; i += 1) {
+    const top = words.slice(0, i).join(" ");
+    const bottom = words.slice(i).join(" ");
+    const wider = Math.max(
+      ctx.measureText(top).width,
+      ctx.measureText(bottom).width,
+    );
+    if (wider < bestWidth) {
+      bestWidth = wider;
+      splitAt = i;
+    }
+  }
+  return {
+    size: minSize,
+    lines: [words.slice(0, splitAt).join(" "), words.slice(splitAt).join(" ")],
+  };
 }
 
 function drawEightPointStar(
@@ -262,8 +314,8 @@ export default function SharePage() {
       <header className="flex items-center justify-between">
         <Link
           href={`/quest/${quest.id}/complete`}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink"
           aria-label="Back"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90"
         >
           <BackIcon />
         </Link>
@@ -294,7 +346,7 @@ export default function SharePage() {
                 key={option}
                 onClick={() => setTheme(option)}
                 aria-pressed={theme === option}
-                className={`h-10 flex-1 rounded-xl border text-sm font-medium capitalize transition-colors ${
+                className={`h-10 flex-1 rounded-xl border text-sm font-medium capitalize transition-colors active:opacity-70 ${
                   theme === option
                     ? "border-accent bg-accent text-on-accent"
                     : "border-line bg-surface text-ink-2 hover:text-ink"
@@ -309,7 +361,7 @@ export default function SharePage() {
         <button
           onClick={() => setShowCount((value) => !value)}
           aria-pressed={showCount}
-          className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5"
+          className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2"
         >
           <span className="text-sm text-ink">Show the count on the card</span>
           <Switch on={showCount} />
@@ -319,11 +371,15 @@ export default function SharePage() {
       <div className="mt-6 space-y-3">
         <button
           onClick={share}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           Share or save card
         </button>
-        {status && <p className="text-center text-xs text-ink-3">{status}</p>}
+        {status && (
+          <p role="status" className="text-center text-xs text-ink-3">
+            {status}
+          </p>
+        )}
         <p className="pb-4 text-center text-xs leading-relaxed text-ink-3">
           Your card only shows what you choose. Sharing is always up to you.
         </p>

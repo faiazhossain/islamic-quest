@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AccountSection } from "@/components/account-section";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Switch } from "@/components/switch";
 import { db, type ProgressEvent } from "@/lib/db/db";
 import { recomputeAllQuests } from "@/lib/db/events";
@@ -17,6 +18,7 @@ const THEME_CHOICES: Array<{ id: ThemeChoice; label: string }> = [
 export default function SettingsPage() {
   const settings = useSettings();
   const [status, setStatus] = useState<string | null>(null);
+  const [confirmErase, setConfirmErase] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const exportData = async () => {
@@ -86,14 +88,7 @@ export default function SettingsPage() {
   };
 
   const resetAll = async () => {
-    const first = window.confirm(
-      "Delete all local progress? Consider exporting a backup first.",
-    );
-    if (!first) return;
-    const second = window.confirm(
-      "Are you sure? All quests, counts, and settings on this device will be erased.",
-    );
-    if (!second) return;
+    setConfirmErase(false);
     try {
       localStorage.clear();
     } catch {
@@ -117,7 +112,7 @@ export default function SettingsPage() {
               key={id}
               onClick={() => settings.setTheme(id)}
               aria-pressed={settings.theme === id}
-              className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors ${
+              className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors active:opacity-70 ${
                 settings.theme === id
                   ? "border-accent bg-accent text-on-accent"
                   : "border-line bg-surface text-ink-2 hover:text-ink"
@@ -166,9 +161,16 @@ export default function SettingsPage() {
             event.target.value = "";
           }}
         />
-        <ActionButton onClick={resetAll} danger>
+        <ActionButton onClick={() => setConfirmErase(true)} danger>
           Erase all local data
         </ActionButton>
+        {/* Result feedback sits with the actions that trigger it, not below
+            the fold after later sections. */}
+        {status && (
+          <p className="pt-1 text-xs text-ink-3" role="status">
+            {status}
+          </p>
+        )}
         <p className="pt-1 text-xs leading-relaxed text-ink-3">
           Your practice lives on this device. Export creates a backup file you
           can re-import anytime.
@@ -184,11 +186,16 @@ export default function SettingsPage() {
         <LinkRow href="/about">About &amp; privacy</LinkRow>
       </Section>
 
-      {status && (
-        <p className="rise pt-4 text-center text-xs text-ink-3" role="status">
-          {status}
-        </p>
-      )}
+      <ConfirmDialog
+        open={confirmErase}
+        onCancel={() => setConfirmErase(false)}
+        onConfirm={resetAll}
+        title="Erase all local data?"
+        description="This permanently deletes every quest, count, and setting on this device. Consider exporting a backup first. This cannot be undone."
+        confirmLabel="Erase everything"
+        cancelLabel="Keep my data"
+        danger
+      />
     </div>
   );
 }
@@ -230,7 +237,7 @@ function ToggleRow({
     <button
       onClick={() => onToggle(!on)}
       aria-pressed={on}
-      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:bg-surface-2"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2"
     >
       <span className="min-w-0">
         <span className="block text-sm text-ink">{label}</span>
@@ -253,7 +260,7 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className={`flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm transition-colors hover:bg-surface-2 ${
+      className={`flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm transition-colors hover:bg-surface-2 active:bg-surface-2 ${
         danger ? "text-danger" : "text-ink"
       }`}
     >
@@ -266,7 +273,7 @@ function LinkRow({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm text-ink transition-colors hover:bg-surface-2"
+      className="flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
     >
       {children}
       <Chevron />

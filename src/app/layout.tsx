@@ -45,10 +45,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b1020" },
-    { media: "(prefers-color-scheme: light)", color: "#faf6ed" },
-  ],
+  // Single static meta; the pre-paint script and applyTheme() keep it in
+  // sync with the resolved theme so the browser chrome always matches.
+  themeColor: "#0b1020",
 };
 
 /**
@@ -57,15 +56,18 @@ export const viewport: Viewport = {
  */
 const themeInit = `
 (function () {
+  var theme;
   try {
     var stored = localStorage.getItem("amalq:theme");
-    var theme = stored === "light" || stored === "dark"
+    theme = stored === "light" || stored === "dark"
       ? stored
       : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    document.documentElement.dataset.theme = theme;
   } catch (error) {
-    document.documentElement.dataset.theme = "dark";
+    theme = "dark";
   }
+  document.documentElement.dataset.theme = theme;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", theme === "light" ? "#faf6ed" : "#0b1020");
 })();
 `;
 

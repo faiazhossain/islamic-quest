@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HADIYA_URL } from "@/lib/config";
 
 export const metadata = {
@@ -7,7 +8,17 @@ export const metadata = {
 export default function SupportPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="rise">
+      <div className="rise">
+        <Link
+          href="/settings"
+          className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 text-sm text-ink-3 transition-colors hover:text-ink-2 active:opacity-60"
+        >
+          <BackChevron />
+          Settings
+        </Link>
+      </div>
+
+      <header className="rise mt-2">
         <h1 className="font-display text-[2rem] leading-tight text-ink">
           Support Amal Quest
         </h1>
@@ -40,7 +51,7 @@ export default function SupportPage() {
             href={HADIYA_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+            className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
           >
             Give a Hadiya
           </a>
@@ -63,5 +74,19 @@ export default function SupportPage() {
         Amal Quest remains fully usable with or without it.
       </p>
     </div>
+  );
+}
+
+function BackChevron() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+      <path
+        d="M10 3.5 5.5 8 10 12.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -115,7 +115,7 @@ export default function JourneyPage() {
           </p>
           <Link
             href="/explore"
-            className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+            className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
           >
             Choose a quest
           </Link>
@@ -172,7 +172,7 @@ export default function JourneyPage() {
                     y={point.y - 2}
                     textAnchor={point.x === X_LEFT ? "start" : "end"}
                     className="fill-current text-ink"
-                    fontSize="13"
+                    fontSize="12"
                     fontWeight="600"
                   >
                     {point.title}

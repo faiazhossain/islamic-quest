@@ -97,7 +97,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/explore"
-              className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+              className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
             >
               Choose a quest
             </Link>
@@ -110,7 +110,7 @@ export default function HomePage() {
       {hasAnyProgress && progress !== null && (
         <Link
           href="/journey"
-          className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 text-sm text-ink transition-colors hover:bg-surface-2 [animation-delay:180ms]"
+          className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 text-sm text-ink transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:180ms]"
         >
           View your Journey
           <span aria-hidden="true" className="text-ink-3">
@@ -167,7 +167,7 @@ function CurrentQuestCard({
         </div>
         <Link
           href={`/quest/${questId}/count`}
-          className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+          className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           Continue quest
         </Link>
@@ -196,7 +196,7 @@ function FirstQuestCard() {
         </p>
         <Link
           href="/explore"
-          className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+          className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           Choose your first quest
         </Link>

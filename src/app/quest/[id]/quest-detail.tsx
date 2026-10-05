@@ -71,7 +71,7 @@ export function QuestDetail({ questId }: { questId: string }) {
       <div className="rise">
         <Link
           href="/explore"
-          className="inline-flex items-center gap-1 text-sm text-ink-3 transition-colors hover:text-ink-2"
+          className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 text-sm text-ink-3 transition-colors hover:text-ink-2 active:opacity-60"
         >
           <BackChevron />
           Explore
@@ -99,7 +99,7 @@ export function QuestDetail({ questId }: { questId: string }) {
           className="rounded-3xl border border-line bg-surface-2 px-6 py-8 text-center"
           style={{ boxShadow: "var(--shadow-card)" }}
         >
-          <p className="font-arabic text-[1.9rem] leading-[2.1] text-ink" dir="rtl" lang="ar">
+          <p className="font-arabic text-[2.1rem] leading-[2.2] text-ink" dir="rtl" lang="ar">
             {dhikr.arabic}
           </p>
           <p className="mt-5 text-sm italic leading-relaxed text-ink-2">
@@ -124,7 +124,7 @@ export function QuestDetail({ questId }: { questId: string }) {
       <div className="rise mt-8 pb-4 [animation-delay:240ms]">
         <button
           onClick={start}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           {complete
             ? "Practice again"
