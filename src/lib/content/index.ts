@@ -21,9 +21,17 @@ export const dhikrForQuest = (quest: Quest): Dhikr => {
 /**
  * Launch gate: a quest is public in production only when its dhikr has
  * passed scholar review. Draft content stays visible in development.
+ *
+ * A deliberate staging deploy can set NEXT_PUBLIC_ALLOW_UNREVIEWED=1 to
+ * publish the whole catalog before review completes. The quest page
+ * still labels unreviewed dhikr honestly ("scholar review pending"),
+ * so staging never presents unreviewed content as reviewed. NEXT_PUBLIC_
+ * is required because this gate also runs in client bundles, where only
+ * prefixed variables are inlined. Read at call time, like NODE_ENV.
  */
 export function isQuestPublic(quest: Quest): boolean {
   return (
+    process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED === "1" ||
     process.env.NODE_ENV !== "production" ||
     dhikrForQuest(quest).review.status === "reviewed"
   );
@@ -50,19 +58,20 @@ export function getPublicQuest(id: string): Quest | undefined {
 /**
  * Build-time tripwire: refuses a production build while no quest has
  * passed scholar review, so an empty catalog can never deploy silently.
- * Deliberate staging builds can opt out with ALLOW_UNREVIEWED_BUILD=1.
+ * Deliberate staging deploys can opt out with NEXT_PUBLIC_ALLOW_UNREVIEWED=1
+ * (the same flag that publishes the unreviewed catalog in staging).
  */
 export function assertLaunchReady(): void {
   if (
     process.env.NODE_ENV === "production" &&
     publicQuests().length === 0 &&
-    process.env.ALLOW_UNREVIEWED_BUILD !== "1"
+    process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED !== "1"
   ) {
     throw new Error(
       "Launch gate: every dhikr is still awaiting scholar review " +
         "(review.status in src/lib/content/dhikr.ts). A production build " +
         "would ship an empty catalog. Flip statuses after review, or set " +
-        "ALLOW_UNREVIEWED_BUILD=1 for a deliberate staging build.",
+        "NEXT_PUBLIC_ALLOW_UNREVIEWED=1 for a deliberate staging deploy.",
     );
   }
 }
