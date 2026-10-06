@@ -5,11 +5,22 @@ import { isSameOrigin } from "@/lib/server/http";
 import { rateLimit } from "@/lib/server/rate-limit";
 import { MAX_USER_EVENTS, parseEvents } from "@/lib/event-validation";
 
+/**
+ * Every response here is per-user (the probe returns the account email,
+ * everything else the event log). Mark them uncacheable so no intermediary
+ * ever stores them, matching what the NextAuth routes already send.
+ */
+function json(body: unknown, init?: ResponseInit): NextResponse {
+  const response = NextResponse.json(body, init);
+  response.headers.set("cache-control", "no-store");
+  return response;
+}
+
 /** Sync capability probe used by the settings UI. */
 export async function GET() {
   const session = authEnabled ? await auth() : null;
   const userKey = (session?.user as { userKey?: string } | undefined)?.userKey;
-  return NextResponse.json({
+  return json({
     enabled: authEnabled,
     signedIn: Boolean(userKey),
     email: session?.user?.email ?? null,
@@ -19,33 +30,33 @@ export async function GET() {
 /** Pushes local events (idempotent by event uuid) and returns the authoritative snapshot. */
 export async function POST(request: Request) {
   if (!authEnabled) {
-    return NextResponse.json({ error: "sync_not_configured" }, { status: 503 });
+    return json({ error: "sync_not_configured" }, { status: 503 });
   }
   if (!isSameOrigin(request)) {
-    return NextResponse.json({ error: "origin_blocked" }, { status: 403 });
+    return json({ error: "origin_blocked" }, { status: 403 });
   }
   const session = await auth();
   const userKey = (session?.user as { userKey?: string } | undefined)?.userKey;
   if (!userKey) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return json({ error: "unauthorized" }, { status: 401 });
   }
   if (!rateLimit(`sync:${userKey}`, 30, 60_000)) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+    return json({ error: "rate_limited" }, { status: 429 });
   }
   const sql = getSql();
   if (!sql) {
-    return NextResponse.json({ error: "sync_not_configured" }, { status: 503 });
+    return json({ error: "sync_not_configured" }, { status: 503 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+    return json({ error: "bad_request" }, { status: 400 });
   }
   const events = parseEvents((body as { events?: unknown } | null)?.events, Date.now());
   if (events === null) {
-    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+    return json({ error: "bad_request" }, { status: 400 });
   }
 
   if (events.length > 0) {
@@ -58,7 +69,7 @@ export async function POST(request: Request) {
     `;
     const existing = Number(counted[0]?.count ?? 0);
     if (existing + events.length > MAX_USER_EVENTS) {
-      return NextResponse.json({ error: "quota_exceeded" }, { status: 409 });
+      return json({ error: "quota_exceeded" }, { status: 409 });
     }
     await sql`
       INSERT INTO progress_events ${sql(
@@ -82,7 +93,7 @@ export async function POST(request: Request) {
     ORDER BY at ASC, id ASC
   `;
 
-  return NextResponse.json({
+  return json({
     synced: events.map((event) => event.id),
     serverEvents: snapshot,
   });
@@ -91,20 +102,20 @@ export async function POST(request: Request) {
 /** Permanently deletes the signed-in user's server-side copy. */
 export async function DELETE(request: Request) {
   if (!authEnabled) {
-    return NextResponse.json({ error: "sync_not_configured" }, { status: 503 });
+    return json({ error: "sync_not_configured" }, { status: 503 });
   }
   if (!isSameOrigin(request)) {
-    return NextResponse.json({ error: "origin_blocked" }, { status: 403 });
+    return json({ error: "origin_blocked" }, { status: 403 });
   }
   const session = await auth();
   const userKey = (session?.user as { userKey?: string } | undefined)?.userKey;
   if (!userKey) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return json({ error: "unauthorized" }, { status: 401 });
   }
   const sql = getSql();
   if (!sql) {
-    return NextResponse.json({ error: "sync_not_configured" }, { status: 503 });
+    return json({ error: "sync_not_configured" }, { status: 503 });
   }
   await sql`DELETE FROM progress_events WHERE user_key = ${userKey}`;
-  return NextResponse.json({ deleted: true });
+  return json({ deleted: true });
 }

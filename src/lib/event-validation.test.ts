@@ -115,6 +115,25 @@ describe("parseImportEnvelope", () => {
     expect(parseImportEnvelope(envelope("events"))).toBeNull();
   });
 
+  it("leaves dangerous JSON keys inert", () => {
+    // JSON.parse turns these into own properties; the parser must neither
+    // merge nor trust them, and pollution must be impossible.
+    const poisoned = JSON.parse(
+      `{"app":"amalyn","version":1,"__proto__":{"polluted":true},"events":[${JSON.stringify({ ...freshEvent, constructor: {"prototype": {}}, prototype: {x: 1} })}]}`,
+    ) as Record<string, unknown>;
+    const result = parseImportEnvelope(poisoned);
+    expect(result).not.toBeNull();
+    expect(({} as { polluted?: boolean }).polluted).toBeUndefined();
+    // Only the five contractual fields survive into the parsed event.
+    expect(Object.keys(result!.events[0]).sort()).toEqual([
+      "at",
+      "delta",
+      "id",
+      "questId",
+      "type",
+    ]);
+  });
+
   it("keeps the abuse-cap constants reachable and ordered", () => {
     // Documented boundaries: import batches fit in one sync batch, and the
     // per-user server cap sits far above anything genuine practice produces.

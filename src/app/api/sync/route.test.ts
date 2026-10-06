@@ -252,4 +252,24 @@ describe("GET /api/sync", () => {
     const body = await response.text();
     expect(body).not.toContain("secret-key");
   });
+
+  it("marks every response uncacheable", async () => {
+    // Responses carry per-user data; no intermediary may store them.
+    state.session = signedIn("k8");
+    expect((await GET()).headers.get("cache-control")).toBe("no-store");
+    state.session = signedIn("k9");
+    expect(
+      (await POST(post(JSON.stringify({ events: [] })))).headers.get(
+        "cache-control",
+      ),
+    ).toBe("no-store");
+    state.session = signedIn("k10");
+    const deleteResponse = await DELETE(
+      new Request(`${ORIGIN}/api/sync`, {
+        method: "DELETE",
+        headers: { "x-forwarded-host": "amalyn.test", origin: ORIGIN },
+      }),
+    );
+    expect(deleteResponse.headers.get("cache-control")).toBe("no-store");
+  });
 });
