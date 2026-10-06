@@ -60,7 +60,7 @@ product-level.**
 | Bangla localization | v1.1 | Content + QA double when it ships |
 | Community goals | v2 | Cold-start problem; aggregate numbers look dead at launch |
 | Streaks as a system | v1.1 | v1 carries only a quiet personal record; full gentle-streak layer later |
-| Analytics | none in v1 | Nothing to measure without a data pipeline; privacy-friendly counters can come later |
+| Analytics | Plausible (added 2026-10-06, user-directed) | Cookieless, aggregate page-view counting via plausible.nsuone.com; disclosed on About & Privacy; never connected to worship data. The original "none in v1" scope tightened to this single privacy-friendly counter |
 
 ---
 

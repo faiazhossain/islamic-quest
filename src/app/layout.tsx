@@ -1,7 +1,24 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Amiri, Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+
+/**
+ * Privacy-friendly, cookieless page-view counting (Plausible). Aggregate
+ * numbers only - no cookies, no profiles, never tied to a worshipper's
+ * data. Disclosed on the About & Privacy page; the CSP allows exactly
+ * this host (next.config.ts). The URL is the account-specific script
+ * path, so it is pinned here rather than read from an env var.
+ */
+const PLAUSIBLE_SCRIPT_URL =
+  "https://plausible.nsuone.com/js/pa-3Ykx5VMRkIbvhBM77oUvx.js";
+
+/** Official Plausible bootstrap: queues calls until the loader arrives. */
+const PLAUSIBLE_INIT = `
+window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+plausible.init()
+`;
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -81,6 +98,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-bg font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <AppShell>{children}</AppShell>
+        <Script src={PLAUSIBLE_SCRIPT_URL} strategy="afterInteractive" />
+        <Script id="plausible-init" strategy="afterInteractive">
+          {PLAUSIBLE_INIT}
+        </Script>
       </body>
     </html>
   );

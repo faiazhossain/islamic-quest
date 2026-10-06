@@ -175,3 +175,13 @@ can interleave unless a dependency says otherwise.
   all 20 quest routes. CDP screenshots verified at 375px (bottom sheet,
   dawn) and 1280px (centered dialog, night): Arabic RTL/Amiri, ﷺ glyph,
   Escape close, honest footer.
+- 2026-10-06 — Plausible analytics installed (user-directed; refines the
+  "analytics: none in v1" scope decision). Cookieless, aggregate page-view
+  counting via next/script afterInteractive in the root layout, pinned to
+  plausible.nsuone.com. CSP widened deliberately and narrowly: exactly one
+  third-party host, script-src + connect-src only (security-headers test
+  now pins that boundary). About & Privacy copy updated to disclose it
+  honestly (replaces "this version collects no analytics"); product
+  definition analytics row updated. Service worker passes cross-origin
+  requests through untouched, so offline behavior is unchanged (beacon
+  simply fails silently offline).

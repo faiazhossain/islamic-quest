@@ -12,7 +12,7 @@ const PROMISES = [
   },
   {
     title: "Private by default",
-    body: "Your worship history stays on your device. No account is needed, nothing is published unless you choose to share it, and we do not sell or profile your data. This version collects no analytics.",
+    body: "Your worship history stays on your device. No account is needed, nothing is published unless you choose to share it, and we do not sell or profile your data. Page visits are counted with Plausible — cookieless, aggregate, and anonymous: no profiles, no advertising, and never connected to your practice.",
   },
   {
     title: "Content with care",

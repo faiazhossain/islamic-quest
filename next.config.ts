@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 /**
- * Content-Security-Policy for a fully self-contained app: every script,
- * style, font, and image is same-origin (next/font self-hosts at build
- * time; there are no third-party calls).
+ * Content-Security-Policy for an app that is same-origin except for one
+ * deliberate third party: Plausible, a cookieless, privacy-friendly
+ * analytics service (script + its /api/event beacon). Everything else -
+ * styles, fonts, images - is same-origin (next/font self-hosts at build
+ * time).
  *
  * 'unsafe-inline' is required and deliberate:
  * - script-src: the root layout's pre-paint theme script and Next's own
@@ -18,15 +20,17 @@ import type { NextConfig } from "next";
  *
  * Exported for the security regression tests (src/lib/server/security-headers.test.ts).
  */
+const PLAUSIBLE_HOST = "https://plausible.nsuone.com";
+
 export function contentSecurityPolicy(isDev: boolean): string {
   return [
     "default-src 'self'",
     // 'unsafe-eval' is a dev-only need (React's debugging eval); never in production.
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'unsafe-inline' ${PLAUSIBLE_HOST}${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self' ${PLAUSIBLE_HOST}`,
     // The service worker is a same-origin classic script.
     "worker-src 'self'",
     "manifest-src 'self'",
