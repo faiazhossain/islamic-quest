@@ -1,5 +1,5 @@
 /*
- * Amal Quest service worker: offline shell + static asset caching.
+ * Amalyn service worker: offline shell + static asset caching.
  *
  * Rules that matter:
  * - API routes are never intercepted; auth and sync must never see stale data.
@@ -8,7 +8,7 @@
  *   so counting always works offline.
  */
 
-const VERSION = "amalq-v1";
+const VERSION = "amalyn-v1";
 const STATIC_CACHE = `${VERSION}-static`;
 const PRECACHE_URLS = ["/", "/manifest.webmanifest"];
 

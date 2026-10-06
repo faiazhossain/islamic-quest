@@ -1,5 +1,5 @@
 #!/bin/sh
-# Amal Quest phase validator.
+# Amalyn phase validator.
 # Runs after every implementation phase; a failing check stops the pipeline.
 set -e
 cd "$(dirname "$0")/.."

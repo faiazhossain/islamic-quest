@@ -29,12 +29,12 @@ export interface QuestProgress {
   updatedAt: number;
 }
 
-export class AmalQuestDb extends Dexie {
+export class AmalynDb extends Dexie {
   events!: EntityTable<ProgressEvent, "id">;
   questProgress!: EntityTable<QuestProgress, "questId">;
 
   constructor() {
-    super("amal-quest");
+    super("amalyn");
     this.version(1).stores({
       events: "id, questId, at, synced",
       questProgress: "questId",
@@ -42,4 +42,4 @@ export class AmalQuestDb extends Dexie {
   }
 }
 
-export const db = new AmalQuestDb();
+export const db = new AmalynDb();

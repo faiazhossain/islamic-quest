@@ -58,7 +58,7 @@ export default function HomePage() {
     <div className="flex flex-1 flex-col">
       <header className="rise pt-8">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ink-3">
-          Amal Quest
+          Amalyn
         </p>
         <h1 className="mt-4 font-display text-[2.15rem] leading-[1.12] text-ink">
           As-salamu alaykum.

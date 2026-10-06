@@ -1,4 +1,4 @@
--- Amal Quest server schema. Applied by `npm run db:push`.
+-- Amalyn server schema. Applied by `npm run db:push`.
 -- Events are append-only; the client event uuid is the idempotency key.
 
 CREATE TABLE IF NOT EXISTS progress_events (

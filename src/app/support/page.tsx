@@ -2,7 +2,7 @@ import Link from "next/link";
 import { HADIYA_URL } from "@/lib/config";
 
 export const metadata = {
-  title: "Support Amal Quest",
+  title: "Support Amalyn",
 };
 
 export default function SupportPage() {
@@ -20,13 +20,13 @@ export default function SupportPage() {
 
       <header className="rise mt-2">
         <h1 className="font-display text-[2rem] leading-tight text-ink">
-          Support Amal Quest
+          Support Amalyn
         </h1>
       </header>
 
       <div className="rise mt-6 space-y-4 text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
         <p>
-          Amal Quest is completely free. There are no ads, no subscriptions,
+          Amalyn is completely free. There are no ads, no subscriptions,
           and no paid features — nothing is locked, ever.
         </p>
         <p>
@@ -71,7 +71,7 @@ export default function SupportPage() {
       </div>
 
       <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:240ms]">
-        Amal Quest remains fully usable with or without it.
+        Amalyn remains fully usable with or without it.
       </p>
     </div>
   );

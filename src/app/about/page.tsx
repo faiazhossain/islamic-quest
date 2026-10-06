@@ -20,7 +20,7 @@ const PROMISES = [
   },
   {
     title: "Honest rewards",
-    body: "Amal Quest celebrates product milestones — quests completed, a journey growing. It never claims to measure Allah's reward, rank believers, or promise spiritual outcomes. That measure belongs to Allah alone.",
+    body: "Amalyn celebrates product milestones — quests completed, a journey growing. It never claims to measure Allah's reward, rank believers, or promise spiritual outcomes. That measure belongs to Allah alone.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function AboutPage() {
           About &amp; privacy
         </h1>
         <p className="mt-2 text-sm text-ink-2">
-          What Amal Quest promises you.
+          What Amalyn promises you.
         </p>
       </header>
 
@@ -64,11 +64,11 @@ export default function AboutPage() {
         href="/support"
         className="rise mt-6 flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px [animation-delay:160ms]"
       >
-        Support Amal Quest
+        Support Amalyn
       </Link>
 
       <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:240ms]">
-        Amal Quest v{APP_VERSION} - made with care for the Ummah.
+        Amalyn v{APP_VERSION} - made with care for the Ummah.
       </p>
     </div>
   );

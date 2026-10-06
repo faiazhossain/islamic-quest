@@ -1,4 +1,4 @@
-# Amal Quest
+# Amalyn
 
 A free, offline-first PWA for Dhikr: choose a quest, count with intention,
 and grow a journey of light. Worship stays personal; rewards stay

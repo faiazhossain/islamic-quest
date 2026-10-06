@@ -1,4 +1,4 @@
-/** The Amal Quest mark: an eight-point khatam star with a center light. */
+/** The Amalyn mark: an eight-point khatam star with a center light. */
 export function StarMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 100" fill="none" className={className} aria-hidden="true">

@@ -14,7 +14,7 @@ interface SettingsState {
   setWakeLock: (value: boolean) => void;
 }
 
-const THEME_KEY = "amalq:theme";
+const THEME_KEY = "amalyn:theme";
 
 /** Browser chrome / status bar colors matching each resolved theme. */
 const THEME_COLORS = { dark: "#0b1020", light: "#faf6ed" } as const;
@@ -62,7 +62,7 @@ export const useSettings = create<SettingsState>()(
       setSound: (sound) => set({ sound }),
       setWakeLock: (wakeLock) => set({ wakeLock }),
     }),
-    { name: "amalq:settings" },
+    { name: "amalyn:settings" },
   ),
 );
 

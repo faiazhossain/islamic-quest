@@ -1,4 +1,4 @@
-# Amal Quest — Implementation Tasks
+# Amalyn — Implementation Tasks
 
 Tracker for v1.0 (scope: `docs/product-definition.md`).
 Status values: `todo` / `in_progress` / `done` / `blocked`.

@@ -29,7 +29,7 @@ export default function SettingsPage() {
         db.questProgress.toArray(),
       ]);
       const payload = {
-        app: "amal-quest",
+        app: "amalyn",
         version: 1,
         exportedAt: new Date().toISOString(),
         events,
@@ -41,7 +41,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `amal-quest-export-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.download = `amalyn-export-${new Date().toISOString().slice(0, 10)}.json`;
       anchor.click();
       URL.revokeObjectURL(url);
       setStatus("Export downloaded.");
@@ -57,8 +57,8 @@ export default function SettingsPage() {
         version?: number;
         events?: unknown;
       };
-      if (data.app !== "amal-quest" || typeof data.version !== "number") {
-        throw new Error("That file is not an Amal Quest export.");
+      if (data.app !== "amalyn" || typeof data.version !== "number") {
+        throw new Error("That file is not an Amalyn export.");
       }
       // Same contract the sync server enforces, so an accepted import can
       // never wedge syncing with a permanent 400.
@@ -181,7 +181,7 @@ export default function SettingsPage() {
       </Section>
 
       <Section title="More" delay={300}>
-        <LinkRow href="/support">Support Amal Quest</LinkRow>
+        <LinkRow href="/support">Support Amalyn</LinkRow>
         <LinkRow href="/about">About &amp; privacy</LinkRow>
       </Section>
 

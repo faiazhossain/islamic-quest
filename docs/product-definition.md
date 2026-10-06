@@ -1,4 +1,4 @@
-# Amal Quest — Product Definition (v1.0)
+# Amalyn — Product Definition (v1.0)
 
 Status: Draft for approval
 Date: 2026-10-05
@@ -8,7 +8,7 @@ Phase: 2 of the product workflow (Product Definition)
 
 ## 1. Product summary
 
-Amal Quest is a free, offline-first PWA that helps Muslims build a consistent
+Amalyn is a free, offline-first PWA that helps Muslims build a consistent
 personal Dhikr practice through quests, milestones, and a visual journey.
 
 One sentence: **Choose a quest, count with a calm and satisfying counter, and
@@ -40,8 +40,8 @@ product-level.**
 | Quest catalog | ~12–15 quests across 4–5 categories, tiered targets (33 / 100 / 500 / 1000) |
 | Counter | Fullscreen tap counter: +1 per tap, undo, pause, haptics, screen wake, progress bar, milestone moments |
 | Completion | Reverent celebration screen + quest marked complete |
-| Share card | One 9:16 card: dhikr name, completion, date, Amal Quest mark; theme choice; show/hide count |
-| Journey | Winding path of light — glowing milestone waypoints, simple personal record ("N days with Amal Quest") |
+| Share card | One 9:16 card: dhikr name, completion, date, Amalyn mark; theme choice; show/hide count |
+| Journey | Winding path of light — glowing milestone waypoints, simple personal record ("N days with Amalyn") |
 | Account | Optional. Magic link + Google. Cloud sync of progress. App fully functional signed out. |
 | Settings | Haptics, sound, screen wake, theme, data export/import, account, delete data, Support (Hadiya), About/Privacy |
 | PWA | Installable, offline shell, offline counting, safe-area support |
@@ -64,7 +64,7 @@ product-level.**
 ## 3. User flows
 
 ### F1 — First open (no account)
-Onboarding (3 skippable steps: what Amal Quest is, privacy promise, pick your
+Onboarding (3 skippable steps: what Amalyn is, privacy promise, pick your
 first quest) → Home. No signup anywhere in this flow.
 
 ### F2 — Start a quest

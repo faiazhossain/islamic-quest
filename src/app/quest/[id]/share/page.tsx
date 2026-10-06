@@ -127,7 +127,7 @@ function drawCard(canvas: HTMLCanvasElement, input: CardInput): void {
   ctx.fillStyle = palette.accent;
   ctx.font = '600 40px "Hanken Grotesk", system-ui, sans-serif';
   setLetterSpacing(ctx, "10px");
-  ctx.fillText("AMAL QUEST", W / 2, 1724);
+  ctx.fillText("AMALYN", W / 2, 1724);
   setLetterSpacing(ctx, "0px");
 }
 
@@ -210,7 +210,7 @@ function downloadBlob(blob: Blob): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "amal-quest-milestone.png";
+  anchor.download = "amalyn-milestone.png";
   anchor.click();
   URL.revokeObjectURL(url);
 }
@@ -287,12 +287,12 @@ export default function SharePage() {
     const nav = navigator as Navigator & {
       canShare?: (data: ShareData) => boolean;
     };
-    const file = new File([blob], "amal-quest-milestone.png", { type: "image/png" });
+    const file = new File([blob], "amalyn-milestone.png", { type: "image/png" });
     if (nav.canShare?.({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
-          title: "Amal Quest",
+          title: "Amalyn",
           text: "Quest complete - Alhamdulillah",
         });
         setStatus("Shared.");

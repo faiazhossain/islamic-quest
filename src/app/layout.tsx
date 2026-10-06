@@ -22,8 +22,8 @@ const amiri = Amiri({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amal Quest",
-    template: "%s — Amal Quest",
+    default: "Amalyn",
+    template: "%s — Amalyn",
   },
   description:
     "A calm, offline-first Dhikr companion: choose a quest, count with intention, and grow a journey of light. Free forever.",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Amal Quest",
+    title: "Amalyn",
   },
   formatDetection: {
     telephone: false,
@@ -58,7 +58,7 @@ const themeInit = `
 (function () {
   var theme;
   try {
-    var stored = localStorage.getItem("amalq:theme");
+    var stored = localStorage.getItem("amalyn:theme");
     theme = stored === "light" || stored === "dark"
       ? stored
       : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
