@@ -2,43 +2,58 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Stat } from "@/components/stat";
 import { dhikrForQuest, publicQuests, type Quest } from "@/lib/content";
-import { formatCount, formatShortDate, todayStart } from "@/lib/format";
+import { formatCount, formatShortDate } from "@/lib/format";
 import {
   getAllProgress,
-  getFirstEventAt,
+  getPracticeEvents,
   type QuestProgress,
 } from "@/lib/db/events";
+import {
+  allQuestsCompleted,
+  completedDhikrCount,
+  derivePracticeStats,
+  type PracticeEvent,
+} from "@/lib/practice";
 
 interface Waypoint {
   title: string;
   date: string;
   x: number;
   y: number;
-  next: boolean;
+  variant: "completed" | "up-next" | "continues";
 }
 
 const ROW_H = 132;
 const TOP_PAD = 56;
 const X_LEFT = 92;
 const X_RIGHT = 248;
-const DAY_MS = 86_400_000;
 
 export default function JourneyPage() {
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
-  const [firstAt, setFirstAt] = useState<number | null>(null);
+  const [events, setEvents] = useState<PracticeEvent[] | null>(null);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [map, first] = await Promise.all([getAllProgress(), getFirstEventAt()]);
+        const [map, log] = await Promise.all([
+          getAllProgress(),
+          getPracticeEvents(),
+        ]);
         if (!cancelled) {
           setProgress(map);
-          setFirstAt(first ?? null);
+          setEvents(log);
+          setNow(Date.now());
         }
       } catch {
-        if (!cancelled) setProgress(new Map());
+        if (!cancelled) {
+          setProgress(new Map());
+          setEvents([]);
+          setNow(Date.now());
+        }
       }
     })();
     return () => {
@@ -47,15 +62,7 @@ export default function JourneyPage() {
   }, []);
 
   const completed = (progress
-    ? publicQuests()
-        .map((quest) => ({ quest, entry: progress.get(quest.id) }))
-        .filter(
-          (row): row is { quest: Quest; entry: QuestProgress } =>
-            Boolean(row.entry?.completedAt),
-        )
-        .sort(
-          (a, b) => (a.entry.completedAt ?? 0) - (b.entry.completedAt ?? 0),
-        )
+    ? completedQuestsInOrder(progress)
     : []
   ).map(({ quest, entry }, index) => ({
     quest,
@@ -67,34 +74,44 @@ export default function JourneyPage() {
   const nextQuest = progress
     ? publicQuests().find((quest) => !progress.get(quest.id)?.completedAt)
     : undefined;
+  const journeyComplete = progress ? allQuestsCompleted(progress) : false;
+  // `now` arrives with the loaded data, so this stays render-pure; the value
+  // is only read once the skeleton branch is gone.
+  const stats = derivePracticeStats(events ?? [], now);
 
-  const points: Waypoint[] = [
-    ...completed.map(({ quest, entry, x, y }) => ({
-      title: `${dhikrForQuest(quest).names.en} - ${formatCount(quest.target)}x`,
-      date: entry.completedAt ? `Completed ${formatShortDate(entry.completedAt)}` : "",
-      x,
-      y,
-      next: false,
-    })),
-  ];
+  const points: Waypoint[] = completed.map(({ quest, entry, x, y }) => ({
+    title: `${dhikrForQuest(quest).names.en} - ${formatCount(quest.target)}x`,
+    date: entry.completedAt ? `Completed ${formatShortDate(entry.completedAt)}` : "",
+    x,
+    y,
+    variant: "completed",
+  }));
   if (nextQuest) {
     points.push({
       title: `${dhikrForQuest(nextQuest).names.en} - ${formatCount(nextQuest.target)}x`,
       date: "Up next",
       x: completed.length % 2 === 0 ? X_LEFT : X_RIGHT,
       y: TOP_PAD + completed.length * ROW_H,
-      next: true,
+      variant: "up-next",
+    });
+  } else if (journeyComplete && completed.length > 0) {
+    points.push({
+      title: "Your Journey continues",
+      date: `${completed.length} of ${publicQuests().length} quests complete`,
+      x: completed.length % 2 === 0 ? X_LEFT : X_RIGHT,
+      y: TOP_PAD + completed.length * ROW_H,
+      variant: "continues",
     });
   }
 
   const hasAnyProgress = (progress?.size ?? 0) > 0;
-  const daysPracticed = firstAt
-    ? Math.max(1, Math.ceil((todayStart() - firstAt) / DAY_MS) + 1)
-    : 0;
   const totalDhikr = [...(progress?.values() ?? [])].reduce(
     (sum, entry) => sum + entry.count,
     0,
   );
+  // The lit path runs through every milestone - and, once each quest has
+  // been discovered, through the continuation point itself.
+  const litLength = journeyComplete ? completed.length + 1 : completed.length;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -103,7 +120,7 @@ export default function JourneyPage() {
         <p className="mt-1 text-sm text-ink-2">Your path of light.</p>
       </header>
 
-      {progress === null ? (
+      {progress === null || events === null ? (
         <div className="mt-8 h-64 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
       ) : !hasAnyProgress ? (
         <div className="rise mt-10 rounded-3xl border border-line bg-surface p-6 text-center [animation-delay:100ms]">
@@ -123,7 +140,7 @@ export default function JourneyPage() {
       ) : (
         <>
           <div className="rise mt-6 grid grid-cols-3 gap-3 [animation-delay:80ms]">
-            <Stat label="Days" value={String(daysPracticed)} />
+            <Stat label="Days" value={String(stats.daysPracticed)} />
             <Stat label="Quests" value={String(completed.length)} />
             <Stat label="Dhikr" value={formatCount(totalDhikr)} />
           </div>
@@ -143,9 +160,9 @@ export default function JourneyPage() {
                 strokeDasharray="1 8"
                 strokeLinecap="round"
               />
-              {completed.length > 0 && (
+              {litLength > 0 && (
                 <path
-                  d={pathThrough(points.slice(0, completed.length))}
+                  d={pathThrough(points.slice(0, litLength))}
                   fill="none"
                   stroke="var(--accent)"
                   strokeWidth="3"
@@ -154,45 +171,90 @@ export default function JourneyPage() {
                 />
               )}
               {points.map((point) => (
-                <g key={`${point.title}-${point.y}`}>
-                  {!point.next && (
-                    <circle cx={point.x} cy={point.y} r="19" fill="var(--glow)" />
-                  )}
-                  <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r="8.5"
-                    fill={point.next ? "var(--bg)" : "var(--accent)"}
-                    stroke={point.next ? "var(--ink-3)" : "var(--bg)"}
-                    strokeWidth="2"
-                    strokeDasharray={point.next ? "3 3" : undefined}
-                  />
-                  <text
-                    x={point.x === X_LEFT ? point.x + 26 : point.x - 26}
-                    y={point.y - 2}
-                    textAnchor={point.x === X_LEFT ? "start" : "end"}
-                    className="fill-current text-ink"
-                    fontSize="12"
-                    fontWeight="600"
-                  >
-                    {point.title}
-                  </text>
-                  <text
-                    x={point.x === X_LEFT ? point.x + 26 : point.x - 26}
-                    y={point.y + 16}
-                    textAnchor={point.x === X_LEFT ? "start" : "end"}
-                    fontSize="11"
-                    className={point.next ? "fill-current text-accent" : "fill-current text-ink-3"}
-                  >
-                    {point.date}
-                  </text>
-                </g>
+                <WaypointNode key={`${point.title}-${point.y}`} point={point} />
               ))}
             </svg>
           </div>
+
+          {journeyComplete && (
+            <div className="rise rounded-3xl border border-line bg-surface p-6 [animation-delay:240ms]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                Your Journey continues
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-ink-2">
+                {completedDhikrCount(progress)}{" "}
+                {completedDhikrCount(progress) === 1 ? "Amal is" : "Amals are"} now
+                part of your practice. Return to any of them, any day - the path
+                grows with you.
+              </p>
+              <p className="mt-3 text-xs text-ink-3">
+                This month {formatCount(stats.thisMonthCount)} dhikr
+                {stats.thisMonthCount > stats.lastMonthCount &&
+                  ` - +${formatCount(stats.thisMonthCount - stats.lastMonthCount)} over last month`}
+              </p>
+            </div>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+/** Completed quests with their milestone entries, in completion order. */
+function completedQuestsInOrder(
+  progress: Map<string, QuestProgress>,
+): Array<{ quest: Quest; entry: QuestProgress }> {
+  return publicQuests()
+    .map((quest) => ({ quest, entry: progress.get(quest.id) }))
+    .filter(
+      (row): row is { quest: Quest; entry: QuestProgress } =>
+        Boolean(row.entry?.completedAt),
+    )
+    .sort((a, b) => (a.entry.completedAt ?? 0) - (b.entry.completedAt ?? 0));
+}
+
+function WaypointNode({ point }: { point: Waypoint }) {
+  return (
+    <g>
+      {(point.variant === "completed" || point.variant === "continues") && (
+        <circle cx={point.x} cy={point.y} r="19" fill="var(--glow)" />
+      )}
+      <circle
+        cx={point.x}
+        cy={point.y}
+        r="8.5"
+        fill={point.variant === "completed" ? "var(--accent)" : "var(--bg)"}
+        stroke={point.variant === "up-next" ? "var(--ink-3)" : "var(--accent)"}
+        strokeWidth="2"
+        strokeDasharray={point.variant === "up-next" ? "3 3" : undefined}
+      />
+      {point.variant === "continues" && (
+        <circle cx={point.x} cy={point.y} r="3" fill="var(--accent)" />
+      )}
+      <text
+        x={point.x === X_LEFT ? point.x + 26 : point.x - 26}
+        y={point.y - 2}
+        textAnchor={point.x === X_LEFT ? "start" : "end"}
+        className="fill-current text-ink"
+        fontSize="12"
+        fontWeight="600"
+      >
+        {point.title}
+      </text>
+      <text
+        x={point.x === X_LEFT ? point.x + 26 : point.x - 26}
+        y={point.y + 16}
+        textAnchor={point.x === X_LEFT ? "start" : "end"}
+        fontSize="11"
+        className={
+          point.variant === "up-next"
+            ? "fill-current text-accent"
+            : "fill-current text-ink-3"
+        }
+      >
+        {point.date}
+      </text>
+    </g>
   );
 }
 
@@ -206,15 +268,4 @@ function pathThrough(points: Waypoint[]): string {
     d += ` C ${prev.x} ${midY}, ${current.x} ${midY}, ${current.x} ${current.y}`;
   }
   return d;
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-line bg-surface p-3 text-center">
-      <p className="font-display text-xl text-ink">{value}</p>
-      <p className="mt-0.5 text-[11px] uppercase tracking-wide text-ink-3">
-        {label}
-      </p>
-    </div>
-  );
 }

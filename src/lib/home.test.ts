@@ -1,0 +1,138 @@
+import { describe, expect, it } from "vitest";
+import { publicQuests } from "./content";
+import { dayStartOf } from "./format";
+import { selectHomeView, type HomeView } from "./home";
+import type { PracticeEvent } from "./practice";
+import type { QuestProgress } from "./db/db";
+
+const NOW = new Date(2026, 3, 10, 9, 30, 0, 0).getTime();
+const TODAY = dayStartOf(NOW);
+const YESTERDAY = TODAY - 12 * 60 * 60 * 1000;
+
+const entry = (
+  questId: string,
+  fields: Partial<QuestProgress> = {},
+): [string, QuestProgress] => [
+  questId,
+  {
+    questId,
+    count: fields.count ?? 0,
+    startedAt: fields.startedAt,
+    completedAt: fields.completedAt,
+    updatedAt: fields.updatedAt ?? 0,
+  },
+];
+
+const event = (questId: string, delta: number, atMs: number): PracticeEvent => ({
+  questId,
+  delta,
+  at: atMs,
+});
+
+const expectKind = (view: HomeView, kind: HomeView["kind"]): void => {
+  expect(view.kind).toBe(kind);
+};
+
+describe("selectHomeView", () => {
+  it("shows the first-visit state with no progress", () => {
+    const view = selectHomeView({ progress: new Map(), events: [], now: NOW });
+    expectKind(view, "first-visit");
+  });
+
+  it("shows the most recently updated active quest", () => {
+    const all = publicQuests();
+    const progress = new Map([
+      entry(all[0].id, { count: 5, startedAt: 1, updatedAt: 100 }),
+      entry(all[1].id, { count: 9, startedAt: 2, updatedAt: 200 }),
+      entry(all[2].id, { count: 3, completedAt: 50, updatedAt: 300 }),
+    ]);
+    const view = selectHomeView({ progress, events: [], now: NOW });
+    if (view.kind !== "active-quest") throw new Error("expected active-quest");
+    expect(view.questId).toBe(all[1].id);
+    expect(view.count).toBe(9);
+    expect(view.target).toBe(all[1].target);
+  });
+
+  it("shows the next-quest state when quests remain and none is active", () => {
+    const all = publicQuests();
+    const progress = new Map(
+      all.slice(0, 16).map((quest) =>
+        entry(quest.id, { count: 1, completedAt: 50, updatedAt: 50 }),
+      ),
+    );
+    const view = selectHomeView({
+      progress,
+      events: [event(all[0].id, 7, TODAY + 60_000)],
+      now: NOW,
+    });
+    if (view.kind !== "next-quest") throw new Error("expected next-quest");
+    expect(view.todayTotal).toBe(7);
+  });
+
+  it("keeps next-quest at 19 of 20 complete", () => {
+    const all = publicQuests();
+    const progress = new Map(
+      all.slice(0, 19).map((quest) =>
+        entry(quest.id, { count: 1, completedAt: 50, updatedAt: 50 }),
+      ),
+    );
+    expectKind(selectHomeView({ progress, events: [], now: NOW }), "next-quest");
+  });
+
+  it("transitions to the lifelong-practice state at 20 of 20", () => {
+    const all = publicQuests();
+    const progress = new Map(
+      all.map((quest) =>
+        entry(quest.id, { count: 1, completedAt: 50, updatedAt: 50 }),
+      ),
+    );
+    const view = selectHomeView({ progress, events: [], now: NOW });
+    if (view.kind !== "all-complete") throw new Error("expected all-complete");
+    expect(view.completedCount).toBe(20);
+    expect(view.questTotal).toBe(20);
+    expect(all.some((quest) => quest.id === view.daily.questId)).toBe(true);
+    expect(view.daily.todayCount).toBe(0);
+    expect(view.stats.daysPracticed).toBe(0);
+  });
+
+  it("derives the daily quest's count from today's events only", () => {
+    const all = publicQuests();
+    const progress = new Map(
+      all.map((quest) =>
+        entry(quest.id, { count: 40, completedAt: 50, updatedAt: 50 }),
+      ),
+    );
+    const dailyId = selectHomeView({ progress, events: [], now: NOW });
+    if (dailyId.kind !== "all-complete") throw new Error("expected all-complete");
+    const questId = dailyId.daily.questId;
+
+    const events = [
+      event(questId, 1, YESTERDAY),
+      event(questId, 1, YESTERDAY),
+      event(questId, 1, TODAY + 60_000),
+      event(questId, 1, TODAY + 120_000),
+      event(questId, -1, TODAY + 180_000),
+      event("other-quest", 9, TODAY + 60_000),
+    ];
+    const view = selectHomeView({ progress, events, now: NOW });
+    if (view.kind !== "all-complete") throw new Error("expected all-complete");
+    // Yesterday's taps stay in the lifetime count; today nets to 1 and a
+    // sibling quest's taps do not leak into the daily suggestion.
+    expect(view.daily.todayCount).toBe(1);
+    expect(view.todayTotal).toBe(10);
+  });
+
+  it("never lets today's total go negative", () => {
+    const all = publicQuests();
+    const progress = new Map(
+      all.map((quest) =>
+        entry(quest.id, { count: 1, completedAt: 50, updatedAt: 50 }),
+      ),
+    );
+    const events = [event(all[0].id, -1, TODAY + 60_000)];
+    const view = selectHomeView({ progress, events, now: NOW });
+    if (view.kind !== "all-complete") throw new Error("expected all-complete");
+    expect(view.todayTotal).toBe(0);
+    expect(view.daily.todayCount).toBe(0);
+  });
+});

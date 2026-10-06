@@ -272,10 +272,21 @@ for future maintainers:
    Dexie table. Theme must resolve synchronously before first paint; the
    Dexie store holds events and progress only.
 2. **Quest titles/descriptions are derived** (dhikr name + target) rather
-   than stored per tier - 17 quests, zero duplicated copy.
+   than stored per tier - 20 quests across 9 dhikr, zero duplicated copy.
 3. **Review states**: `draft` -> `verified` (references cross-checked by an
    automated research pass against archived sunnah.com pages and
    independent databases) -> `reviewed` (human scholar; the production
    gate). Only `reviewed` content ships in production builds.
 4. **Focus mode**: counter/completion/share hide the bottom nav via the
    shell (`/quest/*/{count,complete,share}`), not route groups.
+5. **Lifelong practice layer (2026-10-06)**: completing a Quest is a one-time
+   milestone; the Amal itself continues. No new event types, schema, or sync
+   surface - the all-quests-complete state, the daily "Today's Amal"
+   suggestion (smallest completed tier of the picked dhikr, rotated by local
+   day), personal stats (days practiced, days in a row, personal best, month
+   totals), and the counter's daily practice frame all derive from the
+   append-only event log in pure functions (`src/lib/practice.ts`,
+   `src/lib/home.ts`). A completed quest's milestone date is immutable and
+   its counter never re-fires the milestone; consistency language is
+   deliberately streak-free ("days in a row", personal best) with no loss
+   state.

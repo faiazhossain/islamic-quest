@@ -1,4 +1,5 @@
 import { db, type ProgressEvent, type QuestProgress } from "./db";
+import type { PracticeEvent } from "../practice";
 
 export type { ProgressEvent, ProgressEventType, QuestProgress } from "./db";
 
@@ -85,6 +86,30 @@ export async function getTodayTotal(dayStart: number): Promise<number> {
   // An undo may correct a count made before day start; today's own
   // total still cannot meaningfully go below zero.
   return Math.max(0, total);
+}
+
+/**
+ * Net deltas for one quest since dayStart - the daily practice frame a
+ * completed quest's counter counts within. Mirrors getTodayTotal per quest;
+ * an undo correcting yesterday's count never makes today negative.
+ */
+export async function getQuestDeltaSince(
+  questId: string,
+  dayStart: number,
+): Promise<number> {
+  const events = await db.events
+    .where("questId")
+    .equals(questId)
+    .and((event) => event.at >= dayStart)
+    .toArray();
+  const total = events.reduce((sum, event) => sum + event.delta, 0);
+  return Math.max(0, total);
+}
+
+/** Minimal projection of the event log for the practice-stat derivations. */
+export async function getPracticeEvents(): Promise<PracticeEvent[]> {
+  const rows = await db.events.toCollection().toArray();
+  return rows.map((row) => ({ questId: row.questId, delta: row.delta, at: row.at }));
 }
 
 export const getUnsyncedEvents = (): Promise<ProgressEvent[]> =>

@@ -1,36 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StarMark } from "@/components/star-mark";
-import { dhikrForQuest, publicQuests } from "@/lib/content";
-import { formatCount, todayStart } from "@/lib/format";
+import { Stat } from "@/components/stat";
+import { formatCount } from "@/lib/format";
 import {
   getAllProgress,
-  getTodayTotal,
+  getPracticeEvents,
   type QuestProgress,
 } from "@/lib/db/events";
+import { selectHomeView, type DailyAmal, type HomeView } from "@/lib/home";
+import type { PracticeEvent, PracticeStats } from "@/lib/practice";
 
 export default function HomePage() {
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
-  const [todayTotal, setTodayTotal] = useState<number | null>(null);
+  const [events, setEvents] = useState<PracticeEvent[] | null>(null);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [map, total] = await Promise.all([
+        const [map, log] = await Promise.all([
           getAllProgress(),
-          getTodayTotal(todayStart()),
+          getPracticeEvents(),
         ]);
         if (!cancelled) {
           setProgress(map);
-          setTodayTotal(total);
+          setEvents(log);
+          setNow(Date.now());
         }
       } catch {
         if (!cancelled) {
           setProgress(new Map());
-          setTodayTotal(0);
+          setEvents([]);
+          setNow(Date.now());
         }
       }
     })();
@@ -39,20 +44,15 @@ export default function HomePage() {
     };
   }, []);
 
-  // Most recently active quest that is started but not complete.
-  const activeQuest = progress
-    ? publicQuests()
-        .map((quest) => ({ quest, entry: progress.get(quest.id) }))
-        .filter(
-          (row): row is {
-            quest: ReturnType<typeof publicQuests>[number];
-            entry: QuestProgress;
-          } => Boolean(row.entry?.startedAt) && !row.entry?.completedAt,
-        )
-        .sort((a, b) => (b.entry.updatedAt ?? 0) - (a.entry.updatedAt ?? 0))[0]
-    : undefined;
-
-  const hasAnyProgress = (progress?.size ?? 0) > 0;
+  // Derived once per data load; a day boundary landing mid-session simply
+  // refreshes on the next mount, as today's totals always have.
+  const view = useMemo<HomeView | null>(
+    () =>
+      progress && events
+        ? selectHomeView({ progress, events, now })
+        : null,
+    [progress, events, now],
+  );
 
   return (
     <div className="flex flex-1 flex-col">
@@ -63,23 +63,28 @@ export default function HomePage() {
         <h1 className="mt-4 font-display text-[2.15rem] leading-[1.12] text-ink">
           As-salamu alaykum.
         </h1>
-        {todayTotal !== null && todayTotal > 0 && (
+        {view && view.kind !== "first-visit" && view.todayTotal > 0 && (
           <p className="mt-3 text-[15px] text-ink-2">
-            Today: {formatCount(todayTotal)} dhikr. Your Journey is waiting.
+            Today: {formatCount(view.todayTotal)} dhikr. Your Journey is waiting.
           </p>
         )}
       </header>
 
-      {progress === null || todayTotal === null ? (
+      {view === null ? (
         <div className="mt-10 h-56 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
-      ) : activeQuest ? (
+      ) : view.kind === "active-quest" ? (
         <CurrentQuestCard
-          questId={activeQuest.quest.id}
-          name={dhikrForQuest(activeQuest.quest).names.en}
-          count={activeQuest.entry.count}
-          target={activeQuest.quest.target}
+          questId={view.questId}
+          name={view.name}
+          count={view.count}
+          target={view.target}
         />
-      ) : hasAnyProgress ? (
+      ) : view.kind === "all-complete" ? (
+        <>
+          <TodaysAmalCard daily={view.daily} />
+          <PracticeProgressCard stats={view.stats} totalDhikr={view.totalDhikr} />
+        </>
+      ) : view.kind === "next-quest" ? (
         <section className="rise mt-10 [animation-delay:120ms]">
           <div
             className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
@@ -110,19 +115,26 @@ export default function HomePage() {
         </>
       )}
 
-      {hasAnyProgress && progress !== null && (
+      {view !== null && view.kind !== "first-visit" && (
         <Link
           href="/journey"
-          className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 text-sm text-ink transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:180ms]"
+          className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:240ms]"
         >
-          View your Journey
+          <span className="min-w-0">
+            <span className="block text-sm text-ink">View your Journey</span>
+            {view.kind === "all-complete" && (
+              <span className="mt-0.5 block text-xs text-ink-3">
+                {view.completedCount} / {view.questTotal} quests complete
+              </span>
+            )}
+          </span>
           <span aria-hidden="true" className="text-ink-3">
             <Chevron />
           </span>
         </Link>
       )}
 
-      <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:240ms]">
+      <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:280ms]">
         Free forever. No ads, no account needed.
       </p>
     </div>
@@ -174,6 +186,98 @@ function CurrentQuestCard({
         >
           Continue quest
         </Link>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The lifelong-practice suggestion: one unlocked Amal per day, at its
+ * intended count. Completing it for the day is acknowledged quietly - the
+ * Amal continues tomorrow, and nothing is ever lost by resting.
+ */
+function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
+  const done = daily.todayCount >= daily.target;
+  const percent = Math.min(Math.round((daily.todayCount / daily.target) * 100), 100);
+  return (
+    <section className="rise mt-10 [animation-delay:120ms]">
+      <div
+        className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
+        style={{ boxShadow: "var(--shadow-card)" }}
+      >
+        <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+          Today&apos;s Amal
+        </p>
+        <h2 className="mt-2 font-display text-xl text-ink">{daily.name}</h2>
+        {done ? (
+          <>
+            <p className="mt-1 text-sm text-jade">
+              {formatCount(daily.target)}x complete
+            </p>
+            <p className="mt-1 text-sm text-ink-2">
+              Today: {formatCount(daily.todayCount)}x
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-1 text-sm text-ink-2">
+              {formatCount(daily.todayCount)} / {formatCount(daily.target)}
+            </p>
+            <div
+              className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"
+              role="progressbar"
+              aria-valuenow={percent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Today's Amal progress"
+            >
+              <div
+                className="h-full rounded-full bg-accent transition-[width]"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <Link
+              href={`/quest/${daily.questId}/count`}
+              className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+            >
+              Practice now
+            </Link>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PracticeProgressCard({
+  stats,
+  totalDhikr,
+}: {
+  stats: PracticeStats;
+  totalDhikr: number;
+}) {
+  return (
+    <section className="rise mt-5 [animation-delay:180ms]">
+      <div className="rounded-3xl border border-line bg-surface p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+          Your progress
+        </p>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <Stat label="Days practiced" value={String(stats.daysPracticed)} />
+          <Stat label="Total" value={formatCount(totalDhikr)} />
+          <Stat
+            label="Best"
+            value={`${stats.bestRunDays} ${stats.bestRunDays === 1 ? "day" : "days"}`}
+          />
+        </div>
+        {/* A quiet run note only while one is live; a rested day shows no zero. */}
+        {stats.currentRunDays > 0 && (
+          <p className="mt-3 text-xs text-jade">
+            {stats.currentRunDays} {stats.currentRunDays === 1 ? "day" : "days"} in a
+            row
+          </p>
+        )}
       </div>
     </section>
   );

@@ -68,7 +68,11 @@ export default function CompletePage() {
         </p>
       )}
 
-      <div className="rise mt-12 w-full max-w-xs space-y-3 [animation-delay:420ms]">
+      <p className="rise mt-6 text-sm text-ink-2 [animation-delay:380ms]">
+        This Amal stays part of your Journey.
+      </p>
+
+      <div className="rise mt-12 w-full max-w-xs space-y-3 [animation-delay:440ms]">
         <Link
           href={`/quest/${quest.id}/share`}
           className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"

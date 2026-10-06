@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
+import { StarMark } from "@/components/star-mark";
 import { dhikrForQuest, getPublicQuest } from "@/lib/content";
-import { formatCount } from "@/lib/format";
+import { formatCount, todayStart } from "@/lib/format";
 import {
   getProgress,
+  getQuestDeltaSince,
   recordIncrement,
   recordQuestCompleted,
   recordQuestStarted,
@@ -50,12 +53,18 @@ export default function CountPage() {
   const [ready, setReady] = useState(false);
   const [pulse, setPulse] = useState(0);
   const [note, setNote] = useState<string | null>(null);
+  // A completed quest's counter runs in the daily frame: it counts today's
+  // practice toward the target instead of the lifetime total, and reaching
+  // the target is a quiet acknowledgment rather than a new milestone.
+  const [dailyFrame, setDailyFrame] = useState(false);
+  const [dailyDone, setDailyDone] = useState(false);
 
   // Refs mirror count so rapid taps never read stale render state.
   const countRef = useRef(0);
   const seenMilestones = useRef<Set<number>>(new Set());
   const completing = useRef(false);
   const noteTimer = useRef<number | null>(null);
+  const doneRef = useRef<HTMLAnchorElement | null>(null);
 
   // Load existing progress, seed milestone state, mark the quest started.
   useEffect(() => {
@@ -64,12 +73,19 @@ export default function CountPage() {
     (async () => {
       const entry = await getProgress(quest.id).catch(() => undefined);
       if (cancelled) return;
-      const existing = entry?.count ?? 0;
-      countRef.current = existing;
-      setCount(existing);
+      // The milestone is permanent, so a completed quest seeds from today's
+      // net count; a first-time quest keeps counting its lifetime total.
+      let seed = entry?.count ?? 0;
+      if (entry?.completedAt) {
+        setDailyFrame(true);
+        seed = await getQuestDeltaSince(quest.id, todayStart()).catch(() => 0);
+        if (cancelled) return;
+      }
+      countRef.current = seed;
+      setCount(seed);
       if (entry) {
         for (const milestone of MILESTONES) {
-          if (existing / quest.target >= milestone.fraction) {
+          if (seed / quest.target >= milestone.fraction) {
             seenMilestones.current.add(milestone.fraction);
           }
         }
@@ -84,6 +100,12 @@ export default function CountPage() {
       if (noteTimer.current !== null) window.clearTimeout(noteTimer.current);
     };
   }, [quest]);
+
+  // Move focus into the acknowledgment so keyboard and screen-reader users
+  // are not left on the covered counter.
+  useEffect(() => {
+    if (dailyDone) doneRef.current?.focus();
+  }, [dailyDone]);
 
   // Keep the screen awake while counting, if enabled and supported.
   useEffect(() => {
@@ -112,7 +134,7 @@ export default function CountPage() {
   }, [wakeLock]);
 
   const tap = useCallback(() => {
-    if (!quest || completing.current || !ready) return;
+    if (!quest || completing.current || !ready || dailyDone) return;
     countRef.current += 1;
     const next = countRef.current;
     setCount(next);
@@ -133,6 +155,13 @@ export default function CountPage() {
       noteTimer.current = window.setTimeout(() => setNote(null), 2200);
     }
 
+    if (dailyFrame) {
+      // The quest's own milestone was recorded once and stays recorded;
+      // crossing the target again completes today's practice, quietly.
+      if (next === quest.target) setDailyDone(true);
+      return;
+    }
+
     if (next >= quest.target) {
       completing.current = true;
       void recordQuestCompleted(quest.id)
@@ -143,14 +172,14 @@ export default function CountPage() {
           router.push(`/quest/${quest.id}/complete`);
         });
     }
-  }, [quest, ready, haptics, sound, router]);
+  }, [quest, ready, haptics, sound, router, dailyFrame, dailyDone]);
 
   const undo = useCallback(() => {
-    if (!quest || countRef.current <= 0 || completing.current) return;
+    if (!quest || countRef.current <= 0 || completing.current || dailyDone) return;
     countRef.current -= 1;
     setCount(countRef.current);
     void recordUndo(quest.id).catch(() => {});
-  }, [quest]);
+  }, [quest, dailyDone]);
 
   if (!quest) return <MissingQuest />;
 
@@ -196,7 +225,7 @@ export default function CountPage() {
           if (event.detail === 0) tap();
         }}
         disabled={!ready}
-        aria-label={`Count one ${dhikr.names.en}. ${formatCount(count)} of ${formatCount(quest.target)}.`}
+        aria-label={`Count one ${dhikr.names.en}. ${formatCount(count)} of ${formatCount(quest.target)}${dailyFrame ? " today" : ""}.`}
         className="relative flex flex-1 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
         <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
@@ -212,7 +241,7 @@ export default function CountPage() {
           {formatCount(count)}
         </span>
         <span className="text-sm text-ink-3">
-          of {formatCount(quest.target)}
+          of {formatCount(quest.target)}{dailyFrame ? " today" : ""}
         </span>
         <div
           className="h-1.5 w-44 overflow-hidden rounded-full bg-surface-2"
@@ -255,6 +284,44 @@ export default function CountPage() {
           Tap anywhere to count
         </p>
       </footer>
+
+      {dailyDone && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Today's amal complete"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg/95 px-6 text-center backdrop-blur-sm"
+          style={{
+            paddingTop: "max(env(safe-area-inset-top), 24px)",
+            paddingBottom: "max(env(safe-area-inset-bottom), 24px)",
+          }}
+        >
+          <div className="relative">
+            <span
+              aria-hidden="true"
+              className="bloom absolute inset-0 rounded-full"
+              style={{ background: "radial-gradient(circle, var(--glow), transparent 72%)" }}
+            />
+            <StarMark className="relative h-20 w-20 text-accent" />
+          </div>
+          <p className="rise mt-8 text-xs font-semibold uppercase tracking-[0.28em] text-accent [animation-delay:150ms]">
+            Today&apos;s amal
+          </p>
+          <h1 className="rise mt-3 font-display text-[2rem] leading-tight text-ink [animation-delay:230ms]">
+            {formatCount(quest.target)}x {dhikr.names.en}
+          </h1>
+          <p className="rise mt-3 font-display text-lg italic text-ink-2 [animation-delay:310ms]">
+            Alhamdulillah
+          </p>
+          <Link
+            ref={doneRef}
+            href="/"
+            className="rise mt-10 flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px [animation-delay:420ms]"
+          >
+            Done
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

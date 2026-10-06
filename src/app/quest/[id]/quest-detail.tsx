@@ -127,15 +127,20 @@ export function QuestDetail({ questId }: { questId: string }) {
           className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
           {complete
-            ? "Practice again"
+            ? "Practice now"
             : started
               ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
               : `Start quest - ${formatCount(quest.target)}x`}
         </button>
         {loaded && complete && progress?.completedAt && (
-          <p className="mt-3 text-center text-xs text-jade">
-            Completed {formatShortDate(progress.completedAt)}
-          </p>
+          <>
+            <p className="mt-3 text-center text-xs text-jade">
+              Completed {formatShortDate(progress.completedAt)}
+            </p>
+            <p className="mt-1 text-center text-xs text-ink-3">
+              You&apos;ve practiced this Amal {formatCount(count)} times.
+            </p>
+          </>
         )}
       </div>
     </div>
