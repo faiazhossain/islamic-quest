@@ -323,7 +323,7 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     title: "Watch your Journey grow",
-    body: "Reaching the target extends your path of light. Share a milestone card if you wish, then begin the next quest at your own pace.",
+    body: "Reaching the target extends your path of light. Completing a quest is a milestone, not an ending - the Amal stays with you, ready to practice any day.",
   },
 ];
 
@@ -368,8 +368,8 @@ function HowItWorks() {
           ))}
         </ol>
         <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-3">
-          No streaks to break, no points, no pressure. Just your practice, at
-          your pace.
+          No streaks to break, no points, no pressure - and no finish line.
+          Just your practice, at your pace.
         </p>
       </div>
     </section>

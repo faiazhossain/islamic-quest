@@ -1,7 +1,7 @@
 {
   "name": "Amalyn",
   "short_name": "Amalyn",
-  "description": "A calm, offline-first Dhikr companion: quests, milestones, and a journey of light.",
+  "description": "A calm, offline-first Dhikr companion: guided quests, lifelong Amal practice, and a journey of light.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -9,7 +9,10 @@
   "orientation": "portrait",
   "background_color": "#0b1020",
   "theme_color": "#0b1020",
-  "categories": ["lifestyle", "education"],
+  "categories": [
+    "lifestyle",
+    "education"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",

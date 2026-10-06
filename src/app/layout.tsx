@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s — Amalyn",
   },
   description:
-    "A calm, offline-first Dhikr companion: choose a quest, count with intention, and grow a journey of light. Free forever.",
+    "A calm, offline-first Dhikr companion: guided quests mark your milestones, and every Amal stays with you for daily practice along a journey of light. Free forever.",
   manifest: "/manifest.webmanifest",
   icons: {
     apple: "/icons/apple-touch-icon.png",
