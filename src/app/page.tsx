@@ -104,7 +104,10 @@ export default function HomePage() {
           </div>
         </section>
       ) : (
-        <FirstQuestCard />
+        <>
+          <FirstQuestCard />
+          <HowItWorks />
+        </>
       )}
 
       {hasAnyProgress && progress !== null && (
@@ -200,6 +203,70 @@ function FirstQuestCard() {
         >
           Choose your first quest
         </Link>
+      </div>
+    </section>
+  );
+}
+
+const HOW_IT_WORKS_STEPS = [
+  {
+    title: "Choose a quest",
+    body: "Pick a dhikr with a target, like 33 or 100. Every quest shows the Arabic, its meaning, and its source, so you always know what you are reciting.",
+  },
+  {
+    title: "Count with intention",
+    body: "A calm, fullscreen counter: tap to count, undo anytime. It works fully offline, and your practice stays private on your device.",
+  },
+  {
+    title: "Watch your Journey grow",
+    body: "Reaching the target extends your path of light. Share a milestone card if you wish, then begin the next quest at your own pace.",
+  },
+];
+
+function HowItWorks() {
+  return (
+    <section
+      aria-labelledby="how-it-works-heading"
+      className="rise mt-5 [animation-delay:180ms]"
+    >
+      <div className="rounded-3xl border border-line bg-surface p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+          First visit?
+        </p>
+        <h2
+          id="how-it-works-heading"
+          className="mt-2 font-display text-xl text-ink"
+        >
+          How Amalyn works
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-2">
+          Amalyn turns daily dhikr into a gentle journey: each quest gives your
+          remembrance a beginning, a rhythm, and a visible path.
+        </p>
+        <ol className="mt-5 space-y-4">
+          {HOW_IT_WORKS_STEPS.map((step, index) => (
+            <li key={step.title} className="flex gap-3.5">
+              <span
+                aria-hidden="true"
+                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-xs font-semibold text-accent"
+              >
+                {index + 1}
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-display text-[15px] text-ink">
+                  {step.title}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-ink-2">
+                  {step.body}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-3">
+          No streaks to break, no points, no pressure. Just your practice, at
+          your pace.
+        </p>
       </div>
     </section>
   );
