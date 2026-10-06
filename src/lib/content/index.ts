@@ -1,10 +1,11 @@
 import { CATEGORIES } from "./categories";
 import { DHIKR } from "./dhikr";
+import { HADITH } from "./hadith";
 import { QUESTS } from "./quests";
-import type { CategoryId, Dhikr, Quest } from "./types";
+import type { CategoryId, Dhikr, HadithEntry, HadithTheme, Quest } from "./types";
 
-export { CATEGORIES, DHIKR, QUESTS };
-export type { CategoryId, Category, Dhikr, Quest } from "./types";
+export { CATEGORIES, DHIKR, HADITH, QUESTS };
+export type { CategoryId, Category, Dhikr, HadithEntry, HadithTheme, Quest } from "./types";
 
 const dhikrById = new Map(DHIKR.map((dhikr) => [dhikr.id, dhikr]));
 
@@ -78,4 +79,32 @@ export function assertLaunchReady(): void {
 
 export function questTitle(quest: Quest): string {
   return `${dhikrForQuest(quest).names.en} × ${quest.target.toLocaleString("en-US")}`;
+}
+
+const THEME_ORDER: Record<HadithTheme, number> = {
+  "prophets-practice": 0,
+  reward: 1,
+  occasion: 2,
+};
+
+/**
+ * Guidance hadith for one amal, ordered prophets-practice -> reward ->
+ * occasion. Stable sort keeps authored order within a theme.
+ *
+ * Same environment gate philosophy as isQuestPublic: an entry still
+ * awaiting citation verification (review.status "draft") never ships to
+ * production, while development and deliberate staging deploys
+ * (NEXT_PUBLIC_ALLOW_UNREVIEWED=1) show the full set for review.
+ */
+export function hadithForDhikr(dhikrId: string): HadithEntry[] {
+  const entries = HADITH.filter((entry) => entry.dhikrIds.includes(dhikrId));
+  if (
+    process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED === "1" ||
+    process.env.NODE_ENV !== "production"
+  ) {
+    return entries.sort((a, b) => THEME_ORDER[a.theme] - THEME_ORDER[b.theme]);
+  }
+  return entries
+    .filter((entry) => entry.review.status !== "draft")
+    .sort((a, b) => THEME_ORDER[a.theme] - THEME_ORDER[b.theme]);
 }

@@ -19,7 +19,10 @@ product-level.**
 
 1. The app never claims to measure sawab, rank believers, or promise religious
    reward. All rewards are product-level (quests completed, journey progress,
-   cards shared).
+   cards shared). The app may, however, quote — with full citation — what the
+   Prophet ﷺ said about an amal's practice and virtue (guidance hadith,
+   added 2026-10-06); quoted Prophetic statements are content, never a
+   computed claim about the user.
 2. No ads, no subscription, no paywall. Hadiya is voluntary, never gates
    anything, and never interrupts the worship flow.
 3. Worship history is private by default. Sharing is always an explicit act.
@@ -290,3 +293,13 @@ for future maintainers:
    its counter never re-fires the milestone; consistency language is
    deliberately streak-free ("days in a row", personal best) with no loss
    state.
+6. **Hadith guidance layer (2026-10-06)**: each dhikr carries cited
+   guidance hadith (`src/lib/content/hadith.ts`, accessed only through
+   `hadithForDhikr()`) shown in a quest-detail modal - bottom sheet on
+   phones, centered dialog on desktop. Narrations are entered once and may
+   guide several dhikr through `dhikrIds`. Each entry carries its own
+   review status, deliberately never inherited from the parent dhikr;
+   `draft` entries never ship to production (same environment gate as
+   quests). English renderings are composed for Amalyn, never copied from
+   published translations. Scholar re-review of these entries is launch
+   gate item F2 in `docs/tasks.md`.

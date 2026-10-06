@@ -57,6 +57,14 @@ can interleave unless a dependency says otherwise.
 | E4 | Self-review sweep + tests for critical logic (events, counter, sync merge) | B1, D2 | done |
 | E5 | Polish: loading/empty/error states, copy review against product contract | all | done |
 
+## Phase F — Hadith guidance layer
+
+| ID | Task | Depends on | Status |
+|---|---|---|---|
+| F1 | Hadith guidance layer: cited hadith per amal + HadithSheet modal (contract change approved 2026-10-06) | E1 | done |
+| F2 | Scholar re-review of added hadith entries (launch gate) | F1 | todo |
+| F3 | Re-verify remaining hadith references once web search quota resets (Ubayy ibn Ka'b Friday narration, Bukhari 7405) | F1 | todo |
+
 ---
 
 ## Progress log
@@ -139,3 +147,31 @@ can interleave unless a dependency says otherwise.
   regression). Note: `npm run build`/validate.sh is intentionally red
   until scholar review flips the 9 statuses or a staging build sets
   ALLOW_UNREVIEWED_BUILD=1.
+- 2026-10-06 — Phase F1 complete: hadith guidance layer. Contract change
+  (explicit user approval, supersedes the 2026-10-05 "bibliographic only -
+  no virtue quotes displayed in the app" line): the guidance section may now
+  quote what the Prophet ﷺ said about an amal's practice and reward, always
+  with citation and per-entry verification. The app still never computes,
+  measures, or attributes reward to the user — quoted Prophetic statements
+  are content, not claims about the user. Shipped: HadithEntry type +
+  src/lib/content/hadith.ts (18 narrations, shared entries across the
+  tasbih trio), per-entry review status (never inherited from the parent
+  dhikr), hadithForDhikr() with the same environment gate as quests
+  (drafts never ship to production), HadithSheet modal (bottom sheet on
+  phones, centered dialog on desktop, ConfirmDialog conventions: focus
+  save/restore, Escape, tab trap incl. links, scroll lock), guidance
+  button on quest detail, enriched practiceGuidance copy, hadith integrity
+  tests. Every Arabic matn and every reference cross-checked on 2026-10-06
+  against sunnah.com and the fawazahmed0/hadith-api dataset (whose Bukhari
+  numbering and Muslim arabicnumber reproduce sunnah.com numbering);
+  narrator corrections vs common memory: Muslim 2137a is Samura ibn
+  Jundab; Muslim 408 wording is "man salla alayya wahidatan". Friday
+  salawat hadith ships as Riyad as-Salihin 1158 (Nawawi's compilation of
+  the Abu Dawud narration with a sound chain) because the Nasa'i/Ibn Majah
+  wordings are graded weak by Darussalam and the Sahih Muslim number could
+  not be pinned in this pass. Dropped rather than shipped unchecked:
+  Tirmidhi 2457 (Da'if, Darussalam), Muslim 2723 (different narration).
+  validate.sh green: lint clean, 95/95 tests, production build prerenders
+  all 20 quest routes. CDP screenshots verified at 375px (bottom sheet,
+  dawn) and 1280px (centered dialog, night): Arabic RTL/Amiri, ﷺ glyph,
+  Escape close, honest footer.

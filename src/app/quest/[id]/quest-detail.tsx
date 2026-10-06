@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { HadithSheet } from "@/components/hadith-sheet";
 import { MissingQuest } from "@/components/missing-quest";
 import {
   CATEGORIES,
   dhikrForQuest,
   getPublicQuest,
+  hadithForDhikr,
 } from "@/lib/content";
+import { REVIEW_LABEL } from "@/lib/content/review";
 import { formatCount, formatShortDate } from "@/lib/format";
 import {
   getProgress,
@@ -16,21 +19,12 @@ import {
   type QuestProgress,
 } from "@/lib/db/events";
 
-/**
- * Honest, per-item review status shown to the user. "reviewed" means a
- * human scholar has signed off; nothing else reaches production builds.
- */
-const REVIEW_LABEL: Record<string, string> = {
-  draft: "Reference pending scholar review",
-  verified: "Reference verified; scholar review pending",
-  reviewed: "Scholar reviewed",
-};
-
 export function QuestDetail({ questId }: { questId: string }) {
   const router = useRouter();
   const quest = getPublicQuest(questId);
   const [progress, setProgress] = useState<QuestProgress | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [hadithOpen, setHadithOpen] = useState(false);
 
   useEffect(() => {
     if (!quest) return;
@@ -60,6 +54,7 @@ export function QuestDetail({ questId }: { questId: string }) {
   const sourceText = [dhikr.source.collection, dhikr.source.reference]
     .filter(Boolean)
     .join(" ");
+  const hadith = hadithForDhikr(dhikr.id);
 
   const start = async () => {
     if (!started) await recordQuestStarted(quest.id).catch(() => {});
@@ -115,7 +110,24 @@ export function QuestDetail({ questId }: { questId: string }) {
         <div className="flex flex-col lg:col-span-5">
           <dl className="rise mt-6 text-sm [animation-delay:180ms] lg:mt-0 lg:[animation-delay:120ms]">
             <Row label="Quest" value={`${formatCount(quest.target)}x`} />
-            <Row label="Guidance" value={dhikr.practiceGuidance.en} />
+            <div className="border-b border-line py-3">
+              <dt className="text-xs uppercase tracking-wide text-ink-3">
+                Guidance
+              </dt>
+              <dd className="mt-1 text-ink">{dhikr.practiceGuidance.en}</dd>
+              {hadith.length > 0 && (
+                <dd className="mt-2">
+                  <button
+                    onClick={() => setHadithOpen(true)}
+                    aria-haspopup="dialog"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
+                  >
+                    <BookIcon />
+                    See the hadith ({hadith.length})
+                  </button>
+                </dd>
+              )}
+            </div>
             <Row
               label="Source"
               value={sourceText || "Verification in progress"}
@@ -147,6 +159,13 @@ export function QuestDetail({ questId }: { questId: string }) {
           </div>
         </div>
       </div>
+
+      <HadithSheet
+        open={hadithOpen}
+        onClose={() => setHadithOpen(false)}
+        title={dhikr.names.en}
+        entries={hadith}
+      />
     </div>
   );
 }
@@ -176,6 +195,20 @@ function BackChevron() {
         d="M10 3.5 5.5 8 10 12.5"
         stroke="currentColor"
         strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function BookIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+      <path
+        d="M8 4.2C7 3.4 5.7 3 4.2 3c-.7 0-1.4.1-2 .2v9c.6-.1 1.3-.2 2-.2 1.5 0 2.8.4 3.8 1.2 1-.8 2.3-1.2 3.8-1.2.7 0 1.4.1 2 .2v-9c-.6-.1-1.3-.2-2-.2-1.5 0-2.8.4-3.8 1.2Zm0 0v9"
+        stroke="currentColor"
+        strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

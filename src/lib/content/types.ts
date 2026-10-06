@@ -43,6 +43,44 @@ export interface Quest {
   target: number;
 }
 
+/**
+ * Why a hadith is shown in the guidance sheet. "prophets-practice" is how
+ * the Prophet (peace be upon him) performed the amal; "reward" quotes only
+ * his own cited words about its virtue — never a computed claim about the
+ * user; "occasion" ties it to a specific time (morning, Friday, ...).
+ */
+export type HadithTheme = "prophets-practice" | "reward" | "occasion";
+
+export interface HadithEntry {
+  /** Stable slug, unique across HADITH, e.g. "salawat-friday-riyad-1158". */
+  id: string;
+  /** Every amal this narration guides; shared narrations list several. */
+  dhikrIds: string[];
+  theme: HadithTheme;
+  /** Standard Arabic matn (verbatim religious text). */
+  arabic: string;
+  /** Fresh faithful English rendering; never a published translation verbatim. */
+  translation: LocalizedText;
+  /** Companion narrator, e.g. "Abu Huraira". */
+  narrator: string;
+  /** e.g. "Sahih al-Bukhari". */
+  collection: string;
+  /** sunnah.com numbering, e.g. "6307" or "596a". */
+  reference: string;
+  /** Only when the collection itself is not the grade, e.g. "Hasan (Darussalam)". */
+  grade?: string;
+  /** Full canonical link, e.g. "https://sunnah.com/bukhari:6307". */
+  sourceUrl: string;
+  /** Parallel citations or context the citation line cannot carry. */
+  note?: string;
+  /**
+   * Per-entry verification. Deliberately NOT inherited from the parent
+   * dhikr's review: each narration stands on its own evidence, so the
+   * open scholar re-review of these entries is shown honestly.
+   */
+  review: ContentReview;
+}
+
 export interface Category {
   id: CategoryId;
   name: LocalizedText;

@@ -17,7 +17,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "Astaghfirullah",
     meaning: { en: "I seek Allah's forgiveness." },
     category: "istighfar",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Any time. The Prophet ﷺ sought forgiveness more than seventy times a day." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "6307; 2702",
@@ -41,7 +41,7 @@ export const DHIKR: Dhikr[] = [
       en: "O Allah, You are my Lord; there is no god but You. You created me and I am Your servant. I keep Your covenant and promise as much as I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favor upon me and I acknowledge my sin, so forgive me — none forgives sins but You.",
     },
     category: "istighfar",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Once in the morning and once in the evening, with conviction." },
     source: {
       collection: "Sahih al-Bukhari",
       reference: "6306",
@@ -61,7 +61,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "Subhanallah",
     meaning: { en: "Glory be to Allah." },
     category: "tasbih",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "After each prayer, 33, 33, then 34. Also before sleeping." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "843; 596a; 5362",
@@ -81,7 +81,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "Alhamdulillah",
     meaning: { en: "All praise is for Allah." },
     category: "tasbih",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "After each prayer, 33, 33, then 34. Also before sleeping." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "843; 596a; 5362",
@@ -101,7 +101,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "Allahu Akbar",
     meaning: { en: "Allah is the Greatest." },
     category: "tasbih",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "After each prayer, 33, 33, then 34. Also before sleeping." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "843; 596a; 5362",
@@ -121,7 +121,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "La ilaha illallah",
     meaning: { en: "There is no god but Allah." },
     category: "dhikr",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Any time. The best of all remembrance." },
     source: {
       collection: "Jami at-Tirmidhi",
       reference: "3383",
@@ -141,7 +141,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "Subhanallahi wa bihamdihi",
     meaning: { en: "Glory be to Allah, and praise is His." },
     category: "tasbih",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Any time. A hundred times a day." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "6405; 2691",
@@ -161,7 +161,7 @@ export const DHIKR: Dhikr[] = [
     transliteration: "La hawla wa la quwwata illa billah",
     meaning: { en: "There is no might nor power except with Allah." },
     category: "dhikr",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Any time, especially in difficulty." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "6384; 2704",
@@ -185,7 +185,7 @@ export const DHIKR: Dhikr[] = [
       en: "O Allah, send blessings upon Muhammad and the family of Muhammad, as You sent blessings upon Ibrahim and the family of Ibrahim. You are Praiseworthy, Glorious. O Allah, bless Muhammad and the family of Muhammad, as You blessed Ibrahim and the family of Ibrahim. You are Praiseworthy, Glorious.",
     },
     category: "salawat",
-    practiceGuidance: { en: "Any time." },
+    practiceGuidance: { en: "Any time, and in abundance on Fridays." },
     source: {
       collection: "Sahih al-Bukhari; Sahih Muslim",
       reference: "3370; 406",
