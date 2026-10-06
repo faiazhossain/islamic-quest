@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "islamic_quest",
+  "project_id": "4d7838af-2188-41b9-8cd1-2a6e3bb31016"
+}
