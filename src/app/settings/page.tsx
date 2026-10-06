@@ -101,9 +101,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col lg:mx-auto lg:max-w-2xl">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink">Settings</h1>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Settings</h1>
       </header>
 
       <Section title="Appearance" delay={60}>

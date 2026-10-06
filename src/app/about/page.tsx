@@ -26,7 +26,7 @@ const PROMISES = [
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col lg:mx-auto lg:max-w-2xl">
       <div className="rise">
         <Link
           href="/settings"
@@ -38,7 +38,7 @@ export default function AboutPage() {
       </div>
 
       <header className="rise mt-2">
-        <h1 className="font-display text-[2rem] leading-tight text-ink">
+        <h1 className="font-display text-[2rem] leading-tight text-ink lg:text-4xl">
           About &amp; privacy
         </h1>
         <p className="mt-2 text-sm text-ink-2">

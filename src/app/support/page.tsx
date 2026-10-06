@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function SupportPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col lg:mx-auto lg:max-w-xl">
       <div className="rise">
         <Link
           href="/settings"
@@ -19,7 +19,7 @@ export default function SupportPage() {
       </div>
 
       <header className="rise mt-2">
-        <h1 className="font-display text-[2rem] leading-tight text-ink">
+        <h1 className="font-display text-[2rem] leading-tight text-ink lg:text-4xl">
           Support Amalyn
         </h1>
       </header>

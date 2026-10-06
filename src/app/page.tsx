@@ -60,7 +60,7 @@ export default function HomePage() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ink-3">
           Amalyn
         </p>
-        <h1 className="mt-4 font-display text-[2.15rem] leading-[1.12] text-ink">
+        <h1 className="mt-4 font-display text-[2.15rem] leading-[1.12] text-ink lg:text-5xl lg:leading-[1.08]">
           As-salamu alaykum.
         </h1>
         {view && view.kind !== "first-visit" && view.todayTotal > 0 && (
@@ -72,66 +72,69 @@ export default function HomePage() {
 
       {view === null ? (
         <div className="mt-10 h-56 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
-      ) : view.kind === "active-quest" ? (
-        <CurrentQuestCard
-          questId={view.questId}
-          name={view.name}
-          count={view.count}
-          target={view.target}
-        />
-      ) : view.kind === "all-complete" ? (
-        <>
-          <TodaysAmalCard daily={view.daily} />
-          <PracticeProgressCard stats={view.stats} totalDhikr={view.totalDhikr} />
-        </>
-      ) : view.kind === "next-quest" ? (
-        <section className="rise mt-10 [animation-delay:120ms]">
-          <div
-            className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          >
-            <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-              Next step
-            </p>
-            <h2 className="mt-2 font-display text-xl text-ink">
-              Begin your next quest.
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-2">
-              Your journey grows with every quest you complete.
-            </p>
-            <Link
-              href="/explore"
-              className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
-            >
-              Choose a quest
-            </Link>
-          </div>
-        </section>
-      ) : (
-        <>
+      ) : view.kind === "first-visit" ? (
+        // The explainer gets the stage on desktop: one centered column.
+        <div className="flex flex-col lg:mx-auto lg:max-w-2xl">
           <FirstQuestCard />
           <HowItWorks />
-        </>
-      )}
+        </div>
+      ) : (
+        <div className="flex flex-col lg:mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
+          {view.kind === "active-quest" ? (
+            <CurrentQuestCard
+              questId={view.questId}
+              name={view.name}
+              count={view.count}
+              target={view.target}
+            />
+          ) : view.kind === "all-complete" ? (
+            <>
+              <TodaysAmalCard daily={view.daily} />
+              <PracticeProgressCard stats={view.stats} totalDhikr={view.totalDhikr} />
+            </>
+          ) : (
+            <section className="rise mt-10 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
+              <div
+                className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                  Next step
+                </p>
+                <h2 className="mt-2 font-display text-xl text-ink">
+                  Begin your next quest.
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-2">
+                  Your journey grows with every quest you complete.
+                </p>
+                <Link
+                  href="/explore"
+                  className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+                >
+                  Choose a quest
+                </Link>
+              </div>
+            </section>
+          )}
 
-      {view !== null && view.kind !== "first-visit" && (
-        <Link
-          href="/journey"
-          className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:240ms]"
-        >
-          <span className="min-w-0">
-            <span className="block text-sm text-ink">View your Journey</span>
-            {view.kind === "all-complete" && (
-              <span className="mt-0.5 block text-xs text-ink-3">
-                {view.completedCount} / {view.questTotal} quests complete
-              </span>
-            )}
-          </span>
-          <span aria-hidden="true" className="text-ink-3">
-            <Chevron />
-          </span>
-        </Link>
+          <Link
+            href="/journey"
+            className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:240ms] lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:180ms]"
+          >
+            <span className="min-w-0">
+              <span className="block text-sm text-ink">View your Journey</span>
+              {view.kind === "all-complete" && (
+                <span className="mt-0.5 block text-xs text-ink-3">
+                  {view.completedCount} / {view.questTotal} quests complete
+                </span>
+              )}
+            </span>
+            <span aria-hidden="true" className="text-ink-3">
+              <Chevron />
+            </span>
+          </Link>
+        </div>
       )}
 
       <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:280ms]">
@@ -154,7 +157,7 @@ function CurrentQuestCard({
 }) {
   const percent = Math.min(Math.round((count / target) * 100), 100);
   return (
-    <section className="rise mt-10 [animation-delay:120ms]">
+    <section className="rise mt-10 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
       <div
         className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
         style={{ boxShadow: "var(--shadow-card)" }}
@@ -200,7 +203,7 @@ function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
   const done = daily.todayCount >= daily.target;
   const percent = Math.min(Math.round((daily.todayCount / daily.target) * 100), 100);
   return (
-    <section className="rise mt-10 [animation-delay:120ms]">
+    <section className="rise mt-10 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
       <div
         className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6"
         style={{ boxShadow: "var(--shadow-card)" }}
@@ -258,7 +261,7 @@ function PracticeProgressCard({
   totalDhikr: number;
 }) {
   return (
-    <section className="rise mt-5 [animation-delay:180ms]">
+    <section className="rise mt-5 [animation-delay:180ms] lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:120ms]">
       <div className="rounded-3xl border border-line bg-surface p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           Your progress

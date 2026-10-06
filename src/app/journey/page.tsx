@@ -116,7 +116,7 @@ export default function JourneyPage() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink">Journey</h1>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Journey</h1>
         <p className="mt-1 text-sm text-ink-2">Your path of light.</p>
       </header>
 
@@ -138,17 +138,17 @@ export default function JourneyPage() {
           </Link>
         </div>
       ) : (
-        <>
-          <div className="rise mt-6 grid grid-cols-3 gap-3 [animation-delay:80ms]">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
+          <div className="rise mt-6 grid grid-cols-3 gap-3 [animation-delay:80ms] lg:col-span-5 lg:sticky lg:top-10 lg:mt-0 lg:self-start">
             <Stat label="Days" value={String(stats.daysPracticed)} />
             <Stat label="Quests" value={String(completed.length)} />
             <Stat label="Dhikr" value={formatCount(totalDhikr)} />
           </div>
 
-          <div className="rise mt-4 [animation-delay:160ms]">
+          <div className="rise mt-4 [animation-delay:160ms] lg:col-span-7 lg:mt-0 lg:[animation-delay:80ms]">
             <svg
               viewBox={`0 0 340 ${TOP_PAD + (points.length - 1) * ROW_H + 110}`}
-              className="w-full"
+              className="w-full lg:mx-auto lg:block lg:max-w-md"
               role="img"
               aria-label={`Journey with ${completed.length} completed quests`}
             >
@@ -177,7 +177,7 @@ export default function JourneyPage() {
           </div>
 
           {journeyComplete && (
-            <div className="rise rounded-3xl border border-line bg-surface p-6 [animation-delay:240ms]">
+            <div className="rise rounded-3xl border border-line bg-surface p-6 [animation-delay:240ms] lg:col-span-5 lg:mt-0 lg:self-start lg:[animation-delay:160ms]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
                 Your Journey continues
               </p>
@@ -194,7 +194,7 @@ export default function JourneyPage() {
               </p>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

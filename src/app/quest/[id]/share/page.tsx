@@ -331,7 +331,7 @@ export default function SharePage() {
 
   return (
     <div
-      className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col px-5"
+      className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col px-5 lg:max-w-4xl lg:px-10"
       style={{
         paddingTop: "max(env(safe-area-inset-top), 16px)",
         paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
@@ -349,66 +349,70 @@ export default function SharePage() {
         <span className="h-11 w-11" aria-hidden="true" />
       </header>
 
-      <div className="mt-5 flex justify-center">
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          className="w-auto rounded-2xl border border-line"
-          style={{ maxHeight: "52vh", boxShadow: "var(--shadow-card)" }}
-          aria-label={`Milestone card: ${formatCount(quest.target)} times ${dhikr.names.en}, quest complete`}
-          role="img"
-        />
-      </div>
-
-      <div className="mt-6 space-y-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
-            Card theme
-          </p>
-          <div className="mt-2 flex gap-2">
-            {(["night", "dawn"] as const).map((option) => (
-              <button
-                key={option}
-                onClick={() => setTheme(option)}
-                aria-pressed={theme === option}
-                className={`h-10 flex-1 rounded-xl border text-sm font-medium capitalize transition-colors active:opacity-70 ${
-                  theme === option
-                    ? "border-accent bg-accent text-on-accent"
-                    : "border-line bg-surface text-ink-2 hover:text-ink"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col lg:mt-5 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:items-start">
+        <div className="mt-5 flex justify-center lg:sticky lg:top-10 lg:col-span-7 lg:mt-0 lg:self-start">
+          <canvas
+            ref={canvasRef}
+            width={W}
+            height={H}
+            className="max-h-[52vh] w-auto rounded-2xl border border-line lg:max-h-[68vh]"
+            style={{ boxShadow: "var(--shadow-card)" }}
+            aria-label={`Milestone card: ${formatCount(quest.target)} times ${dhikr.names.en}, quest complete`}
+            role="img"
+          />
         </div>
 
-        <button
-          onClick={() => setShowCount((value) => !value)}
-          aria-pressed={showCount}
-          className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2"
-        >
-          <span className="text-sm text-ink">Show the count on the card</span>
-          <Switch on={showCount} />
-        </button>
-      </div>
+        <div className="flex flex-col lg:col-span-5">
+          <div className="mt-6 space-y-4 lg:mt-0">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
+                Card theme
+              </p>
+              <div className="mt-2 flex gap-2">
+                {(["night", "dawn"] as const).map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setTheme(option)}
+                    aria-pressed={theme === option}
+                    className={`h-10 flex-1 rounded-xl border text-sm font-medium capitalize transition-colors active:opacity-70 ${
+                      theme === option
+                        ? "border-accent bg-accent text-on-accent"
+                        : "border-line bg-surface text-ink-2 hover:text-ink"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      <div className="mt-6 space-y-3">
-        <button
-          onClick={share}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
-        >
-          Share or save card
-        </button>
-        {status && (
-          <p role="status" className="text-center text-xs text-ink-3">
-            {status}
-          </p>
-        )}
-        <p className="pb-4 text-center text-xs leading-relaxed text-ink-3">
-          Your card only shows what you choose. Sharing is always up to you.
-        </p>
+            <button
+              onClick={() => setShowCount((value) => !value)}
+              aria-pressed={showCount}
+              className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2"
+            >
+              <span className="text-sm text-ink">Show the count on the card</span>
+              <Switch on={showCount} />
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            <button
+              onClick={share}
+              className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+            >
+              Share or save card
+            </button>
+            {status && (
+              <p role="status" className="text-center text-xs text-ink-3">
+                {status}
+              </p>
+            )}
+            <p className="pb-4 text-center text-xs leading-relaxed text-ink-3">
+              Your card only shows what you choose. Sharing is always up to you.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

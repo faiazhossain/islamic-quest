@@ -42,7 +42,7 @@ export default function ExplorePage() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink">Explore</h1>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Explore</h1>
         <p className="mt-1 text-sm text-ink-2">
           Choose a quest at your own pace.
         </p>
@@ -65,9 +65,9 @@ export default function ExplorePage() {
           <div
             role="group"
             aria-label="Filter quests by category"
-            className="no-scrollbar rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms]"
+            className="no-scrollbar rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms] lg:mx-0 lg:flex-wrap lg:overflow-x-visible lg:px-0"
           >
-            <div className="flex w-max gap-2">
+            <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
               {FILTERS.map(({ id, label }) => (
                 <button
                   key={id}
@@ -86,13 +86,13 @@ export default function ExplorePage() {
           </div>
 
           {progress === null ? (
-            <div className="mt-5 space-y-3" aria-hidden="true">
+            <div className="mt-5 space-y-3 lg:grid lg:grid-cols-2 lg:space-y-0 lg:gap-3 xl:grid-cols-3" aria-hidden="true">
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} className="h-[72px] animate-pulse rounded-2xl bg-surface" />
               ))}
             </div>
           ) : (
-            <ul className="rise mt-5 space-y-3 [animation-delay:140ms]">
+            <ul className="rise mt-5 space-y-3 [animation-delay:140ms] lg:grid lg:grid-cols-2 lg:space-y-0 lg:gap-3 xl:grid-cols-3">
               {quests.map((quest) => {
                 const dhikr = dhikrForQuest(quest);
                 const entry = progress.get(quest.id);

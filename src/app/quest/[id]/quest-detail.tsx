@@ -89,59 +89,63 @@ export function QuestDetail({ questId }: { questId: string }) {
             {REVIEW_LABEL[dhikr.review.status] ?? REVIEW_LABEL.draft}
           </span>
         </div>
-        <h1 className="mt-3 font-display text-[2rem] leading-tight text-ink">
+        <h1 className="mt-3 font-display text-[2rem] leading-tight text-ink lg:text-4xl">
           {dhikr.names.en}
         </h1>
       </header>
 
-      <section className="rise mt-6 [animation-delay:120ms]">
-        <div
-          className="rounded-3xl border border-line bg-surface-2 px-6 py-8 text-center"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
-          <p className="font-arabic text-[2.1rem] leading-[2.2] text-ink" dir="rtl" lang="ar">
-            {dhikr.arabic}
-          </p>
-          <p className="mt-5 text-sm italic leading-relaxed text-ink-2">
-            {dhikr.transliteration}
-          </p>
-          <p className="mt-3 text-[15px] leading-relaxed text-ink">
-            {dhikr.meaning.en}
-          </p>
+      <div className="flex flex-col lg:mt-6 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:items-start">
+        <section className="rise mt-6 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
+          <div
+            className="rounded-3xl border border-line bg-surface-2 px-6 py-8 text-center"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <p className="font-arabic text-[2.1rem] leading-[2.2] text-ink lg:text-4xl" dir="rtl" lang="ar">
+              {dhikr.arabic}
+            </p>
+            <p className="mt-5 text-sm italic leading-relaxed text-ink-2">
+              {dhikr.transliteration}
+            </p>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink">
+              {dhikr.meaning.en}
+            </p>
+          </div>
+        </section>
+
+        <div className="flex flex-col lg:col-span-5">
+          <dl className="rise mt-6 text-sm [animation-delay:180ms] lg:mt-0 lg:[animation-delay:120ms]">
+            <Row label="Quest" value={`${formatCount(quest.target)}x`} />
+            <Row label="Guidance" value={dhikr.practiceGuidance.en} />
+            <Row
+              label="Source"
+              value={sourceText || "Verification in progress"}
+              sub={dhikr.source.note}
+            />
+          </dl>
+
+          <div className="rise mt-8 pb-4 [animation-delay:240ms] lg:[animation-delay:180ms]">
+            <button
+              onClick={start}
+              className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+            >
+              {complete
+                ? "Practice now"
+                : started
+                  ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
+                  : `Start quest - ${formatCount(quest.target)}x`}
+            </button>
+            {loaded && complete && progress?.completedAt && (
+              <>
+                <p className="mt-3 text-center text-xs text-jade">
+                  Completed {formatShortDate(progress.completedAt)}
+                </p>
+                <p className="mt-1 text-center text-xs text-ink-3">
+                  You&apos;ve practiced this Amal {formatCount(count)} times.
+                </p>
+              </>
+            )}
+          </div>
         </div>
-      </section>
-
-      <dl className="rise mt-6 text-sm [animation-delay:180ms]">
-        <Row label="Quest" value={`${formatCount(quest.target)}x`} />
-        <Row label="Guidance" value={dhikr.practiceGuidance.en} />
-        <Row
-          label="Source"
-          value={sourceText || "Verification in progress"}
-          sub={dhikr.source.note}
-        />
-      </dl>
-
-      <div className="rise mt-8 pb-4 [animation-delay:240ms]">
-        <button
-          onClick={start}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
-        >
-          {complete
-            ? "Practice now"
-            : started
-              ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
-              : `Start quest - ${formatCount(quest.target)}x`}
-        </button>
-        {loaded && complete && progress?.completedAt && (
-          <>
-            <p className="mt-3 text-center text-xs text-jade">
-              Completed {formatShortDate(progress.completedAt)}
-            </p>
-            <p className="mt-1 text-center text-xs text-ink-3">
-              You&apos;ve practiced this Amal {formatCount(count)} times.
-            </p>
-          </>
-        )}
       </div>
     </div>
   );
