@@ -1,7 +1,6 @@
 import { createHmac } from "node:crypto";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import Resend from "next-auth/providers/resend";
 import type { Provider } from "next-auth/providers";
 
 /**
@@ -22,14 +21,11 @@ function buildProviders(): Provider[] {
   if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
     providers.push(Google);
   }
-  if (process.env.AUTH_RESEND_KEY && process.env.EMAIL_FROM) {
-    providers.push(
-      Resend({
-        apiKey: process.env.AUTH_RESEND_KEY,
-        from: process.env.EMAIL_FROM,
-      }),
-    );
-  }
+  // Resend magic links are NOT wired: the email provider requires a
+  // database adapter (verification-token + user storage), and configuring
+  // it without one makes every /api/auth route fail with MissingAdapter -
+  // taking Google sign-in down with it. The adapter work is tracked in
+  // beads; enable Resend only together with that adapter.
   return providers;
 }
 

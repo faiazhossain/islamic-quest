@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { MAX_AGE_MS, parseEvents } from "./event-validation";
+import {
+  MAX_AGE_MS,
+  MAX_BATCH,
+  MAX_IMPORT_BYTES,
+  MAX_USER_EVENTS,
+  parseEvents,
+  parseImportEnvelope,
+} from "./event-validation";
 
 const NOW = 1_800_000_000_000;
 
@@ -49,5 +56,69 @@ describe("parseEvents", () => {
 
   it("rejects the whole batch when a single event fails", () => {
     expect(parseEvents([valid, { ...valid, id: "e2", delta: 9 }], NOW)).toBeNull();
+  });
+
+  it("accepts exactly the type/delta pairs the client produces", () => {
+    const pairs = [
+      { type: "quest_started", delta: 0 },
+      { type: "increment", delta: 1 },
+      { type: "undo", delta: -1 },
+      { type: "quest_completed", delta: 0 },
+    ] as const;
+    for (const [index, pair] of pairs.entries()) {
+      expect(
+        parseEvents([{ ...valid, id: `e${index}`, ...pair }], NOW),
+      ).toEqual([{ ...valid, id: `e${index}`, ...pair }]);
+    }
+  });
+
+  it("rejects integrity-breaking type/delta pairs", () => {
+    // An "undo" that adds, or a completion with a nonzero delta, would
+    // corrupt the rebuilt counts; only the exact pairs are contractual.
+    expect(parseEvents([{ ...valid, type: "undo", delta: 1 }], NOW)).toBeNull();
+    expect(
+      parseEvents([{ ...valid, type: "quest_completed", delta: -1 }], NOW),
+    ).toBeNull();
+    expect(
+      parseEvents([{ ...valid, type: "quest_started", delta: 1 }], NOW),
+    ).toBeNull();
+    expect(parseEvents([{ ...valid, type: "increment", delta: 0 }], NOW)).toBeNull();
+    expect(parseEvents([{ ...valid, type: "increment", delta: -1 }], NOW)).toBeNull();
+  });
+});
+
+describe("parseImportEnvelope", () => {
+  const envelope = (events: unknown) => ({ app: "amalyn", version: 1, events });
+
+  // parseImportEnvelope validates against the real clock, so the sample
+  // event must sit inside the accepted window.
+  const freshEvent = { ...valid, at: Date.now() - 1000 };
+
+  it("accepts a well-formed export and returns the parsed events", () => {
+    const result = parseImportEnvelope(envelope([freshEvent]));
+    expect(result).toEqual({ events: [freshEvent] });
+  });
+
+  it("rejects files that are not this app's version-1 export", () => {
+    expect(parseImportEnvelope(null)).toBeNull();
+    expect(parseImportEnvelope("export")).toBeNull();
+    expect(parseImportEnvelope({ ...envelope([freshEvent]), app: "other" })).toBeNull();
+    expect(parseImportEnvelope({ ...envelope([freshEvent]), version: 2 })).toBeNull();
+    expect(
+      parseImportEnvelope({ ...envelope([freshEvent]), version: "1" }),
+    ).toBeNull();
+    expect(parseImportEnvelope({ app: "amalyn", version: 1 })).toBeNull();
+  });
+
+  it("rejects envelopes whose events fail the sync contract", () => {
+    expect(parseImportEnvelope(envelope([{ ...freshEvent, questId: "nope" }]))).toBeNull();
+    expect(parseImportEnvelope(envelope("events"))).toBeNull();
+  });
+
+  it("keeps the abuse-cap constants reachable and ordered", () => {
+    // Documented boundaries: import batches fit in one sync batch, and the
+    // per-user server cap sits far above anything genuine practice produces.
+    expect(MAX_IMPORT_BYTES).toBeGreaterThan(MAX_BATCH * 200);
+    expect(MAX_USER_EVENTS).toBeGreaterThan(MAX_BATCH);
   });
 });

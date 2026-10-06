@@ -7,7 +7,10 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Switch } from "@/components/switch";
 import { db } from "@/lib/db/db";
 import { recomputeAllQuests } from "@/lib/db/events";
-import { parseEvents } from "@/lib/event-validation";
+import {
+  MAX_IMPORT_BYTES,
+  parseImportEnvelope,
+} from "@/lib/event-validation";
 import { useSettings, type ThemeChoice } from "@/lib/settings";
 
 const THEME_CHOICES: Array<{ id: ThemeChoice; label: string }> = [
@@ -52,24 +55,23 @@ export default function SettingsPage() {
 
   const importData = async (file: File) => {
     try {
-      const data = JSON.parse(await file.text()) as {
-        app?: string;
-        version?: number;
-        events?: unknown;
-      };
-      if (data.app !== "amalyn" || typeof data.version !== "number") {
-        throw new Error("That file is not an Amalyn export.");
+      // Reject before reading: an oversized file cannot pass validation
+      // (a full batch is well under 1 MB), so never parse it at all.
+      if (file.size > MAX_IMPORT_BYTES) {
+        setStatus("That file is too large to be an Amalyn export.");
+        return;
       }
+      const data: unknown = JSON.parse(await file.text());
       // Same contract the sync server enforces, so an accepted import can
       // never wedge syncing with a permanent 400.
-      const events = parseEvents(data.events);
-      if (events === null) {
-        throw new Error("The export contains events this app cannot accept.");
+      const envelope = parseImportEnvelope(data);
+      if (envelope === null) {
+        throw new Error("That file is not a valid Amalyn export.");
       }
       // Force re-push: the server dedupes by event id, so replaying
       // already-synced rows is safe, and the server copy of a restored
       // backup never silently misses imported history.
-      const restored = events.map((event) => ({ ...event, synced: 0 as const }));
+      const restored = envelope.events.map((event) => ({ ...event, synced: 0 as const }));
       await db.transaction("rw", db.events, async () => {
         await db.events.bulkPut(restored);
       });
