@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>seeding</title>
+</head>
+<body>
+<p id="status">seeding…</p>
+<script>
+  // Temporary dev-only fixture: seeds the Amalyn IndexedDB with completed
+  // quests and practice history so the post-catalog states can be verified
+  // in a headless browser. Visiting it WIPES the local app data, so it must
+  // never be deployed: copy it into public/ only for a local dev server and
+  // delete it again before any build. Kept outside public/ so it can never
+  // ship, and public/dev-seed.html is gitignored as a second guard.
+  const DAY = 86_400_000;
+  // Mirrors src/lib/content/quests.ts TIERS.
+  const TIERS = [
+    ["astaghfirullah", [100, 500, 1000]],
+    ["sayyid-ul-istighfar", [33, 100]],
+    ["subhanallah", [33, 100]],
+    ["alhamdulillah", [33, 100]],
+    ["allahu-akbar", [33, 100]],
+    ["la-ilaha-illallah", [100, 500]],
+    ["subhanallahi-wa-bihamdihi", [100, 500]],
+    ["hawqala", [100, 500]],
+    ["salawat-ibrahimiyya", [100, 500, 1000]],
+  ];
+  const QUESTS = TIERS.flatMap(([dhikrId, targets]) =>
+    targets.map((target) => ({ id: `${dhikrId}-${target}`, dhikrId, target })),
+  );
+  const mode = new URLSearchParams(location.search).get("mode") ?? "20";
+  const remaining = mode === "16"
+    ? new Set(["sayyid-ul-istighfar-100", "allahu-akbar-100", "hawqala-500", "salawat-ibrahimiyya-1000"])
+    : new Set();
+  // "done" completes everything and puts today's daily pick two counts from
+  // its target, so a couple of taps cross it and the done states appear.
+  const dailyPickId = "la-ilaha-illallah-100";
+  const nearDone = mode === "done"
+    ? new Map([[dailyPickId, 98]])
+    : new Map();
+  const completed = QUESTS.filter((quest) => !remaining.has(quest.id));
+
+  const open = () => new Promise((resolve, reject) => {
+    // Open without a pinned version: a fresh profile creates v1 with our
+    // stores; an existing one (the app's Dexie may have upgraded it) opens
+    // as-is and only needs its rows cleared.
+    const request = indexedDB.open("amalyn");
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("events")) {
+        const events = db.createObjectStore("events", { keyPath: "id" });
+        events.createIndex("questId", "questId");
+        events.createIndex("at", "at");
+        events.createIndex("synced", "synced");
+      }
+      if (!db.objectStoreNames.contains("questProgress")) {
+        db.createObjectStore("questProgress", { keyPath: "questId" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  const clear = (db, store) => new Promise((resolve, reject) => {
+    const request = db.transaction(store, "readwrite").objectStore(store).clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+
+  const putAll = (db, store, rows) => new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    for (const row of rows) os.put(row);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+
+  const midnightOf = (daysAgo) => {
+    const d = new Date(Date.now() - daysAgo * DAY);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  };
+
+  (async () => {
+    const db = await open();
+    await clear(db, "events");
+    await clear(db, "questProgress");
+
+    const events = [];
+    const progress = [];
+    let seq = 0;
+    const addEvent = (type, questId, delta, at) => {
+      seq += 1;
+      events.push({ id: `seed-${mode}-${seq}`, type, questId, delta, at, synced: 1 });
+    };
+
+    // Milestones staggered over the past six weeks, earliest first.
+    completed.forEach((quest, index) => {
+      const completedAt = Date.now() - (42 - index * 2) * DAY;
+      addEvent("quest_started", quest.id, 0, completedAt - 3 * DAY);
+      for (let i = 0; i < quest.target; i += 1) {
+        addEvent("increment", quest.id, 1, completedAt - DAY + Math.floor(i * (DAY / quest.target)));
+      }
+      addEvent("quest_completed", quest.id, 0, completedAt);
+      progress.push({
+        questId: quest.id,
+        count: quest.target,
+        startedAt: completedAt - 3 * DAY,
+        completedAt,
+        updatedAt: completedAt,
+      });
+    });
+
+    // Practice history: a 5-day run (d-8..d-4), a rest day (d-3), then the
+    // live run (d-2, d-1, today). A little practice last month as well.
+    const practiceDays = [8, 7, 6, 5, 4, 2, 1];
+    for (const daysAgo of practiceDays) {
+      completed.slice(0, 4).forEach((quest, index) => {
+        addEvent("increment", quest.id, 1, midnightOf(daysAgo) + (9 + index) * 3_600_000);
+        const row = progress.find((entry) => entry.questId === quest.id);
+        row.count += 1;
+        row.updatedAt = midnightOf(daysAgo) + (9 + index) * 3_600_000;
+      });
+    }
+    completed.slice(0, 3).forEach((quest, index) => {
+      addEvent("increment", quest.id, 1, midnightOf(35) + (10 + index) * 3_600_000);
+      addEvent("increment", quest.id, 1, midnightOf(36) + (10 + index) * 3_600_000);
+      const row = progress.find((entry) => entry.questId === quest.id);
+      row.count += 2;
+    });
+    // Today: a few counts on every 33-tier quest so the daily suggestion
+    // shows partial progress whichever dhikr the rotation lands on.
+    QUESTS.filter((quest) => quest.target === 33).forEach((quest, index) => {
+      for (let i = 0; i < 3; i += 1) addEvent("increment", quest.id, 1, Date.now() - 3_600_000 + i * 60_000 + index);
+      const row = progress.find((entry) => entry.questId === quest.id);
+      if (row) {
+        row.count += 3;
+        row.updatedAt = Date.now();
+      }
+    });
+    // Optionally bring the daily pick to the edge of today's target.
+    for (const [questId, count] of nearDone) {
+      for (let i = 0; i < count; i += 1) {
+        addEvent("increment", questId, 1, Date.now() - 7_200_000 + i * 30_000);
+      }
+      const row = progress.find((entry) => entry.questId === questId);
+      if (row) {
+        row.count += count;
+        row.updatedAt = Date.now();
+      }
+    }
+
+    await putAll(db, "events", events);
+    await putAll(db, "questProgress", progress);
+    db.close();
+    document.title = `seeded-${mode}-${events.length}`;
+    document.getElementById("status").textContent = `seeded ${mode}: ${events.length} events, ${progress.length} quests`;
+  })().catch((error) => {
+    document.title = "seed-failed";
+    document.getElementById("status").textContent = String(error);
+  });
+</script>
+</body>
+</html>

@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Dev-only IndexedDB seeding fixture. Never deploy: visiting it wipes the
+# visitor's local app data. Copy scripts/dev-seed.html into public/ only
+# for local headless verification, and delete it again before building.
+/public/dev-seed.html
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
