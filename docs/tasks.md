@@ -17,7 +17,7 @@ can interleave unless a dependency says otherwise.
 | A2 | Design tokens + base styles (color, type, spacing, radius, motion, themes) | A1 | done |
 | A3 | App shell: layout, bottom nav, safe-area, theme handling | A2 | done |
 | A4 | PWA: manifest, icons, service worker, offline shell | A3 | done |
-| A5 | Typed content model + quest data file structure (content fill gated on scholar review) | A1 | done |
+| A5 | Typed content model + quest data file structure (content fill gated on citation verification) | A1 | done |
 
 ## Phase B — Core loop
 
@@ -51,7 +51,7 @@ can interleave unless a dependency says otherwise.
 
 | ID | Task | Depends on | Status |
 |---|---|---|---|
-| E1 | Launch quest catalog drafted with citations (gate: scholar review) | A5 | done |
+| E1 | Launch quest catalog drafted with citations (gate: citation verification) | A5 | done |
 | E2 | Accessibility + mobile audit (320–430px, reduced motion, touch targets) | B7, C1 | done |
 | E3 | Performance pass (bundle size, LCP, offline behavior) | A4, B7 | in_progress |
 | E4 | Self-review sweep + tests for critical logic (events, counter, sync merge) | B1, D2 | done |
@@ -62,7 +62,7 @@ can interleave unless a dependency says otherwise.
 | ID | Task | Depends on | Status |
 |---|---|---|---|
 | F1 | Hadith guidance layer: cited hadith per amal + HadithSheet modal (contract change approved 2026-10-06) | E1 | done |
-| F2 | Scholar re-review of added hadith entries (launch gate) | F1 | todo |
+| F2 | Removed 2026-10-07: scholar re-review gate retired; citation verification is the launch gate (bead islamic-quest-8d6) | F1 | done |
 | F3 | Re-verify remaining hadith references once web search quota resets (Ubayy ibn Ka'b Friday narration, Bukhari 7405) | F1 | todo |
 
 ---
@@ -185,3 +185,16 @@ can interleave unless a dependency says otherwise.
   definition analytics row updated. Service worker passes cross-origin
   requests through untouched, so offline behavior is unchanged (beacon
   simply fails silently offline).
+- 2026-10-07 — Scholar-review layer removed (user decision, bead
+  islamic-quest-8d6): every citation is already verified against authentic
+  collections, so no scholar/student-of-knowledge sign-off is claimed to
+  users or required for launch. ContentReview.status collapsed to
+  draft|verified (reviewer/reviewedAt fields dropped); all 9 dhikr now
+  "verified"; production gate, deep-link gate, generateStaticParams
+  tripwire, and hadith filter all key on verified. User-facing copy reworded
+  en+bn: quest-detail chip and hadith-sheet footnote now read "Reference
+  verified"; explore empty state, About "Content with care" promise, and
+  Support line no longer mention scholars; footnoteReviewed/
+  footnoteVerifiedIntro keys removed. README, product definition (contract
+  item 5, content model, verification process), and task rows A5/E1/F2
+  updated to the verification gate.

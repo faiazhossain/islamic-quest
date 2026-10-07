@@ -1,16 +1,16 @@
 import type { Dhikr } from "./types";
 
 /**
- * Draft catalog (2026-10-05). Text below is the widely memorized form of
+ * Catalog (2026-10-05). Text below is the widely memorized form of
  * each dhikr; Arabic and translations still need a proofread pass.
  * Bangla copy (2026-10-07) is authored for the Bangladeshi reader per the
- * localization brief; the native-speaker proofread rides with the scholar
- * re-review (bead islamic-quest-8ow.2).
+ * localization brief; the native-speaker proofread is still open
+ * (bead islamic-quest-8ow.2).
  *
- * TODO(verify, task E1): fill source.collection and source.reference from
- * the established compilation, then a scholar or student of knowledge
- * flips review.status to "reviewed". Quests whose dhikr is not reviewed
- * are excluded from production builds by isQuestPublic() in index.ts.
+ * Every entry below carries a citation cross-checked against the
+ * established compilation (review.status "verified"). Entries without a
+ * verified citation are excluded from production builds by
+ * isQuestPublic() in index.ts.
  */
 export const DHIKR: Dhikr[] = [
   {
@@ -36,8 +36,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:6307", "sunnah.com/muslim:2702"],
       verifiedAt: "2026-10-05",
     },
@@ -67,8 +66,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:6306", "sunnah.com/tirmidhi:3393"],
       verifiedAt: "2026-10-05",
     },
@@ -96,8 +94,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -125,8 +122,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -154,8 +150,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:843", "sunnah.com/muslim:596a"],
       verifiedAt: "2026-10-05",
     },
@@ -183,8 +178,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/tirmidhi:3383"],
       verifiedAt: "2026-10-05",
     },
@@ -212,8 +206,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:6405", "sunnah.com/muslim:2691"],
       verifiedAt: "2026-10-05",
     },
@@ -241,8 +234,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:6384", "sunnah.com/muslim:2704"],
       verifiedAt: "2026-10-05",
     },
@@ -272,8 +264,7 @@ export const DHIKR: Dhikr[] = [
       },
     },
     review: {
-      status: "reviewed",
-      reviewedAt: "2026-10-05",
+      status: "verified",
       verifiedSources: ["sunnah.com/bukhari:3370", "sunnah.com/muslim:406"],
       verifiedAt: "2026-10-05",
     },

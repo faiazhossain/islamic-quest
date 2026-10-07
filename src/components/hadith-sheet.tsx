@@ -84,10 +84,6 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
 
   if (!open) return null;
 
-  const allReviewed = entries.every(
-    (entry) => entry.review.status === "reviewed",
-  );
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm sm:items-center sm:p-4"
@@ -98,7 +94,7 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
         role="dialog"
         aria-modal="true"
         aria-labelledby="hadith-sheet-title"
-        aria-describedby="hadith-sheet-review"
+        aria-describedby="hadith-sheet-footnote"
         onClick={(event) => event.stopPropagation()}
         className="rise flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-b-0 border-line bg-surface sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-3xl sm:border-b"
         style={{ boxShadow: "var(--shadow-card)" }}
@@ -204,12 +200,10 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
           })}
 
           <p
-            id="hadith-sheet-review"
+            id="hadith-sheet-footnote"
             className="mt-6 text-[11px] leading-relaxed text-ink-3"
           >
-            {allReviewed
-              ? copy.footnoteReviewed
-              : `${localized(REVIEW_LABEL.verified, lang)}. ${copy.footnoteComposed}`}
+            {`${localized(REVIEW_LABEL.verified, lang)}. ${copy.footnoteComposed}`}
           </p>
         </div>
       </div>

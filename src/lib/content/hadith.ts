@@ -15,9 +15,8 @@ import type { HadithEntry } from "./types";
  * graded da'if by Darussalam; Muslim 2723, a different narration).
  *
  * Narrations are entered once and may guide several amals through
- * dhikrIds. Review status here is per-entry and never inherited from the
- * parent dhikr: these citations are reference-verified, and scholar
- * re-review of this guidance layer is an open launch item.
+ * dhikrIds. Verification here is per-entry and never inherited from the
+ * parent dhikr: each citation stands on its own evidence.
  *
  * Access hadith through hadithForDhikr() in index.ts, never by reading
  * HADITH directly from UI code — the helper applies the environment gate.

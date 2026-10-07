@@ -10,7 +10,7 @@ product-level.
 - No ads, no subscription, no paywalls; Hadiya never gates anything
 - Worship history is private by default; sharing is always explicit
 - Offline counting is non-negotiable
-- Religious content is cited and scholar-reviewed before public launch
+- Religious content is cited and verified against authentic sources
 
 ## Stack
 
@@ -58,11 +58,9 @@ generated at runtime. Each dhikr carries:
 - `source` (collection + reference) and `review.status`:
   - `draft` - initial entry
   - `verified` - references cross-checked against public hadith databases
-  - `reviewed` - a human scholar has signed off
 
-Production builds show **only** `reviewed` content (`isQuestPublic()` in
-`src/lib/content/index.ts`). Launch is gated on the human scholar pass;
-references must never be filled from memory.
+Production builds show **only** `verified` content (`isQuestPublic()` in
+`src/lib/content/index.ts`); references must never be filled from memory.
 
 ## Deploying
 

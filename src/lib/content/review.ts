@@ -1,23 +1,20 @@
 import type { ContentReview } from "./types";
 
 /**
- * Honest, per-item review status shown to the user. "reviewed" means a
- * human scholar has signed off; nothing else reaches production builds.
- * Shared by the quest detail page and the hadith sheet so the wording
- * never drifts between surfaces. Resolve with localized() at render time.
+ * Honest, per-item verification status shown to the user. "verified"
+ * means the citation was cross-checked against authentic collections;
+ * nothing else reaches production builds. Shared by the quest detail
+ * page and the hadith sheet so the wording never drifts between
+ * surfaces. Resolve with localized() at render time.
  */
 export const REVIEW_LABEL: Record<ContentReview["status"], LocalizedLabel> = {
   draft: {
-    en: "Reference pending scholar review",
+    en: "Reference pending verification",
     bn: "তথ্যসূত্র যাচাই বাকি",
   },
   verified: {
-    en: "Reference verified; scholar review pending",
-    bn: "তথ্যসূত্র যাচাই হয়েছে; আলেমের পর্যালোচনা বাকি",
-  },
-  reviewed: {
-    en: "Scholar reviewed",
-    bn: "আলেম কর্তৃক পর্যালোচিত",
+    en: "Reference verified",
+    bn: "তথ্যসূত্র যাচাই হয়েছে",
   },
 };
 

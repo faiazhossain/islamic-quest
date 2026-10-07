@@ -8,8 +8,10 @@ import type { Lang } from "./lang";
  * Terminology map (Bangla-First Localization brief, section 8) - the
  * product vocabulary stays consistent everywhere:
  *
- *   Quest      -> Quest / কুয়েস্ট (kept: natural to Bangladeshi users)
+ *   Quest      -> Quest / Quest (English term kept in Bangla copy)
  *   Journey    -> Journey / জার্নি (kept: product brand term)
+ *   Journey of Light -> Journey of Light (English phrase kept in Bangla
+ *                        copy; never translated as "আলোর পথ")
  *   Amal       -> Amal / আমল
  *   Dhikr      -> Dhikr / জিকির (Bangladesh's common spoken form)
  *   Hadith     -> Hadith / হাদিস
@@ -89,8 +91,8 @@ export const EN = {
   exploreSubtitle: "Choose a quest at your own pace.",
   allFilter: "All",
   preparingQuests: "Quests are being prepared with care.",
-  scholarReviewEmpty:
-    "Every dhikr goes through scholar review before it appears here. Please check back soon, in shaa Allah.",
+  verificationEmpty:
+    "Every dhikr is verified against authentic sources before it appears here. Please check back soon, in shaa Allah.",
   filterAria: "Filter quests by category",
   completeBadge: "Complete",
 
@@ -248,7 +250,7 @@ export const EN = {
     },
     {
       title: "Content with care",
-      body: "Every dhikr is drawn from established, widely used collections, shown with its reference, and reviewed by a scholar or student of knowledge before public launch. Nothing is invented here.",
+      body: "Every dhikr is drawn from established, widely used collections, shown with its reference, and verified against authentic sources. Nothing is invented here.",
     },
     {
       title: "Honest rewards",
@@ -266,7 +268,7 @@ export const EN = {
   hadiyaBox:
     "A Hadiya unlocks nothing, because nothing needs unlocking. It does not change your quests, your journey, or your experience in any way.",
   supportHelps:
-    "Support helps with keeping the app online, verifying its religious content with scholars, and keeping it free for everyone.",
+    "Support helps with keeping the app online, verifying its religious content, and keeping it free for everyone.",
   giveHadiya: "Give a Hadiya",
   hadiyaPending: "The support link will appear here once it is set up.",
   supportFooter: "Amalyn remains fully usable with or without it.",
@@ -283,10 +285,8 @@ export const EN = {
   themeRewardHeading: "What the Prophet ﷺ said about its reward",
   themeOccasionHeading: "Special times",
   narratedBy: (name: string) => `Narrated ${name}`,
-  footnoteVerifiedIntro: "Reference verified; scholar review pending.",
   footnoteComposed:
     "Translations are composed for Amalyn; tap a citation to read the full narration on sunnah.com.",
-  footnoteReviewed: "Scholar reviewed.",
   hadithBnPending:
     "The Bangla translation of this narration is being verified; read it from the source for now.",
 
@@ -315,7 +315,7 @@ export type Copy = typeof EN;
  */
 export const BN: Copy = {
   navHome: "হোম",
-  navExplore: "কুয়েস্ট",
+  navExplore: "Quest",
   navJourney: "জার্নি",
   navSettings: "সেটিংস",
   navPrimaryAria: "প্রধান নেভিগেশন",
@@ -323,15 +323,15 @@ export const BN: Copy = {
   greeting: "আসসালামু আলাইকুম।",
   todayLine: (n) => `আজ ${n} জিকির হয়েছে। জার্নি আপনার অপেক্ষায়।`,
   nextStep: "পরবর্তী ধাপ",
-  beginNextQuest: "পরের কুয়েস্ট শুরু করুন।",
-  journeyGrows: "প্রতিটি কুয়েস্ট সম্পন্ন করার সঙ্গে আপনার জার্নি বাড়তে থাকে।",
-  chooseQuest: "কুয়েস্ট বেছে নিন",
+  beginNextQuest: "পরের Quest শুরু করুন।",
+  journeyGrows: "প্রতিটি Quest সম্পন্ন করার সঙ্গে আপনার জার্নি বাড়তে থাকে।",
+  chooseQuest: "Quest বেছে নিন",
   viewJourney: "জার্নি দেখুন",
-  questsComplete: (done, total) => `${total}টির মধ্যে ${done}টি কুয়েস্ট সম্পন্ন`,
-  questsCompleteOf: (done, total) => `${total}টির মধ্যে ${done}টি কুয়েস্ট সম্পন্ন`,
+  questsComplete: (done, total) => `${total}টির মধ্যে ${done}টি Quest সম্পন্ন`,
+  questsCompleteOf: (done, total) => `${total}টির মধ্যে ${done}টি Quest সম্পন্ন`,
   freeForever: "চিরদিনের জন্য ফ্রি। কোনো বিজ্ঞাপন নেই, অ্যাকাউন্টেরও দরকার নেই।",
-  currentQuest: "চলমান কুয়েস্ট",
-  currentQuestProgressAria: "চলমান কুয়েস্টের অগ্রগতি",
+  currentQuest: "চলমান Quest",
+  currentQuestProgressAria: "চলমান Quest-এর অগ্রগতি",
   continueQuest: "চালিয়ে যান",
   todaysAmal: "আজকের আমল",
   timesComplete: (n) => `${n}x সম্পন্ন`,
@@ -344,11 +344,11 @@ export const BN: Copy = {
   statBest: "সর্বোচ্চ",
   dayCount: (n) => `${n} দিন`,
   daysInARow: (n) => `টানা ${n} দিন`,
-  firstQuest: "প্রথম কুয়েস্ট",
+  firstQuest: "প্রথম Quest",
   chooseDhikrBegin: "একটি জিকির বেছে নিয়ে শুরু করুন।",
   firstQuestBody:
-    "একটি Quest বেছে নিন, মন দিয়ে জিকির করুন—আর দেখুন, ধীরে ধীরে আপনার আলোর পথ এগিয়ে যাচ্ছে। আপনার সব Data আপনার Device-এই থাকে।",
-  chooseFirstQuest: "প্রথম কুয়েস্ট বেছে নিন",
+    "একটি Quest বেছে নিন, মন দিয়ে জিকির করুন—আর দেখুন, ধীরে ধীরে আপনার Journey of Light এগিয়ে যাচ্ছে। আপনার সব Data আপনার Device-এই থাকে।",
+  chooseFirstQuest: "প্রথম Quest বেছে নিন",
   firstVisit: "প্রথমবার আসছেন?",
   howAmalynWorks: "Amalyn কীভাবে কাজ করে",
   howItWorksIntro:
@@ -358,46 +358,46 @@ export const BN: Copy = {
     "আপনার পছন্দের একটি জিকির আর তার লক্ষ্য বেছে নিন—যেমন ৩৩ বা ১০০ বার। প্রতিটি Quest-এ আরবি, অর্থ ও সূত্র দেওয়া থাকে, তাই আপনি কী পড়ছেন সেটা সবসময়ই জানতে পারবেন।",
   howStep2Title: "মন দিয়ে জিকির করুন",
   howStep2Body:
-    "শান্ত, Fullscreen Counter-এ Tap করে জিকির গুনুন। ভুল হলে সংখ্যা কমিয়েও নিতে পারবেন। Amalyn পুরোপুরি Offline-এ কাজ করে, আর আপনার আমল আপনার Device-এই Private থাকে।",
+    "শান্ত, Fullscreen Counter-এ Tap করে জিকির Count করুন। ভুল হলে সংখ্যা কমিয়েও নিতে পারবেন। Amalyn পুরোপুরি Offline-এ কাজ করে, আর আপনার আমল আপনার Device-এই Private থাকে।",
   howStep3Title: "আপনার Journey এগোতে দেখুন",
   howStep3Body:
     "একটা Quest-এর লক্ষ্য পূর্ণ হলে আপনার Journey আরও একটু এগিয়ে যায়। Quest Complete করা একটা Milestone—এটাই শেষ নয়। আপনার আমল থেকে যায়, আর আপনি চাইলে যেকোনো দিন আবার জিকির করতে পারবেন।",
   noStreaks:
     "এখানে কোনো ভাঙার মতো Streak নেই, কোনো Point নেই, কোনো চাপ নেই, কোনো শেষের লাইনও নেই। শুধু আপনার আমল—আপনার নিজের গতিতে।",
 
-  exploreTitle: "কুয়েস্ট",
-  exploreSubtitle: "নিজের সুবিধামতো কুয়েস্ট বেছে নিন।",
+  exploreTitle: "Quest",
+  exploreSubtitle: "নিজের সুবিধামতো Quest বেছে নিন।",
   allFilter: "সব",
-  preparingQuests: "কুয়েস্টগুলো যত্নের সঙ্গে প্রস্তুত হচ্ছে।",
-  scholarReviewEmpty:
-    "প্রতিটি জিকির এখানে আসার আগে আলেমদের পর্যালোচনা হয়। ইন শা আল্লাহ, খুব শিগগিরই আবার দেখা হবে।",
-  filterAria: "ক্যাটাগরি অনুযায়ী কুয়েস্ট ফিল্টার করুন",
+  preparingQuests: "Quest-গুলো যত্নের সঙ্গে প্রস্তুত হচ্ছে।",
+  verificationEmpty:
+    "প্রতিটি জিকির নির্ভরযোগ্য সূত্রে যাচাই করেই এখানে আসে। ইন শা আল্লাহ, খুব শিগগিরই আবার দেখা হবে।",
+  filterAria: "ক্যাটাগরি অনুযায়ী Quest ফিল্টার করুন",
   completeBadge: "সম্পন্ন",
 
   journeyTitle: "জার্নি",
-  pathOfLight: "আলোর পথ।",
-  journeyEmptyTitle: "প্রথম কুয়েস্ট দিয়েই পথ শুরু হয়।",
-  journeyEmptyBody: "প্রতিটি সম্পন্ন কুয়েস্ট এই পথে একটি আলো যোগ করে।",
+  pathOfLight: "Journey of Light।",
+  journeyEmptyTitle: "প্রথম Quest দিয়েই পথ শুরু হয়।",
+  journeyEmptyBody: "প্রতিটি সম্পন্ন Quest এই পথে একটি আলো যোগ করে।",
   statDays: "দিন",
-  statQuests: "কুয়েস্ট",
+  statQuests: "Quest",
   statDhikr: "জিকির",
   upNext: "সামনে আসছে",
   journeyContinues: "জার্নি চলতেই থাকে",
   completedOnDate: (date) => `সম্পন্ন ${date}`,
-  journeyAria: (n) => `${n}টি সম্পন্ন কুয়েস্টের জার্নি`,
+  journeyAria: (n) => `${n}টি সম্পন্ন Quest-এর জার্নি`,
   amalsInPractice: (n) =>
     `আপনার আমলে এখন ${n}টি আমল যুক্ত হয়েছে। যেকোনো দিন, যেকোনো একটিতে ফিরে যান - আপনার সঙ্গে পথও এগিয়ে চলবে।`,
   thisMonthDhikr: (n) => `এ মাসে ${n} জিকির`,
   overLastMonth: (n) => ` - গত মাসের চেয়ে +${n}`,
 
-  exploreBack: "কুয়েস্ট",
-  questLabel: "কুয়েস্ট",
+  exploreBack: "Quest",
+  questLabel: "Quest",
   guidanceLabel: "নির্দেশনা",
   seeHadith: (n) => `হাদিস দেখুন (${n})`,
   sourceLabel: "সূত্র",
   verificationInProgress: "যাচাই চলছে",
   continueWithCount: (count, target) => `চলছে - ${count} / ${target}`,
-  startQuest: (n) => `কুয়েস্ট শুরু - ${n}x`,
+  startQuest: (n) => `Quest শুরু - ${n}x`,
   practicedTimes: (n) => `এই আমলটি আপনি ${n} বার করেছেন।`,
   completedShortLine: (date, n) => `সম্পন্ন: ${date} · ${n} বার আমল`,
 
@@ -411,13 +411,13 @@ export const BN: Copy = {
     `একবার ${name} পড়ুন। ${target}-এর মধ্যে ${count}${today}।`,
   todaySuffix: " - আজকের",
   ofTarget: (n) => `লক্ষ্য ${n}`,
-  questProgressAria: "কুয়েস্টের অগ্রগতি",
+  questProgressAria: "Quest-এর অগ্রগতি",
   tapToCount: "গুনতে যেকোনো জায়গায় ট্যাপ করুন",
   todaysAmalCompleteAria: "আজকের আমল সম্পন্ন",
   done: "ঠিক আছে",
   alhamdulillah: "আলহামদুলিল্লাহ",
 
-  questComplete: "কুয়েস্ট সম্পন্ন",
+  questComplete: "Quest সম্পন্ন",
   amalStaysInJourney: "এই আমল আপনার জার্নির অংশ থেকে যাবে।",
   shareMilestone: "এই অর্জন শেয়ার করুন",
   backHome: "হোমে ফিরুন",
@@ -431,15 +431,15 @@ export const BN: Copy = {
   shareOrSave: "কার্ড শেয়ার বা সেভ করুন",
   cardPrivacy:
     "কার্ডে শুধু আপনার বেছে নেওয়া তথ্যই দেখা যায়। শেয়ার করবেন কি না, সেটা সম্পূর্ণ আপনার।",
-  notCompleteYet: "কুয়েস্টটি এখনো সম্পন্ন হয়নি।",
+  notCompleteYet: "Quest-টি এখনো সম্পন্ন হয়নি।",
   finishFirst: "আগে এটি সম্পন্ন করুন, তারপর এই কার্ডটি এখানে অপেক্ষা করবে।",
-  backToQuest: "কুয়েস্টে ফিরুন",
-  shareText: "কুয়েস্ট সম্পন্ন - আলহামদুলিল্লাহ",
+  backToQuest: "Quest-এ ফিরুন",
+  shareText: "Quest সম্পন্ন - আলহামদুলিল্লাহ",
   statusShared: "শেয়ার হয়েছে।",
   statusSaved: "কার্ড ডিভাইসে সেভ হয়েছে।",
   statusImageFailed: "কার্ডের ছবি তৈরি করা যায়নি।",
   canvasCompleted: "সম্পন্ন",
-  canvasAria: (name, n) => `অর্জনের কার্ড: ${name} ${n} বার, কুয়েস্ট সম্পন্ন`,
+  canvasAria: (name, n) => `অর্জনের কার্ড: ${name} ${n} বার, Quest সম্পন্ন`,
 
   settingsTitle: "সেটিংস",
   appearance: "থিম",
@@ -452,7 +452,7 @@ export const BN: Copy = {
   soundLabel: "শব্দ",
   soundHint: "প্রতি ট্যাপে মৃদু টোন",
   wakeLockLabel: "স্ক্রিন জাগিয়ে রাখুন",
-  wakeLockHint: "কুয়েস্টের কাউন্টার খোলা থাকাকালীন",
+  wakeLockHint: "Quest-এর কাউন্টার খোলা থাকাকালীন",
   yourData: "আপনার ডেটা",
   exportProgress: "অগ্রগতি এক্সপোর্ট",
   importFromFile: "ফাইল থেকে ইমপোর্ট",
@@ -473,7 +473,7 @@ export const BN: Copy = {
   importFailed: "ইমপোর্ট ব্যর্থ হয়েছে।",
   eraseConfirmTitle: "সব লোকাল ডেটা মুছে ফেলা হবে?",
   eraseConfirmBody:
-    "এতে এই ডিভাইসের সব কুয়েস্ট, গণনা ও সেটিংস স্থায়ীভাবে মুছে যাবে। চাইলে আগে ব্যাকআপ নিয়ে রাখুন। এটি আর ফেরানো যাবে না।",
+    "এতে এই ডিভাইসের সব Quest, গণনা ও সেটিংস স্থায়ীভাবে মুছে যাবে। চাইলে আগে ব্যাকআপ নিয়ে রাখুন। এটি আর ফেরানো যাবে না।",
   eraseConfirm: "সব মুছে ফেলুন",
   eraseCancel: "ডেটা রেখে দিন",
 
@@ -493,7 +493,7 @@ export const BN: Copy = {
   offlineWillSync: "আপনি অফলাইনে আছেন - পরে সিঙ্ক হবে।",
   syncUnavailable: "সিঙ্ক এখন পাওয়া যাচ্ছে না।",
   syncPrivacy:
-    "অনলাইনে এলে অগ্রগতি নিজে থেকেই সিঙ্ক হয়। শুধু ইভেন্ট ডেটা (গণনা ও কুয়েস্ট) জমা থাকে - একটি গোপন আইডির অধীনে, ইমেইল কখনো নয় - আর কোনো ব্যক্তিগত নোট বা কনটেন্ট কখনোই নয়।",
+    "অনলাইনে এলে অগ্রগতি নিজে থেকেই সিঙ্ক হয়। শুধু ইভেন্ট ডেটা (গণনা ও Quest) জমা থাকে - একটি গোপন আইডির অধীনে, ইমেইল কখনো নয় - আর কোনো ব্যক্তিগত নোট বা কনটেন্ট কখনোই নয়।",
   syncNow: "এখন সিঙ্ক করুন",
   signOut: "সাইন আউট",
   deleteServerCopy: "সার্ভার কপি মুছে দিন",
@@ -517,11 +517,11 @@ export const BN: Copy = {
     },
     {
       title: "যত্নে নেওয়া বিষয়বস্তু",
-      body: "প্রতিটি জিকির প্রসিদ্ধ ও প্রচলিত সংকলন থেকে নেওয়া, তথ্যসূত্রসহ দেখানো হয়, এবং প্রকাশের আগে আলেম বা জ্ঞানের ছাত্রের পর্যালোচনা হয়। এখানে কিছুই বানানো হয় না।",
+      body: "প্রতিটি জিকির প্রসিদ্ধ ও প্রচলিত সংকলন থেকে নেওয়া, তথ্যসূত্রসহ দেখানো হয়, এবং নির্ভরযোগ্য সূত্রে যাচাই করা হয়। এখানে কিছুই বানানো হয় না।",
     },
     {
       title: "সওয়াব নিয়ে সততা",
-      body: "Amalyn উদযাপন করে শুধু অ্যাপের মাইলস্টোন - সম্পন্ন কুয়েস্ট, বাড়তে থাকা জার্নি। এটি কখনো দাবি করে না যে আল্লাহর প্রতিদান মাপা যায়, বান্দাদের স্তরে স্তরে সাজায় না, বা রুহানি ফলের ওয়াদা করে না। সেই হিসাব একমাত্র আল্লাহর।",
+      body: "Amalyn উদযাপন করে শুধু অ্যাপের মাইলস্টোন - সম্পন্ন Quest, বাড়তে থাকা জার্নি। এটি কখনো দাবি করে না যে আল্লাহর প্রতিদান মাপা যায়, বান্দাদের স্তরে স্তরে সাজায় না, বা রুহানি ফলের ওয়াদা করে না। সেই হিসাব একমাত্র আল্লাহর।",
     },
   ],
   versionFooter: (v) => `Amalyn v${v} - উম্মাহর জন্য যত্নে তৈরি।`,
@@ -533,16 +533,16 @@ export const BN: Copy = {
   hadiyaAfter:
     " দিতে পারেন - একটি স্বেচ্ছায় দেওয়া উপহার। এটি কখনো বাধ্যতামূলক নয়, আর আমলের মাঝে কখনো চাওয়াও হয় না।",
   hadiyaBox:
-    "হাদিয়া কিছুই আনলক করে না - কারণ আনলক করার মতো কিছু নেইই। এটি আপনার কুয়েস্ট, জার্নি বা অভিজ্ঞতার কোনো কিছুই বদলায় না।",
+    "হাদিয়া কিছুই আনলক করে না - কারণ আনলক করার মতো কিছু নেইই। এটি আপনার Quest, জার্নি বা অভিজ্ঞতার কোনো কিছুই বদলায় না।",
   supportHelps:
-    "আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু আলেম দিয়ে যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
+    "আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
   giveHadiya: "হাদিয়া দিন",
   hadiyaPending: "সাপোর্ট লিংকটি চালু হলে এখানে দেখা যাবে।",
   supportFooter: "হাদিয়া থাকুক বা না থাকুক, Amalyn সম্পূর্ণ ব্যবহারযোগ্য।",
 
-  missingTitle: "এই কুয়েস্টটি নেই।",
+  missingTitle: "এই Quest-টি নেই।",
   missingBody: "হয়তো নাম বদলানো হয়েছে বা সরিয়ে ফেলা হয়েছে।",
-  backToExplore: "কুয়েস্টে ফিরুন",
+  backToExplore: "Quest-এ ফিরুন",
 
   hadithTitle: "হাদিস",
   closeAria: "বন্ধ করুন",
@@ -550,10 +550,8 @@ export const BN: Copy = {
   themeRewardHeading: "সওয়াব সম্পর্কে রাসূলুল্লাহ (সা.) যা বলেছেন",
   themeOccasionHeading: "বিশেষ সময়",
   narratedBy: (name) => `বর্ণনায় ${name}`,
-  footnoteVerifiedIntro: "তথ্যসূত্র যাচাই হয়েছে; আলেমের পর্যালোচনা বাকি।",
   footnoteComposed:
     "বাংলা অনুবাদ: আল হাদিস (ihadis.com)। পুরো হাদিস পড়তে সূত্রে ট্যাপ করুন।",
-  footnoteReviewed: "আলেম কর্তৃক পর্যালোচিত।",
   hadithBnPending:
     "এই বর্ণনার বাংলা অনুবাদ এখনো যাচাই করা হচ্ছে; আপাতত সূত্র থেকে পড়ুন।",
 

@@ -135,7 +135,7 @@ export function QuestDetail({ questId }: { questId: string }) {
             </span>
           )}
           <span className="text-[11px] text-ink-3">
-            {localized(REVIEW_LABEL[dhikr.review.status] ?? REVIEW_LABEL.draft, lang)}
+            {localized(REVIEW_LABEL[dhikr.review.status], lang)}
           </span>
         </div>
         <h1 className="mt-3 font-display text-[2rem] leading-tight text-ink lg:text-4xl">

@@ -84,7 +84,7 @@ describe("hadith citations and verification", () => {
 
   it("ships no draft hadith", () => {
     for (const entry of HADITH) {
-      expect(["verified", "reviewed"]).toContain(entry.review.status);
+      expect(entry.review.status).toBe("verified");
       expect(entry.review.verifiedAt).toBeTruthy();
     }
   });
@@ -110,7 +110,7 @@ describe("hadith Bangla verification", () => {
 
   it("never invents Bangla: every unverified entry is known and bounded", () => {
     // The 2026-10-07 iHadis pass verified 12 of 18 entries; the rest ship
-    // English-only (with the pending note in the sheet) until the scholar
+    // English-only (with the pending note in the sheet) until the iHadis
     // pass locates them under iHadis's Islamic Foundation numbering.
     const unverified = HADITH.filter((entry) => !entry.translation.bn);
     expect(unverified.map((entry) => entry.id).sort()).toEqual([
@@ -143,14 +143,14 @@ describe("hadith Bangla verification", () => {
   });
 });
 
-describe("hadith review gate", () => {
+describe("hadith verification gate", () => {
   it("hides unverified hadith in production but shows them in development", () => {
     for (const dhikr of DHIKR) {
       setNodeEnv("development");
       const devEntries = hadithForDhikr(dhikr.id);
       setNodeEnv("production");
       const prodEntries = hadithForDhikr(dhikr.id);
-      // Every shipped entry is verified or reviewed; development may show
+      // Every shipped entry is citation-verified; development may show
       // draft entries pending the online verification pass.
       expect(prodEntries.length).toBeLessThanOrEqual(devEntries.length);
       for (const entry of prodEntries) {
@@ -159,7 +159,7 @@ describe("hadith review gate", () => {
     }
   });
 
-  it("publishes draft hadith when a staging deploy allows unreviewed content", () => {
+  it("publishes draft hadith when a staging deploy opts out of the gate", () => {
     setNodeEnv("production");
     setAllowUnreviewed("1");
     for (const dhikr of DHIKR) {

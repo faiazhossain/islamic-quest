@@ -28,7 +28,7 @@ product-level.**
 3. Worship history is private by default. Sharing is always an explicit act.
 4. Offline counting is non-negotiable. Network is never required for a tap.
 5. Religious content is never invented. Every item is cited and
-   scholar-reviewed before public launch.
+   verified against authentic sources.
 6. Gentle tone. No guilt, no streak-shaming, no retention pressure.
 7. Reduced-motion, large text, and touch-target accessibility are first-class.
 
@@ -135,9 +135,10 @@ Every screen verified at 320 / 360 / 390 / 430 px.
 
 ## 6. Content model
 
-Religious content lives in typed TypeScript data files in the repo, reviewed
-before launch. It is never fetched from a third-party API or generated at
-runtime. Bangla fields are optional until v1.1 (i18n-ready shape).
+Religious content lives in typed TypeScript data files in the repo, cited
+and verified before launch. It is never fetched from a third-party API or
+generated at runtime. Bangla fields are optional until v1.1 (i18n-ready
+shape).
 
 ```ts
 interface Dhikr {
@@ -151,12 +152,12 @@ interface Dhikr {
   source: {
     collection: string;        // e.g. "Sahih al-Bukhari"
     reference: string;         // hadith/verse number
-    note?: string;             // grading/ATTRIBUTION context, scholar-supplied
+    note?: string;             // grading/ATTRIBUTION context, verification-supplied
   };
   review: {
-    status: "draft" | "reviewed";
-    reviewer?: string;
-    reviewedAt?: string;       // ISO date
+    status: "draft" | "verified";
+    verifiedSources?: string[]; // where the citation was cross-checked
+    verifiedAt?: string;        // ISO date
   };
 }
 
@@ -235,8 +236,9 @@ progress_events (id, user_id, client_event_id, type, quest_id, delta, at)
 1. Draft the launch catalog from an established, widely used compilation
    (e.g., Hisnul Muslim) — every item with collection + reference.
 2. Founder self-check against sources.
-3. **Scholar or student-of-knowledge review gate before public launch.**
-   No quest ships with `review.status !== "reviewed"`.
+3. **Verification gate before public launch.** Every citation is
+   cross-checked against authentic collections; no quest ships with
+   `review.status !== "verified"`.
 4. Citations are visible on every quest detail screen.
 
 This is the launch-critical path; sourcing starts in parallel with
@@ -276,10 +278,10 @@ for future maintainers:
    Dexie store holds events and progress only.
 2. **Quest titles/descriptions are derived** (dhikr name + target) rather
    than stored per tier - 20 quests across 9 dhikr, zero duplicated copy.
-3. **Review states**: `draft` -> `verified` (references cross-checked by an
-   automated research pass against archived sunnah.com pages and
-   independent databases) -> `reviewed` (human scholar; the production
-   gate). Only `reviewed` content ships in production builds.
+3. **Review states**: `draft` -> `verified` (references cross-checked by
+   an automated research pass against archived sunnah.com pages and
+   independent databases; the production gate). Only `verified` content
+   ships in production builds.
 4. **Focus mode**: counter/completion/share hide the bottom nav via the
    shell (`/quest/*/{count,complete,share}`), not route groups.
 5. **Lifelong practice layer (2026-10-06)**: completing a Quest is a one-time
@@ -301,5 +303,5 @@ for future maintainers:
    review status, deliberately never inherited from the parent dhikr;
    `draft` entries never ship to production (same environment gate as
    quests). English renderings are composed for Amalyn, never copied from
-   published translations. Scholar re-review of these entries is launch
-   gate item F2 in `docs/tasks.md`.
+   published translations. Bangla renderings ship only as verbatim iHadis
+   text; entries not yet located there ship English-only.

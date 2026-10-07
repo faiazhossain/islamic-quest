@@ -52,14 +52,14 @@ export default function ExplorePage() {
       </header>
 
       {progress !== null && quests.length === 0 ? (
-        // Production catalog is still behind the scholar-review gate:
+        // Production catalog is still behind the verification gate:
         // an honest empty state instead of a blank page under the filters.
         <section className="rise mt-10 rounded-3xl border border-line bg-surface p-6 text-center [animation-delay:80ms]">
           <p className="font-display text-lg text-ink">
             {copy.preparingQuests}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-ink-2">
-            {copy.scholarReviewEmpty}
+            {copy.verificationEmpty}
           </p>
         </section>
       ) : (

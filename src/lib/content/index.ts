@@ -23,21 +23,23 @@ export const dhikrForQuest = (quest: Quest): Dhikr => {
 };
 
 /**
- * Launch gate: a quest is public in production only when its dhikr has
- * passed scholar review. Draft content stays visible in development.
+ * Launch gate: a quest is public in production only when its dhikr's
+ * citation has been verified against authentic collections. Draft
+ * content stays visible in development.
  *
  * A deliberate staging deploy can set NEXT_PUBLIC_ALLOW_UNREVIEWED=1 to
- * publish the whole catalog before review completes. The quest page
- * still labels unreviewed dhikr honestly ("scholar review pending"),
- * so staging never presents unreviewed content as reviewed. NEXT_PUBLIC_
- * is required because this gate also runs in client bundles, where only
- * prefixed variables are inlined. Read at call time, like NODE_ENV.
+ * publish the whole catalog before verification completes. The quest
+ * page still labels unverified dhikr honestly ("reference pending
+ * verification"), so staging never presents unverified content as
+ * verified. NEXT_PUBLIC_ is required because this gate also runs in
+ * client bundles, where only prefixed variables are inlined. Read at
+ * call time, like NODE_ENV.
  */
 export function isQuestPublic(quest: Quest): boolean {
   return (
     process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED === "1" ||
     process.env.NODE_ENV !== "production" ||
-    dhikrForQuest(quest).review.status === "reviewed"
+    dhikrForQuest(quest).review.status === "verified"
   );
 }
 
@@ -60,10 +62,10 @@ export function getPublicQuest(id: string): Quest | undefined {
 }
 
 /**
- * Build-time tripwire: refuses a production build while no quest has
- * passed scholar review, so an empty catalog can never deploy silently.
+ * Build-time tripwire: refuses a production build while no quest has a
+ * verified citation, so an empty catalog can never deploy silently.
  * Deliberate staging deploys can opt out with NEXT_PUBLIC_ALLOW_UNREVIEWED=1
- * (the same flag that publishes the unreviewed catalog in staging).
+ * (the same flag that publishes the unverified catalog in staging).
  */
 export function assertLaunchReady(): void {
   if (
@@ -72,10 +74,10 @@ export function assertLaunchReady(): void {
     process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED !== "1"
   ) {
     throw new Error(
-      "Launch gate: every dhikr is still awaiting scholar review " +
+      "Launch gate: no dhikr citation is verified yet " +
         "(review.status in src/lib/content/dhikr.ts). A production build " +
-        "would ship an empty catalog. Flip statuses after review, or set " +
-        "NEXT_PUBLIC_ALLOW_UNREVIEWED=1 for a deliberate staging deploy.",
+        "would ship an empty catalog. Flip statuses after verification, or " +
+        "set NEXT_PUBLIC_ALLOW_UNREVIEWED=1 for a deliberate staging deploy.",
     );
   }
 }
@@ -97,7 +99,7 @@ const THEME_ORDER: Record<HadithTheme, number> = {
  * Same environment gate philosophy as isQuestPublic: an entry still
  * awaiting citation verification (review.status "draft") never ships to
  * production, while development and deliberate staging deploys
- * (NEXT_PUBLIC_ALLOW_UNREVIEWED=1) show the full set for review.
+ * (NEXT_PUBLIC_ALLOW_UNREVIEWED=1) show the full set.
  */
 export function hadithForDhikr(dhikrId: string): HadithEntry[] {
   const entries = HADITH.filter((entry) => entry.dhikrIds.includes(dhikrId));

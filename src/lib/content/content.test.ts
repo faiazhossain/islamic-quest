@@ -71,17 +71,17 @@ describe("Bangla content coverage", () => {
   });
 });
 
-describe("production review gate", () => {
-  it("publishes only scholar-reviewed dhikr in production", () => {
+describe("production verification gate", () => {
+  it("publishes only citation-verified dhikr in production", () => {
     setNodeEnv("production");
     for (const quest of publicQuests()) {
-      expect(dhikrForQuest(quest).review.status).toBe("reviewed");
+      expect(dhikrForQuest(quest).review.status).toBe("verified");
     }
-    const reviewedDhikr = new Set(
-      DHIKR.filter((d) => d.review.status === "reviewed").map((d) => d.id),
+    const verifiedDhikr = new Set(
+      DHIKR.filter((d) => d.review.status === "verified").map((d) => d.id),
     );
     for (const quest of QUESTS) {
-      const shouldPublish = reviewedDhikr.has(quest.dhikrId);
+      const shouldPublish = verifiedDhikr.has(quest.dhikrId);
       expect(publicQuests().some((q) => q.id === quest.id)).toBe(shouldPublish);
     }
   });
@@ -102,16 +102,16 @@ describe("production review gate", () => {
     setNodeEnv("production");
     setAllowUnreviewed("true");
     for (const quest of publicQuests()) {
-      expect(dhikrForQuest(quest).review.status).toBe("reviewed");
+      expect(dhikrForQuest(quest).review.status).toBe("verified");
     }
   });
 
   it("gates deep links the same way as the lists", () => {
     const quest = QUESTS[0];
     setNodeEnv("production");
-    const reviewed =
-      dhikrForQuest(quest).review.status === "reviewed" ? quest : undefined;
-    expect(getPublicQuest(quest.id)?.id).toBe(reviewed?.id ?? undefined);
+    const verified =
+      dhikrForQuest(quest).review.status === "verified" ? quest : undefined;
+    expect(getPublicQuest(quest.id)?.id).toBe(verified?.id ?? undefined);
     setNodeEnv("development");
     expect(getPublicQuest(quest.id)?.id).toBe(getQuest(quest.id)?.id);
   });

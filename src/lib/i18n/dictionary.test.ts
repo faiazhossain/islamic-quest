@@ -56,9 +56,15 @@ describe("UI dictionary", () => {
     for (const entry of collectStrings(BN, "bn")) {
       const path = entry.slice(0, entry.indexOf("="));
       const value = entry.slice(entry.indexOf("=") + 1);
-      // Deliberate Latin exceptions: the brand, the host, and a login
-      // provider whose name users read in Latin.
-      if (/amalyn|sunnah|ihadis|google|emailplaceholder/i.test(path) || /English/.test(value)) {
+      // Deliberate Latin exceptions: the brand, the host, a login
+      // provider whose name users read in Latin, and the product nouns
+      // "Quest" and "Journey of Light", which stay English in Bangla
+      // copy (terminology map).
+      if (
+        /amalyn|sunnah|ihadis|google|emailplaceholder|pathoflight/i.test(path) ||
+        /English/.test(value) ||
+        value === "Quest"
+      ) {
         continue;
       }
       expect(pureLatin.test(value), `not Bengali: ${entry}`).toBe(true);

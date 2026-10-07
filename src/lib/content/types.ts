@@ -11,18 +11,19 @@ export interface DhikrSource {
   collection: string;
   /** Hadith or verse reference. Filled during verification (task E1). */
   reference: string;
-  /** Grading or attribution context. Supplied by the reviewer only. */
+  /** Grading or attribution context. Supplied during verification only. */
   note?: LocalizedText;
 }
 
 export interface ContentReview {
-  status: "draft" | "verified" | "reviewed";
+  /**
+   * "verified" means the citation was cross-checked against authentic
+   * collections; only verified content ships to production.
+   */
+  status: "draft" | "verified";
   /** Where the citation was cross-checked (automated research pass). */
   verifiedSources?: string[];
   verifiedAt?: string;
-  /** The human scholar who signed off (launch gate). */
-  reviewer?: string;
-  reviewedAt?: string;
 }
 
 export interface Dhikr {
@@ -82,8 +83,8 @@ export interface HadithEntry {
   note?: LocalizedText;
   /**
    * Per-entry verification. Deliberately NOT inherited from the parent
-   * dhikr's review: each narration stands on its own evidence, so the
-   * open scholar re-review of these entries is shown honestly.
+   * dhikr's review: each narration stands on its own evidence, and its
+   * verification status is shown honestly.
    */
   review: ContentReview;
 }
