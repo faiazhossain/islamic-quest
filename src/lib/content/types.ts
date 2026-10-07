@@ -94,3 +94,11 @@ export interface Category {
   name: LocalizedText;
   description: LocalizedText;
 }
+
+/**
+ * A narration shown on the Support page about the Hadiya itself: giving,
+ * receiving, and the Prophet's (peace be upon him) own practice. Same
+ * citation shape and verification standard as a guidance hadith, minus
+ * the amal linkage that only the quest sheet needs.
+ */
+export type HadiyaHadith = Omit<HadithEntry, "dhikrIds" | "theme">;

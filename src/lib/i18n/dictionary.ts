@@ -270,8 +270,51 @@ export const EN = {
   supportHelps:
     "Support helps with keeping the app online, verifying its religious content, and keeping it free for everyone.",
   giveHadiya: "Give a Hadiya",
-  hadiyaPending: "The support link will appear here once it is set up.",
+  supportHadithHeading: "The Prophet ﷺ and the Hadiya",
+  seeMoreHadith: (n: string) => `More hadith (${n})`,
+  hadiyaDua:
+    "A Hadiya truly encourages me to keep working on more Islamic content. Give only if you really want to - otherwise, your dua is the biggest Hadiya for me. Please keep me in your dua - that alone is enough.",
+  wayToGive: "Ways to give",
+  regionHint: "Choose where you are sending your gift from.",
+  regionInsideBd: "Inside Bangladesh",
+  regionOutsideBd: "Outside Bangladesh",
+  intlVisaNote: "Sending from outside Bangladesh? Use the EBL Visa account.",
+  bkashLabel: "bKash (Personal)",
+  eblVisaLabel: "EBL Visa",
+  bankNameLabel: "Eastern Bank PLC",
+  accountName: "Account name",
+  accountNumber: "Account number",
+  branchLabel: "Branch",
+  copyAria: "Copy",
+  copiedStatus: "Copied.",
+  hadiyaSentButton: "I've sent a Hadiya",
+  hadiyaSentHint:
+    "Optional. Nothing personal is shared - only that a Hadiya was sent.",
+  hadiyaThanks:
+    "JazakAllahu khayran. Your Hadiya encourages this work - may Allah accept it.",
   supportFooter: "Amalyn remains fully usable with or without it.",
+
+  // Feedback
+  feedbackLink: "Send feedback",
+  feedbackTitle: "Feedback",
+  feedbackIntro:
+    "Assalamu alaykum. Amalyn is a small, sincere effort - and no matter how carefully it is built, a mistake can still slip in: a hadith text, a translation, a source reference, or anything else you see here. If something looks off, please tell me. Pointing out a mistake is a real help to everyone who uses Amalyn, and your honest feedback shapes what comes next. Every message reaches me directly, and I read each one.",
+  feedbackMistakeTitle: "Report a mistake",
+  feedbackMistakeHint:
+    "A wrong hadith text, translation, or reference - or anything else that looks off",
+  feedbackIdeaTitle: "Share feedback",
+  feedbackIdeaHint: "Suggestions, ideas, or kind words - all are welcome",
+  feedbackMessageLabel: "Your message",
+  feedbackMessagePlaceholder: "Describe the mistake, or share your thoughts...",
+  feedbackContactLabel: "Email or contact (optional)",
+  feedbackContactHint: "Only if you would like a reply. Your message reaches the developer alone.",
+  feedbackSend: "Send",
+  feedbackSending: "Sending...",
+  feedbackSent:
+    "JazakAllahu khayran - your message has reached me. Every report is read with care.",
+  feedbackFailed: "Could not send right now. Please try again.",
+  feedbackPrivacy:
+    "Your message goes straight to the developer - no account needed, nothing published, nothing tracked.",
 
   // Missing quest
   missingTitle: "That quest doesn't exist.",
@@ -537,8 +580,51 @@ export const BN: Copy = {
   supportHelps:
     "আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
   giveHadiya: "হাদিয়া দিন",
-  hadiyaPending: "সাপোর্ট লিংকটি চালু হলে এখানে দেখা যাবে।",
+  supportHadithHeading: "রাসূলুল্লাহ (সা.) এবং হাদিয়া",
+  seeMoreHadith: (n) => `আরও হাদিস (${n})`,
+  hadiyaDua:
+    "আপনার হাদিয়া আমাকে আরও ইসলামিক কনটেন্ট তৈরির কাজ চালিয়ে যেতে সত্যিই উৎসাহিত করে। সত্যিই ইচ্ছা হলে তবেই দিন - নইলে আপনার দোয়াই আমার জন্য সর্ববৃহৎ হাদিয়া। আপনার দোয়ায় আমাকে রাখুন - এটুকুই আমার জন্য যথেষ্ট।",
+  wayToGive: "হাদিয়া পাঠানোর উপায়",
+  regionHint: "আপনি কোথা থেকে হাদিয়া পাঠাচ্ছেন, সেটি বেছে নিন।",
+  regionInsideBd: "বাংলাদেশে",
+  regionOutsideBd: "বাংলাদেশের বাইরে",
+  intlVisaNote: "বাংলাদেশের বাইরে থেকে পাঠালে নিচের EBL ভিসা হিসাবটি ব্যবহার করুন।",
+  bkashLabel: "বিকাশ (Personal)",
+  eblVisaLabel: "EBL ভিসা",
+  bankNameLabel: "ইস্টার্ন ব্যাংক পিএলসি",
+  accountName: "হিসাবের নাম",
+  accountNumber: "হিসাব নম্বর",
+  branchLabel: "শাখা",
+  copyAria: "কপি করুন",
+  copiedStatus: "কপি হয়েছে।",
+  hadiyaSentButton: "আমি হাদিয়া পাঠিয়েছি",
+  hadiyaSentHint:
+    "ঐচ্ছিক। কোনো ব্যক্তিগত তথ্য যায় না - শুধু একটি হাদিয়া পাঠানো হয়েছে জানানো হয়।",
+  hadiyaThanks:
+    "জাযাকাল্লাহু খাইরান। আপনার হাদিয়া এই কাজকে উৎসাহিত করে - আল্লাহ যেন এটি কবুল করেন।",
   supportFooter: "হাদিয়া থাকুক বা না থাকুক, Amalyn সম্পূর্ণ ব্যবহারযোগ্য।",
+
+  feedbackLink: "মতামত জানান",
+  feedbackTitle: "মতামত",
+  feedbackIntro:
+    "আসসালামু আলাইকুম। Amalyn একটি ছোট, আন্তরিক চেষ্টা - যতই যত্ন নেওয়া হোক, কোথাও ভুল থেকে যেতে পারে: কোনো হাদিসের লেখা, অনুবাদ, সূত্র, কিংবা অ্যাপের অন্য যেকোনো জায়গায়। কিছু ভুল চোখে পড়লে আমাকে জানান। একটি ভুল ধরিয়ে দেওয়া Amalyn ব্যবহারকারী প্রত্যেকের জন্যই আসল সাহায্য, আর আপনার অকৃপণ মতামতই সামনের পথ গড়ে দেয়। প্রতিটি বার্তা সরাসরি আমার কাছে পৌঁছায়, আর আমি প্রতিটি বার্তাই মন দিয়ে পড়ি।",
+  feedbackMistakeTitle: "ভুল জানান",
+  feedbackMistakeHint:
+    "কোনো হাদিসের লেখা, অনুবাদ বা সূত্রে ভুল - কিংবা অন্য যেকোনো অসঙ্গতি",
+  feedbackIdeaTitle: "মতামত শেয়ার করুন",
+  feedbackIdeaHint: "পরামর্শ, আইডিয়া কিংবা ভালো লাগার কথা - সবই সমাদৃত",
+  feedbackMessageLabel: "আপনার বার্তা",
+  feedbackMessagePlaceholder: "ভুলটি বিস্তারিত লিখুন, বা আপনার মতামত শেয়ার করুন...",
+  feedbackContactLabel: "ইমেইল বা যোগাযোগের মাধ্যম (ঐচ্ছিক)",
+  feedbackContactHint:
+    "উত্তর চাইলেই কেবল লিখুন। আপনার বার্তা কেবল ডেভেলপারের কাছেই পৌঁছায়।",
+  feedbackSend: "পাঠান",
+  feedbackSending: "পাঠানো হচ্ছে...",
+  feedbackSent:
+    "জাযাকাল্লাহু খাইরান - আপনার বার্তা পৌঁছে গেছে। প্রতিটি বার্তা মন দিয়ে পড়া হয়।",
+  feedbackFailed: "এখন পাঠানো যায়নি। আবার চেষ্টা করুন।",
+  feedbackPrivacy:
+    "আপনার বার্তা সরাসরি ডেভেলপারের কাছে যায় - অ্যাকাউন্ট লাগে না, কিছু প্রকাশ হয় না, কিছু ট্র্যাকও করা হয় না।",
 
   missingTitle: "এই Quest-টি নেই।",
   missingBody: "হয়তো নাম বদলানো হয়েছে বা সরিয়ে ফেলা হয়েছে।",

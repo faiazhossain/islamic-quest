@@ -57,11 +57,12 @@ describe("UI dictionary", () => {
       const path = entry.slice(0, entry.indexOf("="));
       const value = entry.slice(entry.indexOf("=") + 1);
       // Deliberate Latin exceptions: the brand, the host, a login
-      // provider whose name users read in Latin, and the product nouns
-      // "Quest" and "Journey of Light", which stay English in Bangla
-      // copy (terminology map).
+      // provider whose name users read in Latin, payment brands users
+      // read in Latin (bKash, EBL, Visa), and the product nouns "Quest"
+      // and "Journey of Light", which stay English in Bangla copy
+      // (terminology map).
       if (
-        /amalyn|sunnah|ihadis|google|emailplaceholder|pathoflight/i.test(path) ||
+        /amalyn|sunnah|ihadis|google|emailplaceholder|pathoflight|bkash|ebl|visa/i.test(path) ||
         /English/.test(value) ||
         value === "Quest"
       ) {

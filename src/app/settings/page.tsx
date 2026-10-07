@@ -197,6 +197,7 @@ export default function SettingsPage() {
       </Section>
 
       <Section title={copy.more} delay={300}>
+        <LinkRow href="/feedback">{copy.feedbackLink}</LinkRow>
         <LinkRow href="/support">{copy.supportAmalyn}</LinkRow>
         <LinkRow href="/about">{copy.aboutPrivacy}</LinkRow>
       </Section>

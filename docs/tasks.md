@@ -198,3 +198,14 @@ can interleave unless a dependency says otherwise.
   footnoteVerifiedIntro keys removed. README, product definition (contract
   item 5, content model, verification process), and task rows A5/E1/F2
   updated to the verification gate.
+- 2026-10-07 — Share metadata added (bead islamic-quest-53w): shared links
+  now explain what Amalyn is in messaging apps and social cards. Root
+  layout gains metadataBase (https://amalyn.vercel.app), openGraph
+  (siteName/locale/type; title and description inherit), and a
+  summary_large_image twitter card (falls back to og values). New
+  opengraph-image.tsx at the root segment renders a 1200x630 night-sky
+  card (wordmark, tagline, journey-of-light dot motif) with next/og's
+  bundled default font at build time - no font assets to sync. og:url and
+  canonical deliberately unset at root level to avoid mislabeling child
+  pages; per-quest share cards (generateMetadata) remain open as
+  follow-up.

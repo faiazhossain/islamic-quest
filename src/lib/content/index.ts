@@ -3,12 +3,13 @@ import type { Lang } from "../i18n/lang";
 import { formatCount } from "../format";
 import { CATEGORIES } from "./categories";
 import { DHIKR } from "./dhikr";
+import { HADIYA_HADITH } from "./hadiya-hadith";
 import { HADITH } from "./hadith";
 import { QUESTS } from "./quests";
 import type { CategoryId, Dhikr, HadithEntry, HadithTheme, Quest } from "./types";
 
-export { CATEGORIES, DHIKR, HADITH, QUESTS };
-export type { CategoryId, Category, Dhikr, HadithEntry, HadithTheme, Quest } from "./types";
+export { CATEGORIES, DHIKR, HADITH, HADIYA_HADITH, QUESTS };
+export type { CategoryId, Category, Dhikr, HadithEntry, HadithTheme, HadiyaHadith, Quest } from "./types";
 
 const dhikrById = new Map(DHIKR.map((dhikr) => [dhikr.id, dhikr]));
 

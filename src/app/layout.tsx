@@ -42,13 +42,35 @@ const notoBengali = Noto_Sans_Bengali({
   subsets: ["bengali"],
 });
 
+/**
+ * Production origin. Resolves every relative URL in share metadata
+ * (og:image, og:url) to an absolute URL, which scrapers require. Update
+ * it if the app moves off its Vercel domain.
+ */
+const SITE_URL = "https://amalyn.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Amalyn",
     template: "%s — Amalyn",
   },
   description:
     "A calm, offline-first Dhikr companion: guided quests mark your milestones, and every Amal stays with you for daily practice along a journey of light. Free forever.",
+  openGraph: {
+    // title and description inherit from the metadata above; the image
+    // comes from opengraph-image.tsx in this segment. og:url is left
+    // unset on purpose: a root-level URL would mislabel child pages,
+    // and scrapers already know the shared URL.
+    siteName: "Amalyn",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    // summary_large_image suits the 1200x630 card; title, description,
+    // and image fall back to the openGraph values.
+    card: "summary_large_image",
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     apple: "/icons/apple-touch-icon.png",
