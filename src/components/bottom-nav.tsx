@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "./nav-icons";
+import { useLang } from "@/lib/i18n";
+import { navLabels } from "@/lib/i18n/dictionary";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const lang = useLang();
+  const labels = navLabels(lang);
 
   return (
     <nav
@@ -16,8 +20,9 @@ export function BottomNav() {
         className="mx-auto flex w-full max-w-md px-2 pt-1.5"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 10px)" }}
       >
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, label: enLabel, icon: Icon }) => {
           const active = pathname === href;
+          const label = labels[href] ?? enLabel;
           return (
             <Link
               key={href}

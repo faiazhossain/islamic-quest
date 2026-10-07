@@ -12,7 +12,8 @@ import {
   hadithForDhikr,
 } from "@/lib/content";
 import { REVIEW_LABEL } from "@/lib/content/review";
-import { formatCount, formatShortDate } from "@/lib/format";
+import { formatCount, formatShortDate, toBnDigits } from "@/lib/format";
+import { useCopy, useLang, localized } from "@/lib/i18n";
 import {
   getProgress,
   recordQuestStarted,
@@ -31,6 +32,8 @@ const NAV_OFFSET = "calc(58px + max(env(safe-area-inset-bottom), 10px))";
 export function QuestDetail({ questId }: { questId: string }) {
   const router = useRouter();
   const quest = getPublicQuest(questId);
+  const copy = useCopy();
+  const lang = useLang();
   const [progress, setProgress] = useState<QuestProgress | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [hadithOpen, setHadithOpen] = useState(false);
@@ -88,9 +91,15 @@ export function QuestDetail({ questId }: { questId: string }) {
   const count = progress?.count ?? 0;
   const started = Boolean(progress?.startedAt) || count > 0;
   const complete = Boolean(progress?.completedAt);
-  const sourceText = [dhikr.source.collection, dhikr.source.reference]
-    .filter(Boolean)
-    .join(" ");
+  // Citation line: collections get their standard Bangla names in bn mode,
+  // and reference digits render as Bengali numerals.
+  const collectionText = dhikr.source.collection
+    .split(";")
+    .map((segment) => segment.trim())
+    .map((segment) => copy.collectionBn[segment] ?? segment)
+    .join("; ");
+  const referenceText = lang === "bn" ? toBnDigits(dhikr.source.reference) : dhikr.source.reference;
+  const sourceText = [collectionText, referenceText].filter(Boolean).join(" ");
   const hadith = hadithForDhikr(dhikr.id);
 
   const start = async () => {
@@ -99,10 +108,10 @@ export function QuestDetail({ questId }: { questId: string }) {
   };
 
   const startLabel = complete
-    ? "Practice now"
+    ? copy.practiceNow
     : started
-      ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
-      : `Start quest - ${formatCount(quest.target)}x`;
+      ? copy.continueWithCount(formatCount(count, lang), formatCount(quest.target, lang))
+      : copy.startQuest(formatCount(quest.target, lang));
 
   return (
     // Extra bottom padding clears the mobile action bar that sits above
@@ -114,7 +123,7 @@ export function QuestDetail({ questId }: { questId: string }) {
           className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 text-sm text-ink-3 transition-colors hover:text-ink-2 active:opacity-60"
         >
           <BackChevron />
-          Explore
+          {copy.exploreBack}
         </Link>
       </div>
 
@@ -122,15 +131,15 @@ export function QuestDetail({ questId }: { questId: string }) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {category && (
             <span className="rounded-full border border-line px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-2">
-              {category.name.en}
+              {localized(category.name, lang)}
             </span>
           )}
           <span className="text-[11px] text-ink-3">
-            {REVIEW_LABEL[dhikr.review.status] ?? REVIEW_LABEL.draft}
+            {localized(REVIEW_LABEL[dhikr.review.status] ?? REVIEW_LABEL.draft, lang)}
           </span>
         </div>
         <h1 className="mt-3 font-display text-[2rem] leading-tight text-ink lg:text-4xl">
-          {dhikr.names.en}
+          {localized(dhikr.names, lang)}
         </h1>
       </header>
 
@@ -147,19 +156,19 @@ export function QuestDetail({ questId }: { questId: string }) {
               {dhikr.transliteration}
             </p>
             <p className="mt-3 text-[15px] leading-relaxed text-ink">
-              {dhikr.meaning.en}
+              {localized(dhikr.meaning, lang)}
             </p>
           </div>
         </section>
 
         <div className="flex flex-col lg:col-span-5">
           <dl className="rise mt-6 text-sm [animation-delay:180ms] lg:mt-0 lg:[animation-delay:120ms]">
-            <Row label="Quest" value={`${formatCount(quest.target)}x`} />
+            <Row label={copy.questLabel} value={`${formatCount(quest.target, lang)}x`} />
             <div className="border-b border-line py-3">
               <dt className="text-xs uppercase tracking-wide text-ink-3">
-                Guidance
+                {copy.guidanceLabel}
               </dt>
-              <dd className="mt-1 text-ink">{dhikr.practiceGuidance.en}</dd>
+              <dd className="mt-1 text-ink">{localized(dhikr.practiceGuidance, lang)}</dd>
               {hadith.length > 0 && (
                 <dd className="mt-2">
                   <button
@@ -168,15 +177,15 @@ export function QuestDetail({ questId }: { questId: string }) {
                     className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
                   >
                     <BookIcon />
-                    See the hadith ({hadith.length})
+                    {copy.seeHadith(formatCount(hadith.length, lang))}
                   </button>
                 </dd>
               )}
             </div>
             <Row
-              label="Source"
-              value={sourceText || "Verification in progress"}
-              sub={dhikr.source.note}
+              label={copy.sourceLabel}
+              value={sourceText || copy.verificationInProgress}
+              sub={dhikr.source.note ? localized(dhikr.source.note, lang) : undefined}
             />
           </dl>
 
@@ -190,10 +199,10 @@ export function QuestDetail({ questId }: { questId: string }) {
             {loaded && complete && progress?.completedAt && (
               <>
                 <p className="mt-3 text-center text-xs text-jade">
-                  Completed {formatShortDate(progress.completedAt)}
+                  {copy.completedOnDate(formatShortDate(progress.completedAt, lang))}
                 </p>
                 <p className="mt-1 text-center text-xs text-ink-3">
-                  You&apos;ve practiced this Amal {formatCount(count)} times.
+                  {copy.practicedTimes(formatCount(count, lang))}
                 </p>
               </>
             )}
@@ -204,7 +213,7 @@ export function QuestDetail({ questId }: { questId: string }) {
       <HadithSheet
         open={hadithOpen}
         onClose={() => setHadithOpen(false)}
-        title={dhikr.names.en}
+        title={localized(dhikr.names, lang)}
         entries={hadith}
       />
 
@@ -245,8 +254,7 @@ export function QuestDetail({ questId }: { questId: string }) {
           </button>
           {loaded && complete && progress?.completedAt && (
             <p className="mt-1.5 text-center text-[11px] text-ink-3">
-              Completed {formatShortDate(progress.completedAt)} · practiced{" "}
-              {formatCount(count)} times
+              {copy.completedShortLine(formatShortDate(progress.completedAt, lang), formatCount(count, lang))}
             </p>
           )}
         </div>

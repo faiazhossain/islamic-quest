@@ -7,6 +7,8 @@ import { MissingQuest } from "@/components/missing-quest";
 import { Switch } from "@/components/switch";
 import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
+import type { Lang } from "@/lib/i18n/lang";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 import { getProgress } from "@/lib/db/events";
 
 const W = 1080;
@@ -46,6 +48,11 @@ interface CardInput {
   showCount: boolean;
   date: string;
   palette: CardPalette;
+  lang: Lang;
+  /** Bengali-script numerals need the Bangla font on the canvas. */
+  banglaFamily: string;
+  completedLabel: string;
+  alhamdulillah: string;
 }
 
 /** Draws the 9:16 milestone card. Pure canvas; no external assets. */
@@ -86,21 +93,30 @@ function drawCard(canvas: HTMLCanvasElement, input: CardInput): void {
 
   ctx.textAlign = "center";
 
+  const bodyFamily = input.lang === "bn"
+    ? `${input.banglaFamily}, "Hanken Grotesk", system-ui, sans-serif`
+    : '"Hanken Grotesk", system-ui, sans-serif';
+  const displayFamily = input.lang === "bn"
+    ? `${input.banglaFamily}, Georgia, serif`
+    : 'Fraunces, Georgia, serif';
+
   if (input.showCount) {
     ctx.fillStyle = palette.ink;
-    ctx.font = '300 230px Fraunces, Georgia, serif';
-    ctx.fillText(`${formatCount(input.target)}`, W / 2, 840);
+    ctx.font = `300 230px ${displayFamily}`;
+    ctx.fillText(`${formatCount(input.target, input.lang)}`, W / 2, 840);
     ctx.fillStyle = palette.sub;
-    ctx.font = '600 44px "Hanken Grotesk", system-ui, sans-serif';
-    ctx.fillText("COMPLETED", W / 2, 920);
+    ctx.font = `600 44px ${bodyFamily}`;
+    ctx.fillText(input.completedLabel, W / 2, 920);
   }
 
   // Long names must never clip at the card edge: shrink to fit, then wrap
   // onto two balanced lines as a last resort.
   ctx.fillStyle = palette.ink;
   const nameY = input.showCount ? 1064 : 820;
-  const fitted = fitLines(ctx, input.dhikrName.toUpperCase(), W - 160, 84, 56);
-  ctx.font = `700 ${fitted.size}px "Hanken Grotesk", system-ui, sans-serif`;
+  // Bangla script has no letter-case; uppercasing is Latin-only behavior.
+  const displayName = input.lang === "bn" ? input.dhikrName : input.dhikrName.toUpperCase();
+  const fitted = fitLines(ctx, displayName, W - 160, 84, 56, bodyFamily);
+  ctx.font = `700 ${fitted.size}px ${bodyFamily}`;
   if (fitted.lines.length === 1) {
     ctx.fillText(fitted.lines[0], W / 2, nameY);
   } else {
@@ -110,11 +126,11 @@ function drawCard(canvas: HTMLCanvasElement, input: CardInput): void {
   }
 
   ctx.fillStyle = palette.accent;
-  ctx.font = 'italic 500 92px Fraunces, Georgia, serif';
-  ctx.fillText("Alhamdulillah", W / 2, input.showCount ? 1216 : 972);
+  ctx.font = `italic 500 92px ${displayFamily}`;
+  ctx.fillText(input.alhamdulillah, W / 2, input.showCount ? 1216 : 972);
 
   ctx.fillStyle = palette.sub;
-  ctx.font = '500 36px "Hanken Grotesk", system-ui, sans-serif';
+  ctx.font = `500 36px ${bodyFamily}`;
   ctx.fillText(input.date, W / 2, 1560);
 
   ctx.strokeStyle = palette.line;
@@ -141,9 +157,9 @@ function fitLines(
   maxWidth: number,
   maxSize: number,
   minSize: number,
+  family: string,
 ): { size: number; lines: string[] } {
-  const font = (size: number) =>
-    `700 ${size}px "Hanken Grotesk", system-ui, sans-serif`;
+  const font = (size: number) => `700 ${size}px ${family}`;
   for (let size = maxSize; size >= minSize; size -= 4) {
     ctx.font = font(size);
     if (ctx.measureText(text).width <= maxWidth) {
@@ -218,6 +234,8 @@ function downloadBlob(blob: Blob): void {
 export default function SharePage() {
   const params = useParams<{ id: string }>();
   const quest = getPublicQuest(params.id);
+  const copy = useCopy();
+  const lang = useLang();
   const [theme, setTheme] = useState<"night" | "dawn">("night");
   const [showCount, setShowCount] = useState(true);
   const [fontsReady, setFontsReady] = useState(false);
@@ -264,14 +282,39 @@ export default function SharePage() {
     // The card never draws before the real completion date is known - it
     // must not fall back to today for a quest completed on another day.
     if (!canvas || !fontsReady || !quest || !completedAt) return;
-    drawCard(canvas, {
-      dhikrName: dhikrForQuest(quest).names.en,
-      target: quest.target,
-      showCount,
-      date: formatShortDate(completedAt),
-      palette: PALETTES[theme],
-    });
-  }, [fontsReady, theme, showCount, quest, completedAt]);
+    const banglaFamily =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--font-bangla")
+        .trim() || "sans-serif";
+    let cancelled = false;
+    (async () => {
+      if (lang === "bn") {
+        // Bengali glyphs load lazily; make sure the canvas font is ready
+        // before drawing, or the card silently falls back to system fonts.
+        try {
+          await document.fonts.load(`700 84px ${banglaFamily}`, "আমল");
+          await document.fonts.load(`300 230px ${banglaFamily}`, "১২৩");
+        } catch {
+          // Font API unavailable; the draw below still uses the family.
+        }
+      }
+      if (cancelled) return;
+      drawCard(canvas, {
+        dhikrName: localized(dhikrForQuest(quest).names, lang),
+        target: quest.target,
+        showCount,
+        date: formatShortDate(completedAt, lang),
+        palette: PALETTES[theme],
+        lang,
+        banglaFamily,
+        completedLabel: copy.canvasCompleted,
+        alhamdulillah: copy.alhamdulillah,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fontsReady, theme, showCount, quest, completedAt, lang, copy]);
 
   const share = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -281,7 +324,7 @@ export default function SharePage() {
     try {
       blob = await toBlob(canvas);
     } catch {
-      setStatus("Could not create the card image.");
+      setStatus(copy.statusImageFailed);
       return;
     }
     const nav = navigator as Navigator & {
@@ -293,9 +336,9 @@ export default function SharePage() {
         await navigator.share({
           files: [file],
           title: "Amalyn",
-          text: "Quest complete - Alhamdulillah",
+          text: copy.shareText,
         });
-        setStatus("Shared.");
+        setStatus(copy.statusShared);
         return;
       } catch (error) {
         if ((error as DOMException)?.name === "AbortError") return;
@@ -303,8 +346,8 @@ export default function SharePage() {
       }
     }
     downloadBlob(blob);
-    setStatus("Card saved to your device.");
-  }, []);
+    setStatus(copy.statusSaved);
+  }, [copy]);
 
   if (!quest) return <MissingQuest />;
   const dhikr = dhikrForQuest(quest);
@@ -314,16 +357,16 @@ export default function SharePage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="font-display text-xl text-ink">
-          This quest isn&apos;t complete yet.
+          {copy.notCompleteYet}
         </p>
         <p className="text-sm leading-relaxed text-ink-2">
-          Finish it first, and its milestone card will be waiting here.
+          {copy.finishFirst}
         </p>
         <Link
           href={`/quest/${quest.id}`}
           className="mt-4 flex h-11 items-center justify-center rounded-2xl bg-accent px-6 font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
-          Back to the quest
+          {copy.backToQuest}
         </Link>
       </div>
     );
@@ -340,12 +383,12 @@ export default function SharePage() {
       <header className="flex items-center justify-between">
         <Link
           href={`/quest/${quest.id}/complete`}
-          aria-label="Back"
+          aria-label={copy.backAria}
           className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90"
         >
           <BackIcon />
         </Link>
-        <p className="text-sm font-medium text-ink-2">Share milestone</p>
+        <p className="text-sm font-medium text-ink-2">{copy.shareTitle}</p>
         <span className="h-11 w-11" aria-hidden="true" />
       </header>
 
@@ -357,7 +400,7 @@ export default function SharePage() {
             height={H}
             className="max-h-[52vh] w-auto rounded-2xl border border-line lg:max-h-[68vh]"
             style={{ boxShadow: "var(--shadow-card)" }}
-            aria-label={`Milestone card: ${formatCount(quest.target)} times ${dhikr.names.en}, quest complete`}
+            aria-label={copy.canvasAria(localized(dhikr.names, lang), formatCount(quest.target, lang))}
             role="img"
           />
         </div>
@@ -366,7 +409,7 @@ export default function SharePage() {
           <div className="mt-6 space-y-4 lg:mt-0">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
-                Card theme
+                {copy.cardTheme}
               </p>
               <div className="mt-2 flex gap-2">
                 {(["night", "dawn"] as const).map((option) => (
@@ -391,7 +434,7 @@ export default function SharePage() {
               aria-pressed={showCount}
               className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2"
             >
-              <span className="text-sm text-ink">Show the count on the card</span>
+              <span className="text-sm text-ink">{copy.showCountOnCard}</span>
               <Switch on={showCount} />
             </button>
           </div>
@@ -401,7 +444,7 @@ export default function SharePage() {
               onClick={share}
               className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
             >
-              Share or save card
+              {copy.shareOrSave}
             </button>
             {status && (
               <p role="status" className="text-center text-xs text-ink-3">
@@ -409,7 +452,7 @@ export default function SharePage() {
               </p>
             )}
             <p className="pb-4 text-center text-xs leading-relaxed text-ink-3">
-              Your card only shows what you choose. Sharing is always up to you.
+              {copy.cardPrivacy}
             </p>
           </div>
         </div>

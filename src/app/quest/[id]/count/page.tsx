@@ -7,6 +7,7 @@ import { MissingQuest } from "@/components/missing-quest";
 import { StarMark } from "@/components/star-mark";
 import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount, todayStart } from "@/lib/format";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
   getProgress,
   getQuestDeltaSince,
@@ -20,15 +21,22 @@ import { playTick } from "@/lib/tick";
 
 interface Milestone {
   fraction: number;
-  message: string;
+  key: "quarter" | "half" | "threeQuarters" | "almost";
 }
 
 const MILESTONES: Milestone[] = [
-  { fraction: 0.25, message: "A quarter of the way" },
-  { fraction: 0.5, message: "Halfway there" },
-  { fraction: 0.75, message: "Three quarters done" },
-  { fraction: 0.9, message: "Almost there" },
+  { fraction: 0.25, key: "quarter" },
+  { fraction: 0.5, key: "half" },
+  { fraction: 0.75, key: "threeQuarters" },
+  { fraction: 0.9, key: "almost" },
 ];
+
+const MILESTONE_COPY = {
+  quarter: "milestoneQuarter",
+  half: "milestoneHalf",
+  threeQuarters: "milestoneThreeQuarters",
+  almost: "milestoneAlmost",
+} as const;
 
 interface WakeLockSentinelLike {
   release: () => Promise<void>;
@@ -44,6 +52,8 @@ export default function CountPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const quest = getPublicQuest(params.id);
+  const copy = useCopy();
+  const lang = useLang();
 
   const haptics = useSettings((state) => state.haptics);
   const sound = useSettings((state) => state.sound);
@@ -150,7 +160,7 @@ export default function CountPage() {
     );
     if (milestone) {
       seenMilestones.current.add(milestone.fraction);
-      setNote(milestone.message);
+      setNote(copy[MILESTONE_COPY[milestone.key]]);
       if (noteTimer.current !== null) window.clearTimeout(noteTimer.current);
       noteTimer.current = window.setTimeout(() => setNote(null), 2200);
     }
@@ -172,7 +182,7 @@ export default function CountPage() {
           router.push(`/quest/${quest.id}/complete`);
         });
     }
-  }, [quest, ready, haptics, sound, router, dailyFrame, dailyDone]);
+  }, [quest, ready, haptics, sound, router, dailyFrame, dailyDone, copy]);
 
   const undo = useCallback(() => {
     if (!quest || countRef.current <= 0 || completing.current || dailyDone) return;
@@ -195,18 +205,18 @@ export default function CountPage() {
       >
         <button
           onClick={() => router.push(`/quest/${quest.id}`)}
-          aria-label="Leave counter (progress is saved)"
+          aria-label={copy.leaveCounterAria}
           className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90"
         >
           <CloseIcon />
         </button>
         <p className="min-w-0 truncate text-sm font-medium text-ink-2">
-          {dhikr.names.en}
+          {localized(dhikr.names, lang)}
         </p>
         <button
           onClick={undo}
           disabled={count <= 0}
-          aria-label="Undo one count"
+          aria-label={copy.undoCountAria}
           className="flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface hover:text-ink active:scale-90 disabled:opacity-30"
         >
           <UndoIcon />
@@ -225,7 +235,7 @@ export default function CountPage() {
           if (event.detail === 0) tap();
         }}
         disabled={!ready}
-        aria-label={`Count one ${dhikr.names.en}. ${formatCount(count)} of ${formatCount(quest.target)}${dailyFrame ? " today" : ""}.`}
+        aria-label={copy.countAria(localized(dhikr.names, lang), formatCount(count, lang), formatCount(quest.target, lang), dailyFrame ? copy.todaySuffix : "")}
         className="relative flex flex-1 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
         <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
@@ -238,10 +248,10 @@ export default function CountPage() {
           }`}
           aria-hidden="true"
         >
-          {formatCount(count)}
+          {formatCount(count, lang)}
         </span>
         <span className="text-sm text-ink-3">
-          of {formatCount(quest.target)}{dailyFrame ? " today" : ""}
+          {copy.ofTarget(formatCount(quest.target, lang))}{dailyFrame ? copy.todaySuffix : ""}
         </span>
         <div
           className="h-1.5 w-44 overflow-hidden rounded-full bg-surface-2"
@@ -281,7 +291,7 @@ export default function CountPage() {
           }`}
           aria-hidden={count > 0}
         >
-          Tap anywhere to count
+          {copy.tapToCount}
         </p>
       </footer>
 
@@ -289,7 +299,7 @@ export default function CountPage() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Today's amal complete"
+          aria-label={copy.todaysAmalCompleteAria}
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg/95 px-6 text-center backdrop-blur-sm"
           style={{
             paddingTop: "max(env(safe-area-inset-top), 24px)",
@@ -305,20 +315,20 @@ export default function CountPage() {
             <StarMark className="relative h-20 w-20 text-accent" />
           </div>
           <p className="rise mt-8 text-xs font-semibold uppercase tracking-[0.28em] text-accent [animation-delay:150ms]">
-            Today&apos;s amal
+            {copy.todaysAmal}
           </p>
           <h1 className="rise mt-3 font-display text-[2rem] leading-tight text-ink [animation-delay:230ms]">
-            {formatCount(quest.target)}x {dhikr.names.en}
+            {formatCount(quest.target, lang)}x {localized(dhikr.names, lang)}
           </h1>
           <p className="rise mt-3 font-display text-lg italic text-ink-2 [animation-delay:310ms]">
-            Alhamdulillah
+            {copy.alhamdulillah}
           </p>
           <Link
             ref={doneRef}
             href="/"
             className="rise mt-10 flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px [animation-delay:420ms]"
           >
-            Done
+            {copy.done}
           </Link>
         </div>
       )}

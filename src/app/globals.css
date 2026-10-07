@@ -71,8 +71,10 @@
   --color-on-accent: var(--on-accent);
   --color-jade: var(--jade);
   --color-danger: var(--danger);
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-body: var(--font-hanken), system-ui, sans-serif;
+  /* --font-bangla (next/font) rides as the Bengali-script fallback in the
+     Latin chains; Latin glyphs keep Hanken/Fraunces, Bengali gets Noto. */
+  --font-display: var(--font-fraunces), var(--font-bangla), Georgia, serif;
+  --font-body: var(--font-hanken), var(--font-bangla), system-ui, sans-serif;
   --font-arabic: var(--font-amiri), serif;
 }
 

@@ -1,3 +1,6 @@
+import { localized } from "../i18n/localized";
+import type { Lang } from "../i18n/lang";
+import { formatCount } from "../format";
 import { CATEGORIES } from "./categories";
 import { DHIKR } from "./dhikr";
 import { HADITH } from "./hadith";
@@ -77,8 +80,8 @@ export function assertLaunchReady(): void {
   }
 }
 
-export function questTitle(quest: Quest): string {
-  return `${dhikrForQuest(quest).names.en} × ${quest.target.toLocaleString("en-US")}`;
+export function questTitle(quest: Quest, lang: Lang = "en"): string {
+  return `${localized(dhikrForQuest(quest).names, lang)} × ${formatCount(quest.target, lang)}`;
 }
 
 const THEME_ORDER: Record<HadithTheme, number> = {

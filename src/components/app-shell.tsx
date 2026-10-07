@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Atmosphere } from "./atmosphere";
 import { BottomNav } from "./bottom-nav";
+import { LanguageChooser } from "./language-chooser";
 import { PwaRegister } from "./pwa-register";
 import { SideRail } from "./side-rail";
 import { SyncManager } from "./sync-manager";
@@ -59,6 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
       <PwaRegister />
       <SyncManager />
+      <LanguageChooser />
     </>
   );
 }

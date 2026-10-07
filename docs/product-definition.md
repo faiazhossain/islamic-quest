@@ -48,7 +48,7 @@ product-level.**
 | Account | Optional. Magic link + Google. Cloud sync of progress. App fully functional signed out. |
 | Settings | Haptics, sound, screen wake, theme, data export/import, account, delete data, Support (Hadiya), About/Privacy |
 | PWA | Installable, offline shell, offline counting, safe-area support |
-| i18n | English UI, architected with next-intl so Bangla ships in v1.1 without rework |
+| i18n | English UI, Bangla shipped in v1.1 (2026-10-07): settings-driven language (en/bn) with a first-visit chooser - not next-intl, which is built around a request locale and was never installed |
 
 ### Out (deliberately)
 
@@ -224,7 +224,7 @@ progress_events (id, user_id, client_event_id, type, quest_id, delta, at)
 | Auth | Auth.js v5 | Google OAuth + magic link |
 | DB host | Neon (serverless Postgres) | Free tier to start |
 | PWA | Hand-rolled manifest + service worker | App Router makes next-pwa awkward; a small custom SW is more predictable (decision confirmed at implementation) |
-| i18n | next-intl | `en` now, `bn` in v1.1 |
+| i18n | typed copy table + LocalizedText fields (`src/lib/i18n/`) | `en` + `bn`; first-visit chooser, Settings toggle |
 | Hosting | Vercel | Free tier |
 | Security | Server-side validation, RLS-equivalent ownership checks, rate limiting on sync/auth | Section 31 of the brief honored |
 

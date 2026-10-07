@@ -90,6 +90,59 @@ describe("hadith citations and verification", () => {
   });
 });
 
+describe("hadith Bangla verification", () => {
+  it("attributes every Bangla translation to a verified iHadis source", () => {
+    for (const entry of HADITH) {
+      const bn = entry.translation.bn;
+      if (bn === undefined) continue;
+      // The verbatim rule: a Bangla text may ship only when the exact
+      // iHadis page it was extracted from is recorded as a source.
+      expect(
+        entry.review.verifiedSources?.some((source) =>
+          source.startsWith("https://ihadis.com/"),
+        ),
+        `entry ${entry.id} ships bn without an iHadis source`,
+      ).toBe(true);
+      expect(bn.trim()).not.toBe("");
+      expect(bn).toMatch(/\p{Script=Bengali}/u);
+    }
+  });
+
+  it("never invents Bangla: every unverified entry is known and bounded", () => {
+    // The 2026-10-07 iHadis pass verified 12 of 18 entries; the rest ship
+    // English-only (with the pending note in the sheet) until the scholar
+    // pass locates them under iHadis's Islamic Foundation numbering.
+    const unverified = HADITH.filter((entry) => !entry.translation.bn);
+    expect(unverified.map((entry) => entry.id).sort()).toEqual([
+      "four-beloved-words-muslim-2137a",
+      "istighfar-hundred-a-day-muslim-2702",
+      "la-dies-knowing-paradise-muslim-26a",
+      "salawat-ten-mercies-muslim-408",
+      "tasbih-33-33-34-muslim-596a",
+      "tasbih-sea-foam-muslim-597a",
+    ].sort());
+  });
+
+  it("keeps the Arabic matn untouched by localization", () => {
+    // Spot anchors from the original verified catalog: localization must
+    // never edit religious text.
+    expect(HADITH.find((e) => e.id === "istighfar-seventy-a-day-bukhari-6307")?.arabic).toContain(
+      "لأَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",
+    );
+    expect(HADITH.find((e) => e.id === "salawat-ten-mercies-muslim-408")?.arabic).toBe(
+      "مَنْ صَلَّى عَلَىَّ وَاحِدَةً صَلَّى اللَّهُ عَلَيْهِ عَشْرًا",
+    );
+  });
+
+  it("carries Bangla narrator names beside the verified Bangla text", () => {
+    for (const entry of HADITH) {
+      if (entry.translation.bn && entry.narratorBn !== undefined) {
+        expect(entry.narratorBn).toMatch(/\p{Script=Bengali}/u);
+      }
+    }
+  });
+});
+
 describe("hadith review gate", () => {
   it("hides unverified hadith in production but shows them in development", () => {
     for (const dhikr of DHIKR) {

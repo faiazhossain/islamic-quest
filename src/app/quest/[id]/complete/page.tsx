@@ -7,11 +7,14 @@ import { MissingQuest } from "@/components/missing-quest";
 import { StarMark } from "@/components/star-mark";
 import { dhikrForQuest, getPublicQuest } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 import { getProgress, recordQuestCompleted } from "@/lib/db/events";
 
 export default function CompletePage() {
   const params = useParams<{ id: string }>();
   const quest = getPublicQuest(params.id);
+  const copy = useCopy();
+  const lang = useLang();
   const [completedAt, setCompletedAt] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -54,22 +57,22 @@ export default function CompletePage() {
       </div>
 
       <p className="rise mt-10 text-xs font-semibold uppercase tracking-[0.28em] text-accent [animation-delay:150ms]">
-        Quest complete
+        {copy.questComplete}
       </p>
       <h1 className="rise mt-3 font-display text-[2.1rem] leading-tight text-ink [animation-delay:230ms]">
-        {formatCount(quest.target)}x {dhikr.names.en}
+        {formatCount(quest.target, lang)}x {localized(dhikr.names, lang)}
       </h1>
       <p className="rise mt-3 font-display text-lg italic text-ink-2 [animation-delay:310ms]">
-        Alhamdulillah
+        {copy.alhamdulillah}
       </p>
       {ready && completedAt && (
         <p className="rise mt-1 text-xs text-ink-3 [animation-delay:360ms]">
-          {formatShortDate(completedAt)}
+          {formatShortDate(completedAt, lang)}
         </p>
       )}
 
       <p className="rise mt-6 text-sm text-ink-2 [animation-delay:380ms]">
-        This Amal stays part of your Journey.
+        {copy.amalStaysInJourney}
       </p>
 
       <div className="rise mt-12 w-full max-w-xs space-y-3 [animation-delay:440ms]">
@@ -77,13 +80,13 @@ export default function CompletePage() {
           href={`/quest/${quest.id}/share`}
           className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
-          Share this milestone
+          {copy.shareMilestone}
         </Link>
         <Link
           href="/"
           className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
         >
-          Back home
+          {copy.backHome}
         </Link>
       </div>
     </div>

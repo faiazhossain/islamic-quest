@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "./nav-icons";
 import { StarMark } from "./star-mark";
+import { useLang } from "@/lib/i18n";
+import { navLabels } from "@/lib/i18n/dictionary";
 
 /**
  * Desktop navigation rail. Mirror of BottomNav's contract: same items,
@@ -12,6 +14,8 @@ import { StarMark } from "./star-mark";
  */
 export function SideRail() {
   const pathname = usePathname();
+  const lang = useLang();
+  const labels = navLabels(lang);
 
   return (
     <nav
@@ -24,8 +28,9 @@ export function SideRail() {
           <span className="font-display text-lg text-ink">Amalyn</span>
         </div>
         <div className="flex flex-col gap-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {NAV_ITEMS.map(({ href, label: enLabel, icon: Icon }) => {
             const active = pathname === href;
+            const label = labels[href] ?? enLabel;
             return (
               <Link
                 key={href}

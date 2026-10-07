@@ -12,7 +12,7 @@ export interface DhikrSource {
   /** Hadith or verse reference. Filled during verification (task E1). */
   reference: string;
   /** Grading or attribution context. Supplied by the reviewer only. */
-  note?: string;
+  note?: LocalizedText;
 }
 
 export interface ContentReview {
@@ -59,10 +59,17 @@ export interface HadithEntry {
   theme: HadithTheme;
   /** Standard Arabic matn (verbatim religious text). */
   arabic: string;
-  /** Fresh faithful English rendering; never a published translation verbatim. */
+  /**
+   * English: a fresh faithful rendering, never a published translation
+   * verbatim. Bangla (when present): the VERBATIM translation from the
+   * verified iHadis source - never composed or paraphrased. Entries whose
+   * Bangla could not be verified on iHadis ship without `bn`.
+   */
   translation: LocalizedText;
   /** Companion narrator, e.g. "Abu Huraira". */
   narrator: string;
+  /** Narrator as printed on iHadis, e.g. "আবূ হুরায়রা (রাঃ)". */
+  narratorBn?: string;
   /** e.g. "Sahih al-Bukhari". */
   collection: string;
   /** sunnah.com numbering, e.g. "6307" or "596a". */
@@ -72,7 +79,7 @@ export interface HadithEntry {
   /** Full canonical link, e.g. "https://sunnah.com/bukhari:6307". */
   sourceUrl: string;
   /** Parallel citations or context the citation line cannot carry. */
-  note?: string;
+  note?: LocalizedText;
   /**
    * Per-entry verification. Deliberately NOT inherited from the parent
    * dhikr's review: each narration stands on its own evidence, so the

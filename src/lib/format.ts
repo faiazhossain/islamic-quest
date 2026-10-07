@@ -1,6 +1,11 @@
-/** Shared formatting helpers (en-US now; the active locale can be threaded in when i18n ships). */
+/** Shared formatting helpers, locale-aware since the bn language shipped. */
+import type { Lang } from "./i18n/lang";
 
-export const formatCount = (value: number): string => value.toLocaleString("en-US");
+const LOCALE: Record<Lang, string> = { en: "en-US", bn: "bn-BD" };
+
+/** Counts in Bengali digits in bn mode ("১০০"), en-US otherwise. */
+export const formatCount = (value: number, lang: Lang = "en"): string =>
+  value.toLocaleString(LOCALE[lang]);
 
 /** Epoch ms for local midnight of the day containing epochMs. */
 export const dayStartOf = (epochMs: number): number => {
@@ -33,10 +38,20 @@ export const dayKeyOrdinal = (key: string): number => {
   return Math.floor(Date.UTC(year, month - 1, day, 12) / 86_400_000);
 };
 
-/** "Mar 5, 2026" style short date for cards and journey waypoints. */
-export const formatShortDate = (epochMs: number): string =>
-  new Date(epochMs).toLocaleDateString("en-US", {
+/** "Mar 5, 2026" / "৫ মার্চ, ২০২৬" style short date for cards and journey waypoints. */
+export const formatShortDate = (epochMs: number, lang: Lang = "en"): string =>
+  new Date(epochMs).toLocaleDateString(LOCALE[lang], {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+
+/**
+ * Converts ASCII digits inside a citation string to Bengali digits in bn
+ * mode ("6307" -> "৬৩০৭"); other characters (letters in "596a") pass
+ * through, since the letter is part of the citation's own identity.
+ */
+export const toBnDigits = (text: string): string =>
+  text.replace(/[0-9]/g, (digit) => BN_DIGITS[Number(digit)]);

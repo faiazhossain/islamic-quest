@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Stat } from "@/components/stat";
 import { dhikrForQuest, publicQuests, type Quest } from "@/lib/content";
 import { formatCount, formatShortDate } from "@/lib/format";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
   getAllProgress,
   getPracticeEvents,
@@ -31,6 +32,8 @@ const X_LEFT = 92;
 const X_RIGHT = 248;
 
 export default function JourneyPage() {
+  const copy = useCopy();
+  const lang = useLang();
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
   const [events, setEvents] = useState<PracticeEvent[] | null>(null);
   const [now, setNow] = useState(0);
@@ -80,24 +83,24 @@ export default function JourneyPage() {
   const stats = derivePracticeStats(events ?? [], now);
 
   const points: Waypoint[] = completed.map(({ quest, entry, x, y }) => ({
-    title: `${dhikrForQuest(quest).names.en} - ${formatCount(quest.target)}x`,
-    date: entry.completedAt ? `Completed ${formatShortDate(entry.completedAt)}` : "",
+    title: `${localized(dhikrForQuest(quest).names, lang)} - ${formatCount(quest.target, lang)}x`,
+    date: entry.completedAt ? copy.completedOnDate(formatShortDate(entry.completedAt, lang)) : "",
     x,
     y,
     variant: "completed",
   }));
   if (nextQuest) {
     points.push({
-      title: `${dhikrForQuest(nextQuest).names.en} - ${formatCount(nextQuest.target)}x`,
-      date: "Up next",
+      title: `${localized(dhikrForQuest(nextQuest).names, lang)} - ${formatCount(nextQuest.target, lang)}x`,
+      date: copy.upNext,
       x: completed.length % 2 === 0 ? X_LEFT : X_RIGHT,
       y: TOP_PAD + completed.length * ROW_H,
       variant: "up-next",
     });
   } else if (journeyComplete && completed.length > 0) {
     points.push({
-      title: "Your Journey continues",
-      date: `${completed.length} of ${publicQuests().length} quests complete`,
+      title: copy.journeyContinues,
+      date: copy.questsCompleteOf(formatCount(completed.length, lang), formatCount(publicQuests().length, lang)),
       x: completed.length % 2 === 0 ? X_LEFT : X_RIGHT,
       y: TOP_PAD + completed.length * ROW_H,
       variant: "continues",
@@ -116,8 +119,8 @@ export default function JourneyPage() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Journey</h1>
-        <p className="mt-1 text-sm text-ink-2">Your path of light.</p>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">{copy.journeyTitle}</h1>
+        <p className="mt-1 text-sm text-ink-2">{copy.pathOfLight}</p>
       </header>
 
       {progress === null || events === null ? (
@@ -125,24 +128,24 @@ export default function JourneyPage() {
       ) : !hasAnyProgress ? (
         <div className="rise mt-10 rounded-3xl border border-line bg-surface p-6 text-center [animation-delay:100ms]">
           <p className="font-display text-lg text-ink">
-            Your path begins with the first quest.
+            {copy.journeyEmptyTitle}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-ink-2">
-            Every completed quest adds a light to this path.
+            {copy.journeyEmptyBody}
           </p>
           <Link
             href="/explore"
             className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
           >
-            Choose a quest
+            {copy.chooseQuest}
           </Link>
         </div>
       ) : (
         <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
           <div className="rise mt-6 grid grid-cols-3 gap-3 [animation-delay:80ms] lg:col-span-5 lg:sticky lg:top-10 lg:mt-0 lg:self-start">
-            <Stat label="Days" value={String(stats.daysPracticed)} />
-            <Stat label="Quests" value={String(completed.length)} />
-            <Stat label="Dhikr" value={formatCount(totalDhikr)} />
+            <Stat label={copy.statDays} value={formatCount(stats.daysPracticed, lang)} />
+            <Stat label={copy.statQuests} value={formatCount(completed.length, lang)} />
+            <Stat label={copy.statDhikr} value={formatCount(totalDhikr, lang)} />
           </div>
 
           <div className="rise mt-4 [animation-delay:160ms] lg:col-span-7 lg:mt-0 lg:[animation-delay:80ms]">
@@ -150,7 +153,7 @@ export default function JourneyPage() {
               viewBox={`0 0 340 ${TOP_PAD + (points.length - 1) * ROW_H + 110}`}
               className="w-full lg:mx-auto lg:block lg:max-w-md"
               role="img"
-              aria-label={`Journey with ${completed.length} completed quests`}
+              aria-label={copy.journeyAria(formatCount(completed.length, lang))}
             >
               <path
                 d={pathThrough(points)}
@@ -179,18 +182,15 @@ export default function JourneyPage() {
           {journeyComplete && (
             <div className="rise rounded-3xl border border-line bg-surface p-6 [animation-delay:240ms] lg:col-span-5 lg:mt-0 lg:self-start lg:[animation-delay:160ms]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-                Your Journey continues
+                {copy.journeyContinues}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-ink-2">
-                {completedDhikrCount(progress)}{" "}
-                {completedDhikrCount(progress) === 1 ? "Amal is" : "Amals are"} now
-                part of your practice. Return to any of them, any day - the path
-                grows with you.
+                {copy.amalsInPractice(formatCount(completedDhikrCount(progress), lang))}
               </p>
               <p className="mt-3 text-xs text-ink-3">
-                This month {formatCount(stats.thisMonthCount)} dhikr
+                {copy.thisMonthDhikr(formatCount(stats.thisMonthCount, lang))}
                 {stats.thisMonthCount > stats.lastMonthCount &&
-                  ` - +${formatCount(stats.thisMonthCount - stats.lastMonthCount)} over last month`}
+                  copy.overLastMonth(formatCount(stats.thisMonthCount - stats.lastMonthCount, lang))}
               </p>
             </div>
           )}

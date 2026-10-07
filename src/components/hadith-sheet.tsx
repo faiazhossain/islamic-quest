@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { REVIEW_LABEL } from "@/lib/content/review";
 import type { HadithEntry, HadithTheme } from "@/lib/content";
+import { toBnDigits } from "@/lib/format";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 
 interface HadithSheetProps {
   open: boolean;
@@ -13,11 +15,17 @@ interface HadithSheetProps {
   entries: HadithEntry[];
 }
 
-const THEME_GROUPS: { theme: HadithTheme; heading: string }[] = [
-  { theme: "prophets-practice", heading: "How the Prophet ﷺ practiced it" },
-  { theme: "reward", heading: "What the Prophet ﷺ said about its reward" },
-  { theme: "occasion", heading: "Special times" },
+const THEME_GROUPS: { theme: HadithTheme }[] = [
+  { theme: "prophets-practice" },
+  { theme: "reward" },
+  { theme: "occasion" },
 ];
+
+const THEME_HEADINGS = {
+  "prophets-practice": "themePracticeHeading",
+  reward: "themeRewardHeading",
+  occasion: "themeOccasionHeading",
+} as const;
 
 /**
  * Guidance sheet listing the cited hadith for one amal. Bottom sheet on
@@ -30,6 +38,8 @@ const THEME_GROUPS: { theme: HadithTheme; heading: string }[] = [
 export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const copy = useCopy();
+  const lang = useLang();
 
   useEffect(() => {
     if (!open) return;
@@ -98,13 +108,13 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
             id="hadith-sheet-title"
             className="font-display text-xl text-ink"
           >
-            Hadith
+            {copy.hadithTitle}
           </h2>
           <p className="mt-0.5 text-sm text-ink-2">{title}</p>
           <button
             ref={closeRef}
             onClick={onClose}
-            aria-label="Close"
+            aria-label={copy.closeAria}
             className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
           >
             <svg
@@ -125,13 +135,13 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-[max(env(safe-area-inset-bottom),2rem)] sm:px-6">
-          {THEME_GROUPS.map(({ theme, heading }) => {
+          {THEME_GROUPS.map(({ theme }) => {
             const group = entries.filter((entry) => entry.theme === theme);
             if (group.length === 0) return null;
             return (
               <section key={theme} className="mt-5 first:mt-0">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-3">
-                  {heading}
+                  {copy[THEME_HEADINGS[theme]]}
                 </h3>
                 {group.map((entry) => (
                   <article
@@ -145,19 +155,38 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
                     >
                       {entry.arabic}
                     </p>
-                    <p className="mt-3 text-[15px] leading-relaxed text-ink">
-                      {entry.translation.en}
-                    </p>
+                    {entry.translation.bn ? (
+                      <p
+                        lang="bn"
+                        className="mt-3 text-[15px] leading-relaxed text-ink"
+                      >
+                        {entry.translation.bn}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="mt-3 text-[15px] leading-relaxed text-ink">
+                          {entry.translation.en}
+                        </p>
+                        {lang === "bn" && (
+                          <p className="mt-1.5 text-xs italic leading-relaxed text-ink-3">
+                            {copy.hadithBnPending}
+                          </p>
+                        )}
+                      </>
+                    )}
                     <p className="mt-3 text-xs text-ink-3">
-                      Narrated {entry.narrator} · {entry.collection}{" "}
-                      {entry.reference}
+                      {copy.narratedBy(lang === "bn" ? (entry.narratorBn ?? entry.narrator) : entry.narrator)}{" "}
+                      · {lang === "bn" ? (copy.collectionBn[entry.collection] ?? entry.collection) : entry.collection}{" "}
+                      {lang === "bn" ? toBnDigits(entry.reference) : entry.reference}
                       {entry.grade && (
-                        <span className="text-jade"> · {entry.grade}</span>
+                        <span className="text-jade">
+                          {" "}· {lang === "bn" ? (copy.gradeBn[entry.grade] ?? entry.grade) : entry.grade}
+                        </span>
                       )}
                     </p>
                     {entry.note && (
                       <p className="mt-1 text-xs leading-relaxed text-ink-3">
-                        {entry.note}
+                        {localized(entry.note, lang)}
                       </p>
                     )}
                     <a
@@ -179,9 +208,8 @@ export function HadithSheet({ open, onClose, title, entries }: HadithSheetProps)
             className="mt-6 text-[11px] leading-relaxed text-ink-3"
           >
             {allReviewed
-              ? REVIEW_LABEL.reviewed + "."
-              : REVIEW_LABEL.verified +
-                ". Translations are composed for Amalyn; tap a citation to read the full narration on sunnah.com."}
+              ? copy.footnoteReviewed
+              : `${localized(REVIEW_LABEL.verified, lang)}. ${copy.footnoteComposed}`}
           </p>
         </div>
       </div>

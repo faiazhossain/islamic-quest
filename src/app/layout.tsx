@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Amiri, Fraunces, Hanken_Grotesk } from "next/font/google";
+import { Amiri, Fraunces, Hanken_Grotesk, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 
@@ -35,6 +35,11 @@ const amiri = Amiri({
   variable: "--font-amiri",
   subsets: ["arabic"],
   weight: ["400", "700"],
+});
+
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-bangla",
+  subsets: ["bengali"],
 });
 
 export const metadata: Metadata = {
@@ -88,15 +93,34 @@ const themeInit = `
 })();
 `;
 
+/**
+ * Applies the stored language before first paint, mirroring themeInit:
+ * the server renders lang="en", so a returning Bangla reader would see a
+ * flash of the wrong lang attribute (affecting font selection) without
+ * this. applyLanguage() keeps later changes in sync.
+ */
+const languageInit = `
+(function () {
+  var lang;
+  try {
+    lang = localStorage.getItem("amalyn:lang");
+  } catch (error) {
+    lang = null;
+  }
+  document.documentElement.lang = lang === "bn" ? "bn" : "en";
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${hanken.variable} ${amiri.variable}`}
+      className={`${fraunces.variable} ${hanken.variable} ${amiri.variable} ${notoBengali.variable}`}
     >
       <body className="bg-bg font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <script dangerouslySetInnerHTML={{ __html: languageInit }} />
         <AppShell>{children}</AppShell>
         <Script src={PLAUSIBLE_SCRIPT_URL} strategy="afterInteractive" />
         <Script id="plausible-init" strategy="afterInteractive">

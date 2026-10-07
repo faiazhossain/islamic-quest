@@ -9,15 +9,18 @@ import {
   type CategoryId,
 } from "@/lib/content";
 import { getAllProgress, type QuestProgress } from "@/lib/db/events";
+import { formatCount } from "@/lib/format";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 
 type Filter = "all" | CategoryId;
 
-const FILTERS: Array<{ id: Filter; label: string }> = [
-  { id: "all", label: "All" },
-  ...CATEGORIES.map((category) => ({ id: category.id as Filter, label: category.name.en })),
-];
-
 export default function ExplorePage() {
+  const copy = useCopy();
+  const lang = useLang();
+  const FILTERS: Array<{ id: Filter; label: string }> = [
+    { id: "all", label: copy.allFilter },
+    ...CATEGORIES.map((category) => ({ id: category.id as Filter, label: localized(category.name, lang) })),
+  ];
   const [filter, setFilter] = useState<Filter>("all");
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
 
@@ -42,9 +45,9 @@ export default function ExplorePage() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Explore</h1>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">{copy.exploreTitle}</h1>
         <p className="mt-1 text-sm text-ink-2">
-          Choose a quest at your own pace.
+          {copy.exploreSubtitle}
         </p>
       </header>
 
@@ -53,18 +56,17 @@ export default function ExplorePage() {
         // an honest empty state instead of a blank page under the filters.
         <section className="rise mt-10 rounded-3xl border border-line bg-surface p-6 text-center [animation-delay:80ms]">
           <p className="font-display text-lg text-ink">
-            Quests are being prepared with care.
+            {copy.preparingQuests}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-ink-2">
-            Every dhikr goes through scholar review before it appears here.
-            Please check back soon, in shaa Allah.
+            {copy.scholarReviewEmpty}
           </p>
         </section>
       ) : (
         <>
           <div
             role="group"
-            aria-label="Filter quests by category"
+            aria-label={copy.filterAria}
             className="no-scrollbar rise -mx-5 mt-5 overflow-x-auto px-5 [animation-delay:80ms] lg:mx-0 lg:flex-wrap lg:overflow-x-visible lg:px-0"
           >
             <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
@@ -105,7 +107,7 @@ export default function ExplorePage() {
                 );
                 const categoryName = CATEGORIES.find(
                   (category) => category.id === dhikr.category,
-                )?.name.en;
+                );
                 return (
                   <li key={quest.id}>
                     <Link
@@ -114,11 +116,11 @@ export default function ExplorePage() {
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-display text-[17px] text-ink">
-                          {dhikr.names.en}
+                          {localized(dhikr.names, lang)}
                         </p>
                         <p className="mt-0.5 text-xs text-ink-3">
-                          {quest.target.toLocaleString("en-US")}x
-                          {categoryName ? ` - ${categoryName}` : ""}
+                          {formatCount(quest.target, lang)}x
+                          {categoryName ? ` - ${localized(categoryName.name, lang)}` : ""}
                         </p>
                         {inProgress && (
                           <div
@@ -135,12 +137,12 @@ export default function ExplorePage() {
                       {complete ? (
                         <span className="flex items-center gap-1.5 text-xs font-semibold text-jade">
                           <CheckIcon />
-                          Complete
+                          {copy.completeBadge}
                         </span>
                       ) : inProgress ? (
                         <span className="text-xs font-medium text-ink-2">
-                          {entryCount.toLocaleString("en-US")} /{" "}
-                          {quest.target.toLocaleString("en-US")}
+                          {formatCount(entryCount, lang)} /{" "}
+                          {formatCount(quest.target, lang)}
                         </span>
                       ) : (
                         <ChevronIcon />

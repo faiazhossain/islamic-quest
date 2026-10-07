@@ -11,16 +11,12 @@ import {
   MAX_IMPORT_BYTES,
   parseImportEnvelope,
 } from "@/lib/event-validation";
-import { useSettings, type ThemeChoice } from "@/lib/settings";
-
-const THEME_CHOICES: Array<{ id: ThemeChoice; label: string }> = [
-  { id: "system", label: "System" },
-  { id: "light", label: "Dawn" },
-  { id: "dark", label: "Night" },
-];
+import { useSettings } from "@/lib/settings";
+import { useCopy } from "@/lib/i18n";
 
 export default function SettingsPage() {
   const settings = useSettings();
+  const copy = useCopy();
   const [status, setStatus] = useState<string | null>(null);
   const [confirmErase, setConfirmErase] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -47,9 +43,9 @@ export default function SettingsPage() {
       anchor.download = `amalyn-export-${new Date().toISOString().slice(0, 10)}.json`;
       anchor.click();
       URL.revokeObjectURL(url);
-      setStatus("Export downloaded.");
+      setStatus(copy.exportDownloaded);
     } catch {
-      setStatus("Export failed.");
+      setStatus(copy.exportFailed);
     }
   };
 
@@ -58,7 +54,7 @@ export default function SettingsPage() {
       // Reject before reading: an oversized file cannot pass validation
       // (a full batch is well under 1 MB), so never parse it at all.
       if (file.size > MAX_IMPORT_BYTES) {
-        setStatus("That file is too large to be an Amalyn export.");
+        setStatus(copy.fileTooLarge);
         return;
       }
       const data: unknown = JSON.parse(await file.text());
@@ -66,7 +62,7 @@ export default function SettingsPage() {
       // never wedge syncing with a permanent 400.
       const envelope = parseImportEnvelope(data);
       if (envelope === null) {
-        throw new Error("That file is not a valid Amalyn export.");
+        throw new Error(copy.fileInvalid);
       }
       // Force re-push: the server dedupes by event id, so replaying
       // already-synced rows is safe, and the server copy of a restored
@@ -76,14 +72,14 @@ export default function SettingsPage() {
         await db.events.bulkPut(restored);
       });
       await recomputeAllQuests();
-      setStatus(`Imported ${restored.length} events. Progress rebuilt.`);
+      setStatus(copy.importedEvents(String(restored.length)));
     } catch (error) {
       setStatus(
         error instanceof SyntaxError
-          ? "That file could not be read."
+          ? copy.fileUnreadable
           : error instanceof Error
             ? error.message
-            : "Import failed.",
+            : copy.importFailed,
       );
     }
   };
@@ -103,12 +99,31 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-1 flex-col lg:mx-auto lg:max-w-2xl">
       <header className="rise">
-        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">Settings</h1>
+        <h1 className="font-display text-[2rem] text-ink lg:text-4xl">{copy.settingsTitle}</h1>
       </header>
 
-      <Section title="Appearance" delay={60}>
+      <Section title={copy.language} delay={30}>
         <div className="flex gap-2">
-          {THEME_CHOICES.map(({ id, label }) => (
+          {([["en", "English"], ["bn", "বাংলা"]] as const).map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => settings.setLanguage(id)}
+              aria-pressed={settings.language === id}
+              className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors active:opacity-70 ${
+                settings.language === id
+                  ? "border-accent bg-accent text-on-accent"
+                  : "border-line bg-surface text-ink-2 hover:text-ink"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title={copy.appearance} delay={60}>
+        <div className="flex gap-2">
+          {([["system", copy.themeSystem], ["light", copy.themeDawn], ["dark", copy.themeNight]] as const).map(([id, label]) => (
             <button
               key={id}
               onClick={() => settings.setTheme(id)}
@@ -125,31 +140,31 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      <Section title="Counting" delay={120}>
+      <Section title={copy.counting} delay={120}>
         <ToggleRow
-          label="Haptic feedback"
-          hint="A soft tick per tap, where supported"
+          label={copy.hapticsLabel}
+          hint={copy.hapticsHint}
           on={settings.haptics}
           onToggle={settings.setHaptics}
         />
         <ToggleRow
-          label="Sound"
-          hint="A gentle tone per tap"
+          label={copy.soundLabel}
+          hint={copy.soundHint}
           on={settings.sound}
           onToggle={settings.setSound}
         />
         <ToggleRow
-          label="Keep screen awake"
-          hint="While a quest counter is open"
+          label={copy.wakeLockLabel}
+          hint={copy.wakeLockHint}
           on={settings.wakeLock}
           onToggle={settings.setWakeLock}
         />
       </Section>
 
-      <Section title="Your data" delay={180}>
-        <ActionButton onClick={exportData}>Export progress</ActionButton>
+      <Section title={copy.yourData} delay={180}>
+        <ActionButton onClick={exportData}>{copy.exportProgress}</ActionButton>
         <ActionButton onClick={() => fileInput.current?.click()}>
-          Import from file
+          {copy.importFromFile}
         </ActionButton>
         <input
           ref={fileInput}
@@ -163,7 +178,7 @@ export default function SettingsPage() {
           }}
         />
         <ActionButton onClick={() => setConfirmErase(true)} danger>
-          Erase all local data
+          {copy.eraseData}
         </ActionButton>
         {/* Result feedback sits with the actions that trigger it, not below
             the fold after later sections. */}
@@ -173,28 +188,27 @@ export default function SettingsPage() {
           </p>
         )}
         <p className="pt-1 text-xs leading-relaxed text-ink-3">
-          Your practice lives on this device. Export creates a backup file you
-          can re-import anytime.
+          {copy.dataNote}
         </p>
       </Section>
 
-      <Section title="Account" delay={240}>
+      <Section title={copy.account} delay={240}>
         <AccountSection />
       </Section>
 
-      <Section title="More" delay={300}>
-        <LinkRow href="/support">Support Amalyn</LinkRow>
-        <LinkRow href="/about">About &amp; privacy</LinkRow>
+      <Section title={copy.more} delay={300}>
+        <LinkRow href="/support">{copy.supportAmalyn}</LinkRow>
+        <LinkRow href="/about">{copy.aboutPrivacy}</LinkRow>
       </Section>
 
       <ConfirmDialog
         open={confirmErase}
         onCancel={() => setConfirmErase(false)}
         onConfirm={resetAll}
-        title="Erase all local data?"
-        description="This permanently deletes every quest, count, and setting on this device. Consider exporting a backup first. This cannot be undone."
-        confirmLabel="Erase everything"
-        cancelLabel="Keep my data"
+        title={copy.eraseConfirmTitle}
+        description={copy.eraseConfirmBody}
+        confirmLabel={copy.eraseConfirm}
+        cancelLabel={copy.eraseCancel}
         danger
       />
     </div>

@@ -3,18 +3,27 @@ import { persist } from "zustand/middleware";
 
 export type ThemeChoice = "system" | "light" | "dark";
 
+/**
+ * UI language. null means "never chosen": the first-visit language chooser
+ * shows until the user picks, and copy falls back to English meanwhile.
+ */
+export type LanguageChoice = "en" | "bn" | null;
+
 interface SettingsState {
   theme: ThemeChoice;
   haptics: boolean;
   sound: boolean;
   wakeLock: boolean;
+  language: LanguageChoice;
   setTheme: (theme: ThemeChoice) => void;
   setHaptics: (value: boolean) => void;
   setSound: (value: boolean) => void;
   setWakeLock: (value: boolean) => void;
+  setLanguage: (language: Exclude<LanguageChoice, null>) => void;
 }
 
 const THEME_KEY = "amalyn:theme";
+const LANGUAGE_KEY = "amalyn:lang";
 
 /** Browser chrome / status bar colors matching each resolved theme. */
 const THEME_COLORS = { dark: "#0b1020", light: "#faf6ed" } as const;
@@ -47,6 +56,22 @@ export function applyTheme(choice: ThemeChoice): void {
   }
 }
 
+/**
+ * Syncs the chosen language onto <html lang> and re-writes the raw
+ * "amalyn:lang" key for the next visit. The root layout's pre-paint script
+ * handles first paint; this keeps later changes in sync. Chosen (non-null)
+ * only - the unset state keeps whatever the pre-paint script resolved.
+ */
+export function applyLanguage(language: Exclude<LanguageChoice, null>): void {
+  if (typeof window === "undefined") return;
+  document.documentElement.lang = language;
+  try {
+    localStorage.setItem(LANGUAGE_KEY, language);
+  } catch {
+    // Storage may be unavailable; language applies for this session only.
+  }
+}
+
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
@@ -54,6 +79,7 @@ export const useSettings = create<SettingsState>()(
       haptics: true,
       sound: false,
       wakeLock: true,
+      language: null,
       setTheme: (theme) => {
         applyTheme(theme);
         set({ theme });
@@ -61,6 +87,10 @@ export const useSettings = create<SettingsState>()(
       setHaptics: (haptics) => set({ haptics }),
       setSound: (sound) => set({ sound }),
       setWakeLock: (wakeLock) => set({ wakeLock }),
+      setLanguage: (language) => {
+        applyLanguage(language);
+        set({ language });
+      },
     }),
     { name: "amalyn:settings" },
   ),

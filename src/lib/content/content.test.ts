@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { localized } from "../i18n/localized";
+import { CATEGORIES } from "./categories";
 import { DHIKR } from "./dhikr";
 import {
   dhikrForQuest,
@@ -7,6 +9,15 @@ import {
   publicQuests,
   QUESTS,
 } from "./index";
+
+const BENGALI = /\p{Script=Bengali}/u;
+
+/** Every LocalizedText in the catalog must carry a real Bangla field. */
+function expectBn(text: { en: string; bn?: string }, where: string): void {
+  expect(text.bn?.trim(), `${where} missing bn`).not.toBe("");
+  expect(text.bn, `${where} bn is not Bengali script`).toMatch(BENGALI);
+  expect(localized(text, "bn")).toBe(text.bn);
+}
 
 const realNodeEnv = process.env.NODE_ENV;
 const realAllowUnreviewed = process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED;
@@ -37,6 +48,26 @@ describe("catalog integrity", () => {
       ids.add(quest.id);
     }
     expect(ids.size).toBe(QUESTS.length);
+  });
+});
+
+describe("Bangla content coverage", () => {
+  it("writes Bangla for every category name and description", () => {
+    for (const category of CATEGORIES) {
+      expectBn(category.name, `category ${category.id} name`);
+      expectBn(category.description, `category ${category.id} description`);
+    }
+  });
+
+  it("writes Bangla for every dhikr name, meaning, guidance, and note", () => {
+    for (const dhikr of DHIKR) {
+      expectBn(dhikr.names, `dhikr ${dhikr.id} names`);
+      expectBn(dhikr.meaning, `dhikr ${dhikr.id} meaning`);
+      expectBn(dhikr.practiceGuidance, `dhikr ${dhikr.id} practiceGuidance`);
+      if (dhikr.source.note) {
+        expectBn(dhikr.source.note, `dhikr ${dhikr.id} source note`);
+      }
+    }
   });
 });
 

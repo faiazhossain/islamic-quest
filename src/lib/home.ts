@@ -4,6 +4,8 @@
  * complete) unit-testable without a DOM.
  */
 import { dhikrForQuest, publicQuests, type Quest } from "./content";
+import type { Lang } from "./i18n/lang";
+import { localized } from "./i18n/localized";
 import { dayStartOf } from "./format";
 import {
   allQuestsCompleted,
@@ -50,10 +52,12 @@ export interface HomeInput {
   progress: Map<string, QuestProgress>;
   events: ReadonlyArray<PracticeEvent>;
   now: number;
+  /** Display language for dhikr names; defaults to English. */
+  lang?: Lang;
 }
 
 export function selectHomeView(input: HomeInput): HomeView {
-  const { progress, events, now } = input;
+  const { progress, events, now, lang = "en" } = input;
   const dayStart = dayStartOf(now);
   const todayTotal = Math.max(
     0,
@@ -77,7 +81,7 @@ export function selectHomeView(input: HomeInput): HomeView {
     return {
       kind: "active-quest",
       questId: active.quest.id,
-      name: dhikrForQuest(active.quest).names.en,
+      name: localized(dhikrForQuest(active.quest).names, lang),
       count: active.entry.count,
       target: active.quest.target,
       todayTotal,
@@ -102,7 +106,7 @@ export function selectHomeView(input: HomeInput): HomeView {
         kind: "all-complete",
         daily: {
           questId: pick.id,
-          name: dhikrForQuest(pick).names.en,
+          name: localized(dhikrForQuest(pick).names, lang),
           target: pick.target,
           todayCount,
         },

@@ -7,7 +7,8 @@ interface ConfirmDialogProps {
   title: string;
   description?: string;
   confirmLabel: string;
-  cancelLabel?: string;
+  /** Callers pass the localized label; there is no language-aware default here. */
+  cancelLabel: string;
   danger?: boolean;
   busy?: boolean;
   onConfirm: () => void;
@@ -24,7 +25,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
-  cancelLabel = "Cancel",
+  cancelLabel,
   danger,
   busy,
   onConfirm,

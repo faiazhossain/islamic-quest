@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { StarMark } from "@/components/star-mark";
 import { Stat } from "@/components/stat";
 import { formatCount } from "@/lib/format";
+import { useCopy, useLang } from "@/lib/i18n";
 import {
   getAllProgress,
   getPracticeEvents,
@@ -14,6 +15,8 @@ import { selectHomeView, type DailyAmal, type HomeView } from "@/lib/home";
 import type { PracticeEvent, PracticeStats } from "@/lib/practice";
 
 export default function HomePage() {
+  const copy = useCopy();
+  const lang = useLang();
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
   const [events, setEvents] = useState<PracticeEvent[] | null>(null);
   const [now, setNow] = useState(0);
@@ -49,9 +52,9 @@ export default function HomePage() {
   const view = useMemo<HomeView | null>(
     () =>
       progress && events
-        ? selectHomeView({ progress, events, now })
+        ? selectHomeView({ progress, events, now, lang })
         : null,
-    [progress, events, now],
+    [progress, events, now, lang],
   );
 
   return (
@@ -61,11 +64,11 @@ export default function HomePage() {
           Amalyn
         </p>
         <h1 className="mt-4 font-display text-[2.15rem] leading-[1.12] text-ink lg:text-5xl lg:leading-[1.08]">
-          As-salamu alaykum.
+          {copy.greeting}
         </h1>
         {view && view.kind !== "first-visit" && view.todayTotal > 0 && (
           <p className="mt-3 text-[15px] text-ink-2">
-            Today: {formatCount(view.todayTotal)} dhikr. Your Journey is waiting.
+            {copy.todayLine(formatCount(view.todayTotal, lang))}
           </p>
         )}
       </header>
@@ -100,19 +103,19 @@ export default function HomePage() {
               >
                 <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-                  Next step
+                  {copy.nextStep}
                 </p>
                 <h2 className="mt-2 font-display text-xl text-ink">
-                  Begin your next quest.
+                  {copy.beginNextQuest}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-ink-2">
-                  Your journey grows with every quest you complete.
+                  {copy.journeyGrows}
                 </p>
                 <Link
                   href="/explore"
                   className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
                 >
-                  Choose a quest
+                  {copy.chooseQuest}
                 </Link>
               </div>
             </section>
@@ -123,10 +126,10 @@ export default function HomePage() {
             className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:240ms] lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:180ms]"
           >
             <span className="min-w-0">
-              <span className="block text-sm text-ink">View your Journey</span>
+              <span className="block text-sm text-ink">{copy.viewJourney}</span>
               {view.kind === "all-complete" && (
                 <span className="mt-0.5 block text-xs text-ink-3">
-                  {view.completedCount} / {view.questTotal} quests complete
+                  {copy.questsComplete(formatCount(view.completedCount, lang), formatCount(view.questTotal, lang))}
                 </span>
               )}
             </span>
@@ -138,7 +141,7 @@ export default function HomePage() {
       )}
 
       <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:280ms]">
-        Free forever. No ads, no account needed.
+        {copy.freeForever}
       </p>
     </div>
   );
@@ -155,6 +158,8 @@ function CurrentQuestCard({
   count: number;
   target: number;
 }) {
+  const copy = useCopy();
+  const lang = useLang();
   const percent = Math.min(Math.round((count / target) * 100), 100);
   return (
     <section className="rise mt-10 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
@@ -164,11 +169,11 @@ function CurrentQuestCard({
       >
         <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          Current quest
+          {copy.currentQuest}
         </p>
         <h2 className="mt-2 font-display text-xl text-ink">{name}</h2>
         <p className="mt-1 text-sm text-ink-2">
-          {formatCount(count)} / {formatCount(target)}
+          {formatCount(count, lang)} / {formatCount(target, lang)}
         </p>
         <div
           className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"
@@ -176,7 +181,7 @@ function CurrentQuestCard({
           aria-valuenow={percent}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label="Current quest progress"
+          aria-label={copy.currentQuestProgressAria}
         >
           <div
             className="h-full rounded-full bg-accent transition-[width]"
@@ -187,7 +192,7 @@ function CurrentQuestCard({
           href={`/quest/${questId}/count`}
           className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
-          Continue quest
+          {copy.continueQuest}
         </Link>
       </div>
     </section>
@@ -200,6 +205,8 @@ function CurrentQuestCard({
  * Amal continues tomorrow, and nothing is ever lost by resting.
  */
 function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
+  const copy = useCopy();
+  const lang = useLang();
   const done = daily.todayCount >= daily.target;
   const percent = Math.min(Math.round((daily.todayCount / daily.target) * 100), 100);
   return (
@@ -210,22 +217,22 @@ function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
       >
         <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          Today&apos;s Amal
+          {copy.todaysAmal}
         </p>
         <h2 className="mt-2 font-display text-xl text-ink">{daily.name}</h2>
         {done ? (
           <>
             <p className="mt-1 text-sm text-jade">
-              {formatCount(daily.target)}x complete
+              {copy.timesComplete(formatCount(daily.target, lang))}
             </p>
             <p className="mt-1 text-sm text-ink-2">
-              Today: {formatCount(daily.todayCount)}x
+              {copy.todayCountLine(formatCount(daily.todayCount, lang))}
             </p>
           </>
         ) : (
           <>
             <p className="mt-1 text-sm text-ink-2">
-              {formatCount(daily.todayCount)} / {formatCount(daily.target)}
+              {formatCount(daily.todayCount, lang)} / {formatCount(daily.target, lang)}
             </p>
             <div
               className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"
@@ -233,7 +240,7 @@ function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
               aria-valuenow={percent}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label="Today's Amal progress"
+              aria-label={copy.todaysAmalProgressAria}
             >
               <div
                 className="h-full rounded-full bg-accent transition-[width]"
@@ -244,7 +251,7 @@ function TodaysAmalCard({ daily }: { daily: DailyAmal }) {
               href={`/quest/${daily.questId}/count`}
               className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
             >
-              Practice now
+              {copy.practiceNow}
             </Link>
           </>
         )}
@@ -260,25 +267,26 @@ function PracticeProgressCard({
   stats: PracticeStats;
   totalDhikr: number;
 }) {
+  const copy = useCopy();
+  const lang = useLang();
   return (
     <section className="rise mt-5 [animation-delay:180ms] lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:120ms]">
       <div className="rounded-3xl border border-line bg-surface p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          Your progress
+          {copy.yourProgress}
         </p>
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <Stat label="Days practiced" value={String(stats.daysPracticed)} />
-          <Stat label="Total" value={formatCount(totalDhikr)} />
+          <Stat label={copy.daysPracticed} value={formatCount(stats.daysPracticed, lang)} />
+          <Stat label={copy.statTotal} value={formatCount(totalDhikr, lang)} />
           <Stat
-            label="Best"
-            value={`${stats.bestRunDays} ${stats.bestRunDays === 1 ? "day" : "days"}`}
+            label={copy.statBest}
+            value={copy.dayCount(formatCount(stats.bestRunDays, lang))}
           />
         </div>
         {/* A quiet run note only while one is live; a rested day shows no zero. */}
         {stats.currentRunDays > 0 && (
           <p className="mt-3 text-xs text-jade">
-            {stats.currentRunDays} {stats.currentRunDays === 1 ? "day" : "days"} in a
-            row
+            {copy.daysInARow(formatCount(stats.currentRunDays, lang))}
           </p>
         )}
       </div>
@@ -287,6 +295,7 @@ function PracticeProgressCard({
 }
 
 function FirstQuestCard() {
+  const copy = useCopy();
   return (
     <section className="rise mt-10 [animation-delay:120ms]">
       <div
@@ -295,42 +304,32 @@ function FirstQuestCard() {
       >
         <StarMark className="absolute -right-10 -top-10 h-40 w-40 text-accent opacity-[0.08]" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          First quest
+          {copy.firstQuest}
         </p>
         <h2 className="mt-2 font-display text-xl text-ink">
-          Choose a dhikr and begin.
+          {copy.chooseDhikrBegin}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-2">
-          Pick a quest, count with intention, and watch your journey of light
-          grow. Everything stays on your device.
+          {copy.firstQuestBody}
         </p>
         <Link
           href="/explore"
           className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
-          Choose your first quest
+          {copy.chooseFirstQuest}
         </Link>
       </div>
     </section>
   );
 }
 
-const HOW_IT_WORKS_STEPS = [
-  {
-    title: "Choose a quest",
-    body: "Pick a dhikr with a target, like 33 or 100. Every quest shows the Arabic, its meaning, and its source, so you always know what you are reciting.",
-  },
-  {
-    title: "Count with intention",
-    body: "A calm, fullscreen counter: tap to count, undo anytime. It works fully offline, and your practice stays private on your device.",
-  },
-  {
-    title: "Watch your Journey grow",
-    body: "Reaching the target extends your path of light. Completing a quest is a milestone, not an ending - the Amal stays with you, ready to practice any day.",
-  },
-];
-
 function HowItWorks() {
+  const copy = useCopy();
+  const steps = [
+    { title: copy.howStep1Title, body: copy.howStep1Body },
+    { title: copy.howStep2Title, body: copy.howStep2Body },
+    { title: copy.howStep3Title, body: copy.howStep3Body },
+  ];
   return (
     <section
       aria-labelledby="how-it-works-heading"
@@ -338,20 +337,19 @@ function HowItWorks() {
     >
       <div className="rounded-3xl border border-line bg-surface p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          First visit?
+          {copy.firstVisit}
         </p>
         <h2
           id="how-it-works-heading"
           className="mt-2 font-display text-xl text-ink"
         >
-          How Amalyn works
+          {copy.howAmalynWorks}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-2">
-          Amalyn turns daily dhikr into a gentle journey: each quest gives your
-          remembrance a beginning, a rhythm, and a visible path.
+          {copy.howItWorksIntro}
         </p>
         <ol className="mt-5 space-y-4">
-          {HOW_IT_WORKS_STEPS.map((step, index) => (
+          {steps.map((step, index) => (
             <li key={step.title} className="flex gap-3.5">
               <span
                 aria-hidden="true"
@@ -371,8 +369,7 @@ function HowItWorks() {
           ))}
         </ol>
         <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-3">
-          No streaks to break, no points, no pressure - and no finish line.
-          Just your practice, at your pace.
+          {copy.noStreaks}
         </p>
       </div>
     </section>
