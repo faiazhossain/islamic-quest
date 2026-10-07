@@ -259,7 +259,7 @@ export default function CountPage() {
           aria-valuenow={percent}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label="Quest progress"
+          aria-label={copy.questProgressAria}
         >
           <div
             className="h-full rounded-full bg-accent transition-[width] duration-150"

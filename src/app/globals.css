@@ -87,6 +87,13 @@
     min-height: 100dvh;
   }
 
+  /* Returning Bangla readers: hide the English server paint until the
+     client tree mounts (set by the pre-paint script, cleared on mount,
+     with a script-side failsafe timer). */
+  html[data-lang-pending] body {
+    visibility: hidden;
+  }
+
   ::selection {
     background: color-mix(in oklab, var(--accent) 30%, transparent);
   }

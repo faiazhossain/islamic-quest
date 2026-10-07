@@ -29,6 +29,12 @@ export function LanguageChooser() {
   const englishRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    // The pre-paint script hides the English server paint for returning
+    // Bangla readers; the client tree is now mounted, so show it.
+    document.documentElement.removeAttribute("data-lang-pending");
+  }, [mounted]);
+
+  useEffect(() => {
     if (mounted && language === null) englishRef.current?.focus();
   }, [mounted, language]);
 

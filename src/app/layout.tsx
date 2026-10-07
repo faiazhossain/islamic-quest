@@ -96,8 +96,10 @@ const themeInit = `
 /**
  * Applies the stored language before first paint, mirroring themeInit:
  * the server renders lang="en", so a returning Bangla reader would see a
- * flash of the wrong lang attribute (affecting font selection) without
- * this. applyLanguage() keeps later changes in sync.
+ * flash of English text before hydration without this. For those readers
+ * it also hides the pre-hydration paint (html[data-lang-pending]) until
+ * the client tree mounts - a blank beat instead of wrong-language text -
+ * with a failsafe timer so a broken hydration can never blank the page.
  */
 const languageInit = `
 (function () {
@@ -107,7 +109,15 @@ const languageInit = `
   } catch (error) {
     lang = null;
   }
-  document.documentElement.lang = lang === "bn" ? "bn" : "en";
+  var bn = lang === "bn";
+  document.documentElement.lang = bn ? "bn" : "en";
+  if (bn) {
+    var root = document.documentElement;
+    root.setAttribute("data-lang-pending", "bn");
+    window.setTimeout(function () {
+      root.removeAttribute("data-lang-pending");
+    }, 1500);
+  }
 })();
 `;
 

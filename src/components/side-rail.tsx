@@ -19,7 +19,7 @@ export function SideRail() {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={labels.navPrimaryAria}
       className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-line/60 lg:flex"
     >
       <div className="flex min-h-0 flex-1 flex-col px-3 pt-8">
