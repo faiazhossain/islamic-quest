@@ -213,6 +213,23 @@
   animation: count-pulse 130ms ease-out;
 }
 
+/* Gentle downward nudge for the scroll-below chevron above the mobile
+   action bar. Rest state equals the 0%/100% frame, so the reduced-motion
+   fallback freezes it at its natural look. */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+.bob {
+  animation: bob 1.6s ease-in-out infinite;
+}
+
 /* Hidden scrollbars for horizontal chip rails (Firefox handled inline). */
 .no-scrollbar {
   scrollbar-width: none;

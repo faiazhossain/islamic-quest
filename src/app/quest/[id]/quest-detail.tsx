@@ -18,6 +18,15 @@ import {
   recordQuestStarted,
   type QuestProgress,
 } from "@/lib/db/events";
+import { moreContentBelow } from "@/lib/scroll";
+
+/**
+ * Bottom offset for the mobile action bar, mirroring BottomNav's fixed
+ * chrome: a 52px item row plus its 6px top padding, then the same
+ * safe-area floor the nav uses for its own bottom padding. Keep the two
+ * in sync if the nav's fixed dimensions ever change.
+ */
+const NAV_OFFSET = "calc(58px + max(env(safe-area-inset-bottom), 10px))";
 
 export function QuestDetail({ questId }: { questId: string }) {
   const router = useRouter();
@@ -25,6 +34,34 @@ export function QuestDetail({ questId }: { questId: string }) {
   const [progress, setProgress] = useState<QuestProgress | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [hadithOpen, setHadithOpen] = useState(false);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  // The fixed action bar can make the page look finished at the fold, so
+  // a hint above it shows while content still extends below the viewport.
+  // It hides once the user reaches the bottom, or entirely when the page
+  // fits without scrolling. A ResizeObserver catches height changes that
+  // are not scroll-driven, like the completed-note rendering after load.
+  useEffect(() => {
+    const check = () => {
+      const doc = document.documentElement;
+      setMoreBelow(
+        moreContentBelow(doc.scrollHeight, window.innerHeight, window.scrollY),
+      );
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    let observer: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(check);
+      observer.observe(document.body);
+    }
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+      observer?.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!quest) return;
@@ -61,8 +98,16 @@ export function QuestDetail({ questId }: { questId: string }) {
     router.push(`/quest/${quest.id}/count`);
   };
 
+  const startLabel = complete
+    ? "Practice now"
+    : started
+      ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
+      : `Start quest - ${formatCount(quest.target)}x`;
+
   return (
-    <div className="flex flex-1 flex-col">
+    // Extra bottom padding clears the mobile action bar that sits above
+    // the bottom nav (main's own padding only clears the nav itself).
+    <div className="flex flex-1 flex-col pb-24 lg:pb-0">
       <div className="rise">
         <Link
           href="/explore"
@@ -92,13 +137,13 @@ export function QuestDetail({ questId }: { questId: string }) {
       <div className="flex flex-col lg:mt-6 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:items-start">
         <section className="rise mt-6 [animation-delay:120ms] lg:col-span-7 lg:mt-0">
           <div
-            className="rounded-3xl border border-line bg-surface-2 px-6 py-8 text-center"
+            className="rounded-3xl border border-line bg-surface-2 px-5 py-6 text-center lg:px-6 lg:py-8"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
-            <p className="font-arabic text-[2.1rem] leading-[2.2] text-ink lg:text-4xl" dir="rtl" lang="ar">
+            <p className="font-arabic text-[1.9rem] leading-[2] text-ink lg:text-4xl lg:leading-[2.2]" dir="rtl" lang="ar">
               {dhikr.arabic}
             </p>
-            <p className="mt-5 text-sm italic leading-relaxed text-ink-2">
+            <p className="mt-4 text-sm italic leading-relaxed text-ink-2 lg:mt-5">
               {dhikr.transliteration}
             </p>
             <p className="mt-3 text-[15px] leading-relaxed text-ink">
@@ -135,16 +180,12 @@ export function QuestDetail({ questId }: { questId: string }) {
             />
           </dl>
 
-          <div className="rise mt-8 pb-4 [animation-delay:240ms] lg:[animation-delay:180ms]">
+          <div className="rise mt-8 hidden pb-4 [animation-delay:240ms] lg:block lg:[animation-delay:180ms]">
             <button
               onClick={start}
               className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
             >
-              {complete
-                ? "Practice now"
-                : started
-                  ? `Continue - ${formatCount(count)} / ${formatCount(quest.target)}`
-                  : `Start quest - ${formatCount(quest.target)}x`}
+              {startLabel}
             </button>
             {loaded && complete && progress?.completedAt && (
               <>
@@ -166,6 +207,50 @@ export function QuestDetail({ questId }: { questId: string }) {
         title={dhikr.names.en}
         entries={hadith}
       />
+
+      {/* Mobile action bar: the primary CTA stays on screen at every scroll
+          position, directly above BottomNav (desktop keeps the inline CTA). */}
+      <div
+        className="fixed inset-x-0 z-40 border-t border-line bg-bg/90 backdrop-blur-lg lg:hidden"
+        style={{ bottom: NAV_OFFSET }}
+      >
+        {/* Tells the user content continues past the fold: content fades
+            out toward the bar, with a bobbing chevron on top. Hidden at the
+            bottom of the page and when everything fits on screen. */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-x-0 -top-8 transition-opacity duration-300 ${
+            moreBelow ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="h-8 bg-linear-to-t from-bg/90" />
+          <div className="absolute inset-x-0 bottom-1.5 flex justify-center text-ink-3">
+            <svg className="bob" viewBox="0 0 16 16" width="16" height="16" fill="none">
+              <path
+                d="M3.5 6 8 10.5 12.5 6"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="mx-auto w-full max-w-md px-5 py-3">
+          <button
+            onClick={start}
+            className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent shadow-lg transition hover:bg-accent-hover active:translate-y-px"
+          >
+            {startLabel}
+          </button>
+          {loaded && complete && progress?.completedAt && (
+            <p className="mt-1.5 text-center text-[11px] text-ink-3">
+              Completed {formatShortDate(progress.completedAt)} · practiced{" "}
+              {formatCount(count)} times
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
