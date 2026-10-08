@@ -373,6 +373,13 @@ export const EN = {
   missingBody: "It may have been renamed or removed.",
   backToExplore: "Back to Explore",
 
+  // Install bar (mobile browsers, pre-install)
+  installTitle: "Get Amalyn on your device",
+  installAndroidHint:
+    "Install the app for one-tap dhikr from your home screen, even offline.",
+  installIosHint: "Tap the Share icon, then choose Add to Home Screen.",
+  installAction: "Install",
+
   // Hadith sheet
   hadithTitle: "Hadith",
   closeAria: "Close",
@@ -728,6 +735,12 @@ export const BN: Copy = {
   missingTitle: "এই Quest-টি নেই।",
   missingBody: "হয়তো নাম বদলানো হয়েছে বা সরিয়ে ফেলা হয়েছে।",
   backToExplore: "Quest-এ ফিরুন",
+
+  installTitle: "আপনার ডিভাইসে Amalyn রাখুন",
+  installAndroidHint:
+    "অ্যাপ ইনস্টল করুন: হোম স্ক্রিন থেকে এক ট্যাপে জিকির, অফলাইনেও কাজ করে।",
+  installIosHint: "Share আইকনে ট্যাপ করে Add to Home Screen নির্বাচন করুন।",
+  installAction: "ইনস্টল করুন",
 
   hadithTitle: "হাদিস",
   closeAria: "বন্ধ করুন",

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Atmosphere } from "./atmosphere";
 import { BottomNav } from "./bottom-nav";
+import { InstallBar } from "./install-bar";
 import { LanguageChooser } from "./language-chooser";
 import { PwaRegister } from "./pwa-register";
 import { SideRail } from "./side-rail";
@@ -42,6 +43,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               : { paddingTop: "max(env(safe-area-inset-top), 20px)" }
           }
         >
+          {/* Install offer lives in the flow so it pushes content down
+              instead of covering the page header. */}
+          {!focusMode && <InstallBar />}
           <main
             className={
               focusMode
