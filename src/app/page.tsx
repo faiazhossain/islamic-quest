@@ -97,6 +97,9 @@ export default function HomePage() {
             target={view.target}
           />
           <HowItWorks />
+          {strict && (
+            <StrictRow challenge={strict.challenge} derived={strict.derived} />
+          )}
         </div>
       ) : (
         <div className="flex flex-col lg:mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">

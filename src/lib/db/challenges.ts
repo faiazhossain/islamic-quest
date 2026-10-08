@@ -30,11 +30,15 @@ export async function createStrictChallenge(input: {
 }
 
 export async function getLatestStrictChallenge(): Promise<StrictChallenge | undefined> {
-  return db.challenges.orderBy("createdAt").last();
+  const all = await listStrictChallenges();
+  return all[all.length - 1];
 }
 
 export async function listStrictChallenges(): Promise<StrictChallenge[]> {
-  return db.challenges.orderBy("createdAt").toArray();
+  // Sorted in JS, not via orderBy: the store indexes only `id`, and the
+  // table holds at most a handful of rows.
+  const all = await db.challenges.toArray();
+  return all.sort((a, b) => a.createdAt - b.createdAt);
 }
 
 export async function deleteStrictChallenge(id: string): Promise<void> {
