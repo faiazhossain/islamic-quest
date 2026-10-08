@@ -37,15 +37,18 @@ const timezoneRegion = (): Region => {
 
 /**
  * Client body of the Support page: the server page keeps its metadata
- * export; only this tree needs the active language. Presents the verified
- * Hadiya hadith (the main one on the page, the rest in a sheet) and the
- * founder-provided channels: bKash inside Bangladesh, the EBL Visa
- * account everywhere.
+ * export; only this tree needs the active language. Dua comes first - the
+ * founder wants the page to open on the request for dua, never on the ask.
+ * The verified Hadiya hadith follows as context, and every giving channel
+ * (the pitch, region toggle, bKash/EBL cards) stays collapsed behind a
+ * disclosure for those who actually want to help.
  */
 export function SupportContent() {
   const copy = useCopy();
   const lang = useLang();
   const [sheetOpen, setSheetOpen] = useState(false);
+  // The giving channels stay hidden until the visitor asks for them.
+  const [giveOpen, setGiveOpen] = useState(false);
   // Null until the visitor picks a region explicitly; before that the
   // timezone decides.
   const [regionOverride, setRegionOverride] = useState<Region | null>(null);
@@ -115,129 +118,17 @@ export function SupportContent() {
         </h1>
       </header>
 
-      {/* The preamble carries the whole pitch: nothing is locked, giving a
-          Hadiya is voluntary, and support keeps the app online. Blank lines
-          in the copy split it into paragraphs; the highlighted word stays
-          mid-preamble. The hadith and the personal note sit below the ways
-          to give. */}
+      {/* Dua first: the page opens on the request for dua, before anything
+          about giving. Two paragraphs ride on "\n\n" + pre-line. */}
       <p className="rise mt-6 whitespace-pre-line text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
-        {copy.supportIntroBefore}
-        <span className="font-semibold text-ink">{copy.hadiyaWord}</span>
-        {copy.supportIntroAfter}
+        {copy.hadiyaDua}
       </p>
 
-      <section
-        aria-labelledby="support-give-heading"
-        className="rise mt-9 [animation-delay:160ms]"
-      >
-        <h2
-          id="support-give-heading"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-3"
-        >
-          {copy.wayToGive}
-        </h2>
-
-        {HADIYA_URL && (
-          <a
-            href={HADIYA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
-          >
-            {copy.giveHadiya}
-          </a>
-        )}
-
-        <p className="mt-3 text-xs text-ink-3">{copy.regionHint}</p>
-        <div className="mt-2 flex gap-2" role="group" aria-label={copy.wayToGive}>
-          {(
-            [
-              ["bd", copy.regionInsideBd],
-              ["intl", copy.regionOutsideBd],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => setRegionOverride(id)}
-              aria-pressed={region === id}
-              className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors active:opacity-70 ${
-                region === id
-                  ? "border-accent bg-accent text-on-accent"
-                  : "border-line bg-surface text-ink-2 hover:text-ink"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-3 space-y-3">
-          {region === "bd" && (
-            <div className="rounded-2xl border border-line bg-surface p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-ink">{copy.bkashLabel}</p>
-                <CopyButton
-                  label={copy.copyAria}
-                  onClick={() => void copyValue("bkash", HADIYA_BKASH_NUMBER)}
-                />
-              </div>
-              <p dir="ltr" className="mt-2 font-display text-xl tracking-[0.08em] text-ink">
-                {HADIYA_BKASH_NUMBER}
-              </p>
-              {copied === "bkash" && <CopiedNote text={copy.copiedStatus} />}
-            </div>
-          )}
-
-          <div className="rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-ink">{copy.eblVisaLabel}</p>
-              <CopyButton
-                label={copy.copyAria}
-                onClick={() => void copyValue("ebl", HADIYA_EBL_ACCOUNT)}
-              />
-            </div>
-            <p className="mt-0.5 text-xs text-ink-3">{copy.bankNameLabel}</p>
-            <dl className="mt-3 space-y-2 text-sm">
-              <DetailRow label={copy.accountNumber} value={HADIYA_EBL_ACCOUNT} numeric />
-              <DetailRow label={copy.accountName} value={HADIYA_EBL_ACCOUNT_NAME} />
-              <DetailRow label={copy.branchLabel} value={HADIYA_EBL_BRANCH} />
-            </dl>
-            {copied === "ebl" && <CopiedNote text={copy.copiedStatus} />}
-            {region === "intl" && (
-              <p className="mt-3 text-xs leading-relaxed text-ink-3">{copy.intlVisaNote}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4">
-          {sent ? (
-            <p
-              role="status"
-              className="rounded-2xl border border-line bg-surface p-4 text-sm leading-relaxed text-ink"
-            >
-              {copy.hadiyaThanks}
-            </p>
-          ) : (
-            <>
-              <button
-                onClick={confirmSent}
-                className="h-11 w-full rounded-2xl border border-line bg-surface text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
-              >
-                {copy.hadiyaSentButton}
-              </button>
-              <p className="mt-2 text-center text-xs leading-relaxed text-ink-3">
-                {copy.hadiyaSentHint}
-              </p>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* The religious context sits below the ways to give: it enriches the
-          decision but is never required reading before the action. */}
+      {/* The religious context sits between the dua and the giving section:
+          it enriches the decision but is never required reading. */}
       <section
         aria-labelledby="support-hadith-heading"
-        className="rise mt-9 [animation-delay:240ms]"
+        className="rise mt-9 [animation-delay:160ms]"
       >
         <h2
           id="support-hadith-heading"
@@ -260,36 +151,129 @@ export function SupportContent() {
         )}
       </section>
 
-      <p className="rise mt-9 whitespace-pre-line text-[15px] leading-relaxed text-ink-2 [animation-delay:300ms]">
-        {copy.hadiyaDua}
-      </p>
+      {/* Giving stays collapsed until wanted: the disclosure opens onto the
+          pitch and every channel, so the page itself never opens on the
+          ask. Clipboard copy, region default, and the confirm ping behave
+          exactly as before. */}
+      <section className="rise mt-9 [animation-delay:240ms]">
+        <button
+          onClick={() => setGiveOpen((open) => !open)}
+          aria-expanded={giveOpen}
+          aria-controls="support-give-panel"
+          className="flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
+        >
+          {copy.wayToGive}
+          <GiveChevron open={giveOpen} />
+        </button>
 
-      <section
-        aria-labelledby="support-feedback-heading"
-        className="rise mt-9 [animation-delay:360ms]"
-      >
-        <h2
-          id="support-feedback-heading"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-3"
-        >
-          {copy.feedbackLink}
-        </h2>
-        <Link
-          href="/feedback"
-          className="mt-3 flex h-11 w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 text-sm text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
-        >
-          {copy.feedbackMistakeTitle}
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-            <path
-              d="M6 3.5 10.5 8 6 12.5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-ink-3"
-            />
-          </svg>
-        </Link>
+        {giveOpen && (
+          <div id="support-give-panel" className="mt-3">
+            {/* The pitch carries the whole framing: nothing is locked,
+                giving a Hadiya is voluntary, and support keeps the app
+                online. Blank lines in the copy split it into paragraphs;
+                the highlighted word stays mid-preamble. */}
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-2">
+              {copy.supportIntroBefore}
+              <span className="font-semibold text-ink">{copy.hadiyaWord}</span>
+              {copy.supportIntroAfter}
+            </p>
+
+            {HADIYA_URL && (
+              <a
+                href={HADIYA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+              >
+                {copy.giveHadiya}
+              </a>
+            )}
+
+            <p className="mt-3 text-xs text-ink-3">{copy.regionHint}</p>
+            <div className="mt-2 flex gap-2" role="group" aria-label={copy.wayToGive}>
+              {(
+                [
+                  ["bd", copy.regionInsideBd],
+                  ["intl", copy.regionOutsideBd],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setRegionOverride(id)}
+                  aria-pressed={region === id}
+                  className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors active:opacity-70 ${
+                    region === id
+                      ? "border-accent bg-accent text-on-accent"
+                      : "border-line bg-surface text-ink-2 hover:text-ink"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 space-y-3">
+              {region === "bd" && (
+                <div className="rounded-2xl border border-line bg-surface p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-ink">{copy.bkashLabel}</p>
+                    <CopyButton
+                      label={copy.copyAria}
+                      onClick={() => void copyValue("bkash", HADIYA_BKASH_NUMBER)}
+                    />
+                  </div>
+                  <p dir="ltr" className="mt-2 font-display text-xl tracking-[0.08em] text-ink">
+                    {HADIYA_BKASH_NUMBER}
+                  </p>
+                  {copied === "bkash" && <CopiedNote text={copy.copiedStatus} />}
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-line bg-surface p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-ink">{copy.eblVisaLabel}</p>
+                  <CopyButton
+                    label={copy.copyAria}
+                    onClick={() => void copyValue("ebl", HADIYA_EBL_ACCOUNT)}
+                  />
+                </div>
+                <p className="mt-0.5 text-xs text-ink-3">{copy.bankNameLabel}</p>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <DetailRow label={copy.accountNumber} value={HADIYA_EBL_ACCOUNT} numeric />
+                  <DetailRow label={copy.accountName} value={HADIYA_EBL_ACCOUNT_NAME} />
+                  <DetailRow label={copy.branchLabel} value={HADIYA_EBL_BRANCH} />
+                </dl>
+                {copied === "ebl" && <CopiedNote text={copy.copiedStatus} />}
+                {region === "intl" && (
+                  <p className="mt-3 text-xs leading-relaxed text-ink-3">{copy.intlVisaNote}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              {sent ? (
+                <p
+                  role="status"
+                  className="rounded-2xl border border-line bg-surface p-4 text-sm leading-relaxed text-ink"
+                >
+                  {copy.hadiyaThanks}
+                </p>
+              ) : (
+                <>
+                  <button
+                    onClick={confirmSent}
+                    className="h-11 w-full rounded-2xl border border-line bg-surface text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
+                  >
+                    {copy.hadiyaSentButton}
+                  </button>
+                  <p className="mt-2 text-center text-xs leading-relaxed text-ink-3">
+                    {copy.hadiyaSentHint}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       <SupportHadithSheet
@@ -364,6 +348,27 @@ function BackChevron() {
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
       <path
         d="M10 3.5 5.5 8 10 12.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function GiveChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      aria-hidden="true"
+      className={`shrink-0 text-ink-3 transition-transform ${open ? "rotate-180" : ""}`}
+    >
+      <path
+        d="M3.5 6 8 10.5 12.5 6"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"

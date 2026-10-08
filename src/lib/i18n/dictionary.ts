@@ -322,8 +322,9 @@ export const EN = {
   giveHadiya: "Give a Hadiya",
   supportHadithHeading: "The Prophet ﷺ and the Hadiya",
   seeMoreHadith: (n: string) => `More hadith (${n})`,
+  // Two paragraphs via "\n\n" + pre-line rendering, dua first (mirrors bn).
   hadiyaDua:
-    "A Hadiya truly encourages me to keep working on more Islamic content. Give only if you really want to - otherwise, your dua is the biggest Hadiya for me. Please keep me in your dua - that alone is enough.",
+    "Your dua is the biggest Hadiya for me. Please keep me in your dua - that alone is enough.\n\nAnd if you wish, you may also support this work with a Hadiya - a voluntary gift that encourages me to keep creating more Islamic content.",
   wayToGive: "Ways to give",
   regionHint: "Choose where you are sending your gift from.",
   regionInsideBd: "Inside Bangladesh",
