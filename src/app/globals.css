@@ -169,6 +169,53 @@
   }
 }
 
+/* Scrollbar ------------------------------------------------------------ */
+
+/*
+ * A quiet, Amalyn-tinted scrollbar: a thin rounded thumb that rests in
+ * muted ink and warms to gold on interaction, on a transparent track so
+ * the night/dawn atmosphere shows through. WebKit gets the crafted
+ * pseudo-element look; Firefox inherits thin, token-colored bars (kept
+ * Firefox-only because a non-auto scrollbar-width/color disables the
+ * WebKit pseudo styling in Chromium and Safari).
+ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: color-mix(in oklab, var(--ink-3) 45%, transparent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--accent) 60%, transparent);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: color-mix(in oklab, var(--accent) 85%, transparent);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@-moz-document url-prefix("") {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--ink-3) 45%, transparent)
+      transparent;
+  }
+}
+
 /* Motion --------------------------------------------------------------- */
 
 @keyframes rise {
