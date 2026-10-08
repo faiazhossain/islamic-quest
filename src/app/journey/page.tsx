@@ -4,6 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Stat } from "@/components/stat";
 import { dhikrForQuest, publicQuests, type Quest } from "@/lib/content";
+import {
+  stageProgress,
+  suggestedQuest,
+  trackStages,
+  type StageId,
+} from "@/lib/content/journey";
+import { STRICT_CHALLENGE_QUEST_ID } from "@/lib/challenge";
 import { formatCount, formatShortDate } from "@/lib/format";
 import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
@@ -74,9 +81,7 @@ export default function JourneyPage() {
     y: TOP_PAD + index * ROW_H,
   }));
 
-  const nextQuest = progress
-    ? publicQuests().find((quest) => !progress.get(quest.id)?.completedAt)
-    : undefined;
+  const nextQuest = progress ? suggestedQuest(progress) : undefined;
   const journeyComplete = progress ? allQuestsCompleted(progress) : false;
   // `now` arrives with the loaded data, so this stays render-pure; the value
   // is only read once the skeleton branch is gone.
@@ -108,8 +113,10 @@ export default function JourneyPage() {
   }
 
   const hasAnyProgress = (progress?.size ?? 0) > 0;
+  // Quest-labeled total: Strict Challenge counts stay out by design.
   const totalDhikr = [...(progress?.values() ?? [])].reduce(
-    (sum, entry) => sum + entry.count,
+    (sum, entry) =>
+      entry.questId === STRICT_CHALLENGE_QUEST_ID ? sum : sum + entry.count,
     0,
   );
   // The lit path runs through every milestone - and, once each quest has
@@ -194,9 +201,134 @@ export default function JourneyPage() {
               </p>
             </div>
           )}
+
+          <TrackSection progress={progress} journeyDone={journeyComplete} />
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The forward-facing track: the suggested order of stages, with the
+ * current stage highlighted. A recommendation only - Explore stays fully
+ * open, and completing stages unlocks nothing because nothing is locked.
+ */
+function TrackSection({
+  progress,
+  journeyDone,
+}: {
+  progress: Map<string, QuestProgress>;
+  journeyDone: boolean;
+}) {
+  const copy = useCopy();
+  const lang = useLang();
+  const meta: Record<StageId, { name: string; desc: string }> = {
+    foundation: { name: copy.stageFoundation, desc: copy.stageFoundationDesc },
+    growth: { name: copy.stageGrowth, desc: copy.stageGrowthDesc },
+    depth: { name: copy.stageDepth, desc: copy.stageDepthDesc },
+    abundance: { name: copy.stageAbundance, desc: copy.stageAbundanceDesc },
+  };
+  const stages = trackStages().map((trackStage) => ({
+    ...trackStage,
+    ...stageProgress(trackStage.quests, progress),
+  }));
+  const currentId = stages.find(
+    ({ completed, total }) => completed < total,
+  )?.stage.id;
+
+  return (
+    <section
+      aria-labelledby="track-heading"
+      className="rise mt-10 [animation-delay:320ms] lg:col-span-12"
+    >
+      <h2 id="track-heading" className="font-display text-lg text-ink">
+        {copy.trackHeading}
+      </h2>
+      <ol className="mt-4 space-y-3">
+        {stages.map(({ stage, completed, total }) => {
+          const complete = completed === total;
+          const current = stage.id === currentId;
+          const percent = Math.round((completed / total) * 100);
+          return (
+            <li
+              key={stage.id}
+              className={`rounded-2xl border p-4 ${
+                current ? "border-accent-deep/50" : "border-line"
+              } bg-surface`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-display text-[15px] text-ink">
+                  {meta[stage.id].name}
+                </p>
+                {complete ? (
+                  <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-jade">
+                    <CheckIcon />
+                    {copy.stageComplete}
+                  </span>
+                ) : current ? (
+                  <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+                    {copy.youAreHere}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-0.5 text-xs text-ink-3">{meta[stage.id].desc}</p>
+              <div className="mt-2.5 flex items-center gap-3">
+                <div
+                  className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2"
+                  role="progressbar"
+                  aria-valuenow={percent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={meta[stage.id].name}
+                >
+                  <div
+                    className="h-full rounded-full bg-accent transition-[width]"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <span className="shrink-0 text-xs text-ink-2">
+                  {formatCount(completed, lang)} / {formatCount(total, lang)}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+        <li
+          className={`rounded-2xl border p-4 ${
+            journeyDone ? "border-accent-deep/50" : "border-line"
+          } bg-surface`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-display text-[15px] text-ink">
+              {copy.regularPractice}
+            </p>
+            {journeyDone && (
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+                {copy.youAreHere}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-ink-3">
+            {copy.regularPracticeDesc}
+          </p>
+        </li>
+      </ol>
+    </section>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 8.5 6.5 11.5 12.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

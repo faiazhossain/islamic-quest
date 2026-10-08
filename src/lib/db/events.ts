@@ -3,7 +3,8 @@ import type { PracticeEvent } from "../practice";
 
 export type { ProgressEvent, ProgressEventType, QuestProgress } from "./db";
 
-const newId = (): string => {
+/** Client uuid; shared sync idempotency key shape (also used by challenges). */
+export const newId = (): string => {
   if (typeof crypto === "undefined" || typeof crypto.randomUUID !== "function") {
     throw new Error("crypto.randomUUID is unavailable; a secure context is required");
   }

@@ -6,6 +6,7 @@ import { AccountSection } from "@/components/account-section";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Switch } from "@/components/switch";
 import { db } from "@/lib/db/db";
+import { restoreStrictChallenges } from "@/lib/db/challenges";
 import { recomputeAllQuests } from "@/lib/db/events";
 import {
   MAX_IMPORT_BYTES,
@@ -23,16 +24,18 @@ export default function SettingsPage() {
 
   const exportData = async () => {
     try {
-      const [events, questProgress] = await Promise.all([
+      const [events, questProgress, challenges] = await Promise.all([
         db.events.toArray(),
         db.questProgress.toArray(),
+        db.challenges.toArray(),
       ]);
       const payload = {
         app: "amalyn",
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
         events,
         questProgress,
+        challenges,
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: "application/json",
@@ -71,6 +74,7 @@ export default function SettingsPage() {
       await db.transaction("rw", db.events, async () => {
         await db.events.bulkPut(restored);
       });
+      await restoreStrictChallenges(envelope.challenges);
       await recomputeAllQuests();
       setStatus(copy.importedEvents(String(restored.length)));
     } catch (error) {

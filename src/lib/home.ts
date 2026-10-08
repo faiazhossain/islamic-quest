@@ -4,6 +4,8 @@
  * complete) unit-testable without a DOM.
  */
 import { dhikrForQuest, publicQuests, type Quest } from "./content";
+import { suggestedQuest } from "./content/journey";
+import { STRICT_CHALLENGE_QUEST_ID } from "./challenge";
 import type { Lang } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { dayStartOf } from "./format";
@@ -27,7 +29,13 @@ export interface DailyAmal {
 }
 
 export type HomeView =
-  | { kind: "first-visit" }
+  | {
+      kind: "first-visit";
+      /** Suggested first amal: the smallest quest on the track's first stage. */
+      questId: string;
+      name: string;
+      target: number;
+    }
   | {
       kind: "active-quest";
       questId: string;
@@ -36,7 +44,14 @@ export type HomeView =
       target: number;
       todayTotal: number;
     }
-  | { kind: "next-quest"; todayTotal: number }
+  | {
+      kind: "next-quest";
+      /** Suggested next amal: the first incomplete quest on the track. */
+      questId: string;
+      name: string;
+      target: number;
+      todayTotal: number;
+    }
   | {
       kind: "all-complete";
       daily: DailyAmal;
@@ -111,8 +126,13 @@ export function selectHomeView(input: HomeInput): HomeView {
           todayCount,
         },
         stats: derivePracticeStats(events, now),
+        // Quest-labeled total: Strict Challenge counts are worship but not
+        // quest progress, so the reserved id stays out of this figure.
         totalDhikr: [...progress.values()].reduce(
-          (sum, entry) => sum + entry.count,
+          (sum, entry) =>
+            entry.questId === STRICT_CHALLENGE_QUEST_ID
+              ? sum
+              : sum + entry.count,
           0,
         ),
         todayTotal,
@@ -122,7 +142,22 @@ export function selectHomeView(input: HomeInput): HomeView {
     }
   }
 
+  // The track's next suggestion powers both remaining states, so Home can
+  // reach the quest in one tap fewer than routing through Explore. The
+  // fallback only fires for an empty catalog, which the launch gate forbids.
+  const suggested = suggestedQuest(progress) ?? publicQuests()[0];
   return progress.size > 0
-    ? { kind: "next-quest", todayTotal }
-    : { kind: "first-visit" };
+    ? {
+        kind: "next-quest",
+        questId: suggested.id,
+        name: localized(dhikrForQuest(suggested).names, lang),
+        target: suggested.target,
+        todayTotal,
+      }
+    : {
+        kind: "first-visit",
+        questId: suggested.id,
+        name: localized(dhikrForQuest(suggested).names, lang),
+        target: suggested.target,
+      };
 }

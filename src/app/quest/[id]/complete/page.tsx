@@ -5,10 +5,11 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
 import { StarMark } from "@/components/star-mark";
-import { dhikrForQuest, getPublicQuest } from "@/lib/content";
+import { dhikrForQuest, getPublicQuest, type Quest } from "@/lib/content";
+import { suggestedQuest } from "@/lib/content/journey";
 import { formatCount, formatShortDate } from "@/lib/format";
 import { localized, useCopy, useLang } from "@/lib/i18n";
-import { getProgress, recordQuestCompleted } from "@/lib/db/events";
+import { getAllProgress, recordQuestCompleted } from "@/lib/db/events";
 
 export default function CompletePage() {
   const params = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ export default function CompletePage() {
   const copy = useCopy();
   const lang = useLang();
   const [completedAt, setCompletedAt] = useState<number | null>(null);
+  const [next, setNext] = useState<Quest | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -25,9 +27,12 @@ export default function CompletePage() {
       // Belt and braces: if the completion event write raced the router
       // push, record it here; recordQuestCompleted is idempotent.
       await recordQuestCompleted(quest.id).catch(() => {});
-      const entry = await getProgress(quest.id).catch(() => undefined);
+      const progress = await getAllProgress().catch(() => new Map());
       if (cancelled) return;
-      setCompletedAt(entry?.completedAt ?? null);
+      setCompletedAt(progress.get(quest.id)?.completedAt ?? null);
+      // The first not-yet-completed quest on the Journey track becomes
+      // the primary continuation; null means the whole track is done.
+      setNext(suggestedQuest(progress) ?? null);
       setReady(true);
     })();
     return () => {
@@ -76,15 +81,35 @@ export default function CompletePage() {
       </p>
 
       <div className="rise mt-12 w-full max-w-xs space-y-3 [animation-delay:440ms]">
+        {ready && (
+          next ? (
+            <Link
+              href={`/quest/${next.id}`}
+              className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-4 py-2.5 text-center font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+            >
+              {copy.nextQuest(
+                localized(dhikrForQuest(next).names, lang),
+                formatCount(next.target, lang),
+              )}
+            </Link>
+          ) : (
+            <Link
+              href="/journey"
+              className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+            >
+              {copy.viewJourney}
+            </Link>
+          )
+        )}
         <Link
           href={`/quest/${quest.id}/share`}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
+          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
         >
           {copy.shareMilestone}
         </Link>
         <Link
           href="/"
-          className="flex h-12 w-full items-center justify-center rounded-2xl border border-line bg-surface font-semibold text-ink transition-colors hover:bg-surface-2 active:bg-surface-2"
+          className="block pt-1 text-xs text-ink-3 transition-colors hover:text-ink-2"
         >
           {copy.backHome}
         </Link>

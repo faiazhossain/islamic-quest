@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { publicQuests } from "./content";
+import { trackQuests } from "./content/journey";
 import { dayStartOf } from "./format";
 import { selectHomeView, type HomeView } from "./home";
 import type { PracticeEvent } from "./practice";
@@ -34,9 +35,13 @@ const expectKind = (view: HomeView, kind: HomeView["kind"]): void => {
 };
 
 describe("selectHomeView", () => {
-  it("shows the first-visit state with no progress", () => {
+  it("shows the first-visit state with the track's first quest suggested", () => {
     const view = selectHomeView({ progress: new Map(), events: [], now: NOW });
     expectKind(view, "first-visit");
+    if (view.kind !== "first-visit") throw new Error("expected first-visit");
+    expect(view.questId).toBe(trackQuests()[0].id);
+    expect(view.target).toBe(trackQuests()[0].target);
+    expect(view.name.length).toBeGreaterThan(0);
   });
 
   it("shows the most recently updated active quest", () => {
@@ -67,6 +72,11 @@ describe("selectHomeView", () => {
     });
     if (view.kind !== "next-quest") throw new Error("expected next-quest");
     expect(view.todayTotal).toBe(7);
+    // The suggestion follows track order, not catalog order.
+    const expected = trackQuests().find(
+      (quest) => !progress.get(quest.id)?.completedAt,
+    );
+    expect(view.questId).toBe(expected?.id);
   });
 
   it("keeps next-quest at 19 of 20 complete", () => {

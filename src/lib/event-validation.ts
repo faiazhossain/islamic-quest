@@ -1,4 +1,5 @@
-import { QUESTS } from "./content";
+import { DHIKR, QUESTS } from "./content";
+import { MIN_CHALLENGE_DAYS, MIN_CHALLENGE_TARGET, STRICT_CHALLENGE_QUEST_ID, MAX_CHALLENGE_DAYS, MAX_CHALLENGE_TARGET } from "./challenge";
 import type { ProgressEventType } from "./db/db";
 import type { SyncEvent } from "./sync-merge";
 
@@ -8,9 +9,10 @@ import type { SyncEvent } from "./sync-merge";
  * guaranteed to pass the server, and vice versa - a malformed row can
  * never wedge sync into a permanent 400.
  */
-export const KNOWN_QUEST_IDS: ReadonlySet<string> = new Set(
-  QUESTS.map((quest) => quest.id),
-);
+export const KNOWN_QUEST_IDS: ReadonlySet<string> = new Set([
+  ...QUESTS.map((quest) => quest.id),
+  STRICT_CHALLENGE_QUEST_ID,
+]);
 
 const KNOWN_TYPES: readonly ProgressEventType[] = [
   "quest_started",
@@ -110,18 +112,107 @@ export const MAX_IMPORT_BYTES = 10_000_000;
 /** The export envelope written by the settings screen. */
 export interface ImportEnvelope {
   events: SyncEvent[];
+  /** Version-1 files carry none; restored as-is for the challenges store. */
+  challenges: StrictChallengeBackup[];
+}
+
+const KNOWN_DHIKR_IDS: ReadonlySet<string> = new Set(
+  DHIKR.map((dhikr) => dhikr.id),
+);
+
+const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A challenge definition as it travels inside a version-2 backup. */
+export interface StrictChallengeBackup {
+  id: string;
+  dhikrId: string;
+  dailyTarget: number;
+  durationDays: number;
+  startDayKey: string;
+  createdAt: number;
+}
+
+/** Validates one raw challenge row; same all-or-nothing rule as events. */
+function parseChallenge(raw: unknown): StrictChallengeBackup | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const row = raw as Record<string, unknown>;
+  if (
+    typeof row.id !== "string" ||
+    row.id.length === 0 ||
+    row.id.length > 64
+  ) {
+    return null;
+  }
+  if (typeof row.dhikrId !== "string" || !KNOWN_DHIKR_IDS.has(row.dhikrId)) {
+    return null;
+  }
+  const target = row.dailyTarget;
+  if (
+    typeof target !== "number" ||
+    !Number.isInteger(target) ||
+    target < MIN_CHALLENGE_TARGET ||
+    target > MAX_CHALLENGE_TARGET
+  ) {
+    return null;
+  }
+  const days = row.durationDays;
+  if (
+    typeof days !== "number" ||
+    !Number.isInteger(days) ||
+    days < MIN_CHALLENGE_DAYS ||
+    days > MAX_CHALLENGE_DAYS
+  ) {
+    return null;
+  }
+  if (
+    typeof row.startDayKey !== "string" ||
+    !DAY_KEY_PATTERN.test(row.startDayKey) ||
+    Number.isNaN(
+      new Date(`${row.startDayKey}T12:00:00`).getTime(),
+    )
+  ) {
+    return null;
+  }
+  if (
+    typeof row.createdAt !== "number" ||
+    !Number.isFinite(row.createdAt)
+  ) {
+    return null;
+  }
+  return {
+    id: row.id,
+    dhikrId: row.dhikrId,
+    dailyTarget: target,
+    durationDays: days,
+    startDayKey: row.startDayKey,
+    createdAt: row.createdAt,
+  };
 }
 
 /**
  * Validates the export envelope (app marker and version) before any event
  * is examined. Returns null unless the file is exactly the format this
  * version writes, so an unrecognized future export is rejected with a clear
- * message instead of half-imported.
+ * message instead of half-imported. Version 1 is today's events-only
+ * export and stays importable forever; version 2 adds the local
+ * Strict Challenge definitions.
  */
 export function parseImportEnvelope(data: unknown): ImportEnvelope | null {
   if (typeof data !== "object" || data === null) return null;
   const record = data as Record<string, unknown>;
-  if (record.app !== "amalyn" || record.version !== 1) return null;
+  if (record.app !== "amalyn") return null;
+  if (record.version !== 1 && record.version !== 2) return null;
   const events = parseEvents(record.events);
-  return events === null ? null : { events };
+  if (events === null) return null;
+  let challenges: StrictChallengeBackup[] = [];
+  if (record.version === 2) {
+    if (!Array.isArray(record.challenges)) return null;
+    challenges = [];
+    for (const raw of record.challenges) {
+      const challenge = parseChallenge(raw);
+      if (challenge === null) return null;
+      challenges.push(challenge);
+    }
+  }
+  return { events, challenges };
 }

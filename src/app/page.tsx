@@ -4,14 +4,18 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { StarMark } from "@/components/star-mark";
 import { Stat } from "@/components/stat";
+import { deriveStrictChallenge } from "@/lib/challenge";
+import { getDhikr } from "@/lib/content";
+import { getLatestStrictChallenge } from "@/lib/db/challenges";
 import { formatCount } from "@/lib/format";
-import { useCopy, useLang } from "@/lib/i18n";
+import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
   getAllProgress,
   getPracticeEvents,
   type QuestProgress,
 } from "@/lib/db/events";
 import { selectHomeView, type DailyAmal, type HomeView } from "@/lib/home";
+import type { StrictChallenge } from "@/lib/db/db";
 import type { PracticeEvent, PracticeStats } from "@/lib/practice";
 
 export default function HomePage() {
@@ -19,25 +23,29 @@ export default function HomePage() {
   const lang = useLang();
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
   const [events, setEvents] = useState<PracticeEvent[] | null>(null);
+  const [challenge, setChallenge] = useState<StrictChallenge | null>(null);
   const [now, setNow] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [map, log] = await Promise.all([
+        const [map, log, latestChallenge] = await Promise.all([
           getAllProgress(),
           getPracticeEvents(),
+          getLatestStrictChallenge().catch(() => undefined),
         ]);
         if (!cancelled) {
           setProgress(map);
           setEvents(log);
+          setChallenge(latestChallenge ?? null);
           setNow(Date.now());
         }
       } catch {
         if (!cancelled) {
           setProgress(new Map());
           setEvents([]);
+          setChallenge(null);
           setNow(Date.now());
         }
       }
@@ -56,6 +64,11 @@ export default function HomePage() {
         : null,
     [progress, events, now, lang],
   );
+
+  const strict =
+    challenge && events
+      ? { challenge, derived: deriveStrictChallenge(challenge, events, now) }
+      : null;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -78,7 +91,11 @@ export default function HomePage() {
       ) : view.kind === "first-visit" ? (
         // The explainer gets the stage on desktop: one centered column.
         <div className="flex flex-col lg:mx-auto lg:max-w-2xl">
-          <FirstQuestCard />
+          <FirstQuestCard
+            questId={view.questId}
+            name={view.name}
+            target={view.target}
+          />
           <HowItWorks />
         </div>
       ) : (
@@ -106,16 +123,25 @@ export default function HomePage() {
                   {copy.nextStep}
                 </p>
                 <h2 className="mt-2 font-display text-xl text-ink">
-                  {copy.beginNextQuest}
+                  {view.name}
                 </h2>
+                <p className="mt-1 text-sm text-ink-2">
+                  {formatCount(view.target, lang)}x
+                </p>
                 <p className="mt-2 text-sm leading-relaxed text-ink-2">
                   {copy.journeyGrows}
                 </p>
                 <Link
-                  href="/explore"
+                  href={`/quest/${view.questId}`}
                   className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
                 >
-                  {copy.chooseQuest}
+                  {copy.beginSuggested}
+                </Link>
+                <Link
+                  href="/explore"
+                  className="mt-3 block text-center text-xs font-medium text-ink-3 transition-colors hover:text-ink"
+                >
+                  {copy.orChooseAnother}
                 </Link>
               </div>
             </section>
@@ -137,6 +163,8 @@ export default function HomePage() {
               <Chevron />
             </span>
           </Link>
+
+          {strict && <StrictRow challenge={strict.challenge} derived={strict.derived} />}
         </div>
       )}
 
@@ -144,6 +172,55 @@ export default function HomePage() {
         {copy.freeForever}
       </p>
     </div>
+  );
+}
+
+/**
+ * The Strict Challenge entry row: quieter than the quest experience by
+ * design - one line of status, one destination.
+ */
+function StrictRow({
+  challenge,
+  derived,
+}: {
+  challenge: StrictChallenge;
+  derived: ReturnType<typeof deriveStrictChallenge>;
+}) {
+  const copy = useCopy();
+  const lang = useLang();
+
+  let line = copy.strictTagline;
+  if (derived.status === "complete") {
+    line = copy.strictCompleteTitle;
+  } else if (derived.status === "broken") {
+    line = copy.strictStreak(formatCount(derived.streakDays, lang));
+  } else {
+    const dhikr = getDhikr(challenge.dhikrId);
+    const name = dhikr ? localized(dhikr.names, lang) : "";
+    line = derived.todayComplete
+      ? `${name} · ${copy.strictTodayComplete}`
+      : `${name} · ${formatCount(derived.todayCount, lang)} / ${formatCount(
+          challenge.dailyTarget,
+          lang,
+        )} · ${copy.strictDayProgress(
+          formatCount(derived.dayNumber, lang),
+          formatCount(challenge.durationDays, lang),
+        )}`;
+  }
+
+  return (
+    <Link
+      href="/challenge"
+      className="rise col-span-12 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:300ms]"
+    >
+      <span className="min-w-0">
+        <span className="block text-sm text-ink">{copy.strictTitle}</span>
+        <span className="mt-0.5 block truncate text-xs text-ink-3">{line}</span>
+      </span>
+      <span aria-hidden="true" className="text-ink-3">
+        <Chevron />
+      </span>
+    </Link>
   );
 }
 
@@ -294,8 +371,17 @@ function PracticeProgressCard({
   );
 }
 
-function FirstQuestCard() {
+function FirstQuestCard({
+  questId,
+  name,
+  target,
+}: {
+  questId: string;
+  name: string;
+  target: number;
+}) {
   const copy = useCopy();
+  const lang = useLang();
   return (
     <section className="rise mt-10 [animation-delay:120ms]">
       <div
@@ -306,17 +392,22 @@ function FirstQuestCard() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           {copy.firstQuest}
         </p>
-        <h2 className="mt-2 font-display text-xl text-ink">
-          {copy.chooseDhikrBegin}
-        </h2>
+        <h2 className="mt-2 font-display text-xl text-ink">{name}</h2>
+        <p className="mt-1 text-sm text-ink-2">{formatCount(target, lang)}x</p>
         <p className="mt-2 text-sm leading-relaxed text-ink-2">
           {copy.firstQuestBody}
         </p>
         <Link
-          href="/explore"
+          href={`/quest/${questId}`}
           className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
         >
-          {copy.chooseFirstQuest}
+          {copy.beginSuggested}
+        </Link>
+        <Link
+          href="/explore"
+          className="mt-3 block text-center text-xs font-medium text-ink-3 transition-colors hover:text-ink"
+        >
+          {copy.orChooseAnother}
         </Link>
       </div>
     </section>

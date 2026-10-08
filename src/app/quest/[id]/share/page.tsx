@@ -5,11 +5,12 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MissingQuest } from "@/components/missing-quest";
 import { Switch } from "@/components/switch";
-import { dhikrForQuest, getPublicQuest } from "@/lib/content";
+import { dhikrForQuest, getPublicQuest, type Quest } from "@/lib/content";
+import { suggestedQuest } from "@/lib/content/journey";
 import { formatCount, formatShortDate } from "@/lib/format";
 import type { Lang } from "@/lib/i18n/lang";
 import { localized, useCopy, useLang } from "@/lib/i18n";
-import { getProgress } from "@/lib/db/events";
+import { getAllProgress } from "@/lib/db/events";
 
 const W = 1080;
 const H = 1920;
@@ -241,6 +242,7 @@ export default function SharePage() {
   const [fontsReady, setFontsReady] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [completedAt, setCompletedAt] = useState<number | null>(null);
+  const [next, setNext] = useState<Quest | null>(null);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -262,10 +264,11 @@ export default function SharePage() {
   useEffect(() => {
     if (!quest) return;
     let cancelled = false;
-    getProgress(quest.id)
-      .then((entry) => {
+    getAllProgress()
+      .then((progress) => {
         if (!cancelled) {
-          setCompletedAt(entry?.completedAt ?? null);
+          setCompletedAt(progress.get(quest.id)?.completedAt ?? null);
+          setNext(suggestedQuest(progress) ?? null);
           setProgressLoaded(true);
         }
       })
@@ -451,9 +454,28 @@ export default function SharePage() {
                 {status}
               </p>
             )}
-            <p className="pb-4 text-center text-xs leading-relaxed text-ink-3">
+            <p className="text-center text-xs leading-relaxed text-ink-3">
               {copy.cardPrivacy}
             </p>
+            {progressLoaded &&
+              (next ? (
+                <Link
+                  href={`/quest/${next.id}`}
+                  className="block pb-4 text-center text-xs font-semibold text-accent transition-colors hover:text-accent-hover"
+                >
+                  {copy.nextQuest(
+                    localized(dhikrForQuest(next).names, lang),
+                    formatCount(next.target, lang),
+                  )}
+                </Link>
+              ) : (
+                <Link
+                  href="/journey"
+                  className="block pb-4 text-center text-xs font-semibold text-accent transition-colors hover:text-accent-hover"
+                >
+                  {copy.viewJourney}
+                </Link>
+              ))}
           </div>
         </div>
       </div>

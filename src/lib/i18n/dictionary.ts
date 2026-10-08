@@ -41,7 +41,6 @@ export const EN = {
   greeting: "As-salamu alaykum.",
   todayLine: (n: string) => `Today: ${n} dhikr. Your Journey is waiting.`,
   nextStep: "Next step",
-  beginNextQuest: "Begin your next quest.",
   journeyGrows: "Your journey grows with every quest you complete.",
   chooseQuest: "Choose a quest",
   viewJourney: "View your Journey",
@@ -66,10 +65,10 @@ export const EN = {
   daysInARow: (n: string) =>
     `${n} ${n === "1" ? "day" : "days"} in a row`,
   firstQuest: "First quest",
-  chooseDhikrBegin: "Choose a dhikr and begin.",
   firstQuestBody:
     "Pick a quest, count with intention, and watch your journey of light grow. Everything stays on your device.",
-  chooseFirstQuest: "Choose your first quest",
+  beginSuggested: "Begin with this quest",
+  orChooseAnother: "or choose another",
   firstVisit: "First visit?",
   howAmalynWorks: "How Amalyn works",
   howItWorksIntro:
@@ -113,6 +112,59 @@ export const EN = {
   thisMonthDhikr: (n: string) => `This month ${n} dhikr`,
   overLastMonth: (n: string) => ` - +${n} over last month`,
 
+  // Journey track (a suggested order, never a lock - every quest stays
+  // freely startable. Stage names describe practice amounts, product-designed
+  // for habit-building; they never imply a prescribed scheme.)
+  trackHeading: "The path ahead",
+  stageFoundation: "Foundation",
+  stageFoundationDesc: "Small, gentle quests to begin with.",
+  stageGrowth: "Growth",
+  stageGrowthDesc: "A little more each time - still manageable.",
+  stageDepth: "Depth",
+  stageDepthDesc: "Longer sessions for a steadier rhythm.",
+  stageAbundance: "Abundance",
+  stageAbundanceDesc: "The long-distance milestones.",
+  youAreHere: "You are here",
+  stageComplete: "Stage complete",
+  regularPractice: "Regular practice",
+  regularPracticeDesc:
+    "Every quest complete. A daily Amal keeps the rhythm - at your own pace.",
+
+  // Strict Challenge (a personal commitment: 1 amal, 1 daily target,
+  // 1 duration. Product terms "Strict Challenge" / "Challenge" / "streak"
+  // stay in English where natural. Strict means strict - a day counts only
+  // when the target is met - but copy stays calm, never punitive.)
+  strictTitle: "Strict Challenge",
+  strictTagline: "One amal. Every day. A commitment to yourself.",
+  strictChooseAmal: "Which amal will you do?",
+  strictDailyTarget: "How many per day?",
+  strictDuration: "How many days?",
+  strictCustom: "Custom",
+  strictRecommended: "Recommended",
+  strictTimes: (n: string) => `${n} times`,
+  strictDayProgress: (day: string, total: string) => `Day ${day} / ${total}`,
+  strictPerDay: (n: string) => `${n} per day`,
+  strictToday: "Today's Strict",
+  strictTodayComplete: "Today's Strict complete",
+  strictStreak: (n: string) => `${n}-day streak`,
+  strictTodayProgressAria: "Today's challenge progress",
+  strictYourChallenge: "Your Strict Challenge",
+  strictStart: "Start the challenge",
+  strictMissedYesterday: "Yesterday wasn't completed",
+  strictMissedOn: (date: string) => `${date} wasn't completed`,
+  strictRestart: "Start over",
+  strictCompleteTitle: "Strict Challenge complete",
+  strictCompleteBody: (n: string) => `${n}-day commitment finished.`,
+  strictNewChallenge: "Start another challenge",
+  strictEnd: "End challenge",
+  strictEndConfirmTitle: "End this challenge?",
+  strictEndConfirmBody:
+    "Your counts stay in your history, but the challenge itself will close.",
+  strictEndConfirm: "End it",
+  strictKeep: "Keep going",
+  strictTargetInputAria: "Custom daily target",
+  strictDurationInputAria: "Custom duration in days",
+
   // Quest detail
   exploreBack: "Explore",
   questLabel: "Quest",
@@ -147,6 +199,7 @@ export const EN = {
   // Completion
   questComplete: "Quest complete",
   amalStaysInJourney: "This Amal stays part of your Journey.",
+  nextQuest: (name: string, n: string) => `Next: ${name} × ${n}`,
   shareMilestone: "Share this milestone",
   backHome: "Back home",
 
@@ -366,7 +419,6 @@ export const BN: Copy = {
   greeting: "আসসালামু আলাইকুম।",
   todayLine: (n) => `আজ ${n} জিকির হয়েছে। জার্নি আপনার অপেক্ষায়।`,
   nextStep: "পরবর্তী ধাপ",
-  beginNextQuest: "পরের Quest শুরু করুন।",
   journeyGrows: "প্রতিটি Quest সম্পন্ন করার সঙ্গে আপনার জার্নি বাড়তে থাকে।",
   chooseQuest: "Quest বেছে নিন",
   viewJourney: "জার্নি দেখুন",
@@ -388,10 +440,10 @@ export const BN: Copy = {
   dayCount: (n) => `${n} দিন`,
   daysInARow: (n) => `টানা ${n} দিন`,
   firstQuest: "প্রথম Quest",
-  chooseDhikrBegin: "একটি জিকির বেছে নিয়ে শুরু করুন।",
   firstQuestBody:
     "একটি Quest বেছে নিন, মন দিয়ে জিকির করুন—আর দেখুন, ধীরে ধীরে আপনার Journey of Light এগিয়ে যাচ্ছে। আপনার সব Data আপনার Device-এই থাকে।",
-  chooseFirstQuest: "প্রথম Quest বেছে নিন",
+  beginSuggested: "এই Quest দিয়েই শুরু করুন",
+  orChooseAnother: "অথবা অন্যটি বেছে নিন",
   firstVisit: "প্রথমবার আসছেন?",
   howAmalynWorks: "Amalyn কীভাবে কাজ করে",
   howItWorksIntro:
@@ -433,6 +485,52 @@ export const BN: Copy = {
   thisMonthDhikr: (n) => `এ মাসে ${n} জিকির`,
   overLastMonth: (n) => ` - গত মাসের চেয়ে +${n}`,
 
+  trackHeading: "সামনের পথ",
+  stageFoundation: "ভিত্তি",
+  stageFoundationDesc: "শুরুর জন্য ছোট, সহজ Quest।",
+  stageGrowth: "বৃদ্ধি",
+  stageGrowthDesc: "একটু একটু করে বাড়ে - তবু সহজেই সম্ভব।",
+  stageDepth: "গভীরতা",
+  stageDepthDesc: "দীর্ঘ সেশন - আরও স্থির ছন্দের জন্য।",
+  stageAbundance: "প্রাচুর্য",
+  stageAbundanceDesc: "দূরপাল্লার অর্জন।",
+  youAreHere: "আপনি এখানে",
+  stageComplete: "ধাপ সম্পন্ন",
+  regularPractice: "নিয়মিত আমল",
+  regularPracticeDesc:
+    "সব Quest সম্পন্ন। প্রতিদিনের একটি আমল ছন্দ ধরে রাখে - নিজের গতিতে।",
+
+  strictTitle: "Strict Challenge",
+  strictTagline: "একটা আমল। প্রতিদিন। নিজের সাথে একটা commitment।",
+  strictChooseAmal: "কোন আমলটা করবেন?",
+  strictDailyTarget: "প্রতিদিন কতবার?",
+  strictDuration: "কতদিন চালাবেন?",
+  strictCustom: "কাস্টম",
+  strictRecommended: "প্রস্তাবিত",
+  strictTimes: (n) => `${n} বার`,
+  strictDayProgress: (day, total) => `দিন ${day} / ${total}`,
+  strictPerDay: (n) => `${n} বার প্রতিদিন`,
+  strictToday: "আজকের Strict",
+  strictTodayComplete: "আজকের Strict complete",
+  strictStreak: (n) => `${n} দিনের streak`,
+  strictTodayProgressAria: "আজকের Challenge অগ্রগতি",
+  strictYourChallenge: "আপনার Strict Challenge",
+  strictStart: "Challenge শুরু করুন",
+  strictMissedYesterday: "গতকাল সম্পূর্ণ হয়নি",
+  strictMissedOn: (date) => `${date} সম্পূর্ণ হয়নি`,
+  strictRestart: "নতুন করে শুরু করুন",
+  strictCompleteTitle: "Strict Challenge সম্পন্ন",
+  strictCompleteBody: (n) => `${n} দিনের commitment শেষ হয়েছে।`,
+  strictNewChallenge: "আরেকটা Challenge শুরু করুন",
+  strictEnd: "Challenge শেষ করুন",
+  strictEndConfirmTitle: "Challenge শেষ করবেন?",
+  strictEndConfirmBody:
+    "আপনার গণনা ইতিহাসে থাকবে, তবে Challenge-টি বন্ধ হয়ে যাবে।",
+  strictEndConfirm: "শেষ করুন",
+  strictKeep: "চালিয়ে যান",
+  strictTargetInputAria: "নিজের দৈনিক টার্গেট",
+  strictDurationInputAria: "নিজের দিনসংখ্যা",
+
   exploreBack: "Quest",
   questLabel: "Quest",
   guidanceLabel: "নির্দেশনা",
@@ -462,6 +560,7 @@ export const BN: Copy = {
 
   questComplete: "Quest সম্পন্ন",
   amalStaysInJourney: "এই আমল আপনার জার্নির অংশ থেকে যাবে।",
+  nextQuest: (name, n) => `পরবর্তী: ${name} × ${n}`,
   shareMilestone: "এই অর্জন শেয়ার করুন",
   backHome: "হোমে ফিরুন",
 

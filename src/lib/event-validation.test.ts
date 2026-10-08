@@ -37,6 +37,14 @@ describe("parseEvents", () => {
     expect(parseEvents([{ ...valid, delta: 5 }], NOW)).toBeNull();
   });
 
+  it("accepts the reserved Strict Challenge stream like any quest", () => {
+    const strict = { ...valid, questId: "strict-challenge" };
+    expect(parseEvents([strict], NOW)).toEqual([strict]);
+    expect(
+      parseEvents([{ ...strict, type: "undo", delta: -1 }], NOW),
+    ).toEqual([{ ...strict, type: "undo", delta: -1 }]);
+  });
+
   it("rejects ids that are missing or oversized", () => {
     expect(parseEvents([{ ...valid, id: "" }], NOW)).toBeNull();
     expect(parseEvents([{ ...valid, id: "x".repeat(65) }], NOW)).toBeNull();
@@ -96,18 +104,64 @@ describe("parseImportEnvelope", () => {
 
   it("accepts a well-formed export and returns the parsed events", () => {
     const result = parseImportEnvelope(envelope([freshEvent]));
-    expect(result).toEqual({ events: [freshEvent] });
+    expect(result).toEqual({ events: [freshEvent], challenges: [] });
   });
 
-  it("rejects files that are not this app's version-1 export", () => {
+  it("rejects files that are not this app's version-1 or version-2 export", () => {
     expect(parseImportEnvelope(null)).toBeNull();
     expect(parseImportEnvelope("export")).toBeNull();
     expect(parseImportEnvelope({ ...envelope([freshEvent]), app: "other" })).toBeNull();
-    expect(parseImportEnvelope({ ...envelope([freshEvent]), version: 2 })).toBeNull();
+    expect(parseImportEnvelope({ ...envelope([freshEvent]), version: 3 })).toBeNull();
     expect(
       parseImportEnvelope({ ...envelope([freshEvent]), version: "1" }),
     ).toBeNull();
     expect(parseImportEnvelope({ app: "amalyn", version: 1 })).toBeNull();
+  });
+
+  it("accepts version-2 exports with valid challenge definitions", () => {
+    const challengeRow = {
+      id: "c1",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 1000,
+    };
+    const result = parseImportEnvelope({
+      app: "amalyn",
+      version: 2,
+      events: [freshEvent],
+      challenges: [challengeRow],
+    });
+    expect(result).toEqual({ events: [freshEvent], challenges: [challengeRow] });
+    // Version 2 must carry the challenges array, even when empty.
+    expect(
+      parseImportEnvelope({ app: "amalyn", version: 2, events: [freshEvent] }),
+    ).toBeNull();
+  });
+
+  it("rejects version-2 exports whose challenge rows fail validation", () => {
+    const base = {
+      id: "c1",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 1000,
+    };
+    const v2 = (challenge: unknown) => ({
+      app: "amalyn",
+      version: 2,
+      events: [freshEvent],
+      challenges: [challenge],
+    });
+    expect(parseImportEnvelope(v2({ ...base, dhikrId: "not-a-dhikr" }))).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, dailyTarget: 0 }))).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, dailyTarget: 10_001 }))).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, durationDays: 366 }))).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, startDayKey: "2026-13-01" }))).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, id: "" }))).toBeNull();
+    expect(parseImportEnvelope(v2("challenge"))).toBeNull();
   });
 
   it("rejects envelopes whose events fail the sync contract", () => {

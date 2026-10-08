@@ -59,12 +59,13 @@ describe("UI dictionary", () => {
       // Deliberate Latin exceptions: the brand, the host, a login
       // provider whose name users read in Latin, payment brands users
       // read in Latin (bKash, EBL, Visa), and the product nouns "Quest"
-      // and "Journey of Light", which stay English in Bangla copy
+      // and "Strict Challenge", which stay English in Bangla copy
       // (terminology map).
       if (
         /amalyn|sunnah|ihadis|google|emailplaceholder|pathoflight|bkash|ebl|visa/i.test(path) ||
         /English/.test(value) ||
-        value === "Quest"
+        value === "Quest" ||
+        value === "Strict Challenge"
       ) {
         continue;
       }
