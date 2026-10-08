@@ -217,6 +217,44 @@ describe("parseImportEnvelope", () => {
     });
   });
 
+  it("accepts well-formed group ids and rejects malformed ones", () => {
+    const base = {
+      id: "c1",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 1000,
+    };
+    const v2 = (challenge: unknown) => ({
+      app: "amalyn",
+      version: 2,
+      events: [freshEvent],
+      challenges: [challenge],
+    });
+    const grouped = { ...base, groupId: "group-1" };
+    expect(parseImportEnvelope(v2(grouped))).toEqual({
+      events: [freshEvent],
+      challenges: [grouped],
+    });
+    // Two rows of one commitment travel together.
+    const sibling = { ...grouped, id: "c2", dhikrId: "alhamdulillah" };
+    const both = parseImportEnvelope({
+      app: "amalyn",
+      version: 2,
+      events: [freshEvent],
+      challenges: [grouped, sibling],
+    });
+    expect(both?.challenges).toHaveLength(2);
+    expect(
+      parseImportEnvelope(v2({ ...base, groupId: "" })),
+    ).toBeNull();
+    expect(
+      parseImportEnvelope(v2({ ...base, groupId: "has space" })),
+    ).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, groupId: 7 }))).toBeNull();
+  });
+
   it("rejects challenge rows pointing at another challenge's stream", () => {
     const base = {
       id: "c1",

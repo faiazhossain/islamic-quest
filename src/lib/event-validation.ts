@@ -150,6 +150,8 @@ export interface StrictChallengeBackup {
   createdAt: number;
   /** Canonical per-challenge stream; absent on pre-multi-challenge rows. */
   streamId?: string;
+  /** Shared by rows of one multi-amal commitment; absent on solo rows. */
+  groupId?: string;
 }
 
 /** Validates one raw challenge row; same all-or-nothing rule as events. */
@@ -204,6 +206,15 @@ function parseChallenge(raw: unknown): StrictChallengeBackup | null {
     }
     streamId = row.streamId;
   }
+  // The group id only needs the same charset as the challenge id: it is
+  // a label rows share, never a reference to another store.
+  let groupId: string | undefined;
+  if (row.groupId !== undefined) {
+    if (typeof row.groupId !== "string" || !CHALLENGE_ID_PATTERN.test(row.groupId)) {
+      return null;
+    }
+    groupId = row.groupId;
+  }
   return {
     id: row.id,
     dhikrId: row.dhikrId,
@@ -212,6 +223,7 @@ function parseChallenge(raw: unknown): StrictChallengeBackup | null {
     startDayKey: row.startDayKey,
     createdAt: row.createdAt,
     ...(streamId !== undefined ? { streamId } : {}),
+    ...(groupId !== undefined ? { groupId } : {}),
   };
 }
 

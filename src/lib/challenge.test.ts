@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   STRICT_CHALLENGE_QUEST_ID,
   challengeStreamId,
+  deriveChallengeGroup,
   deriveStrictChallenge,
+  groupStrictChallenges,
   isActiveChallenge,
   isChallengeStreamId,
   streamIdFor,
@@ -185,6 +187,92 @@ describe("concurrent challenges", () => {
     expect(second.status).toBe("broken");
     expect(second.missedDayKey).toBe("2026-03-01");
     expect(second.streakDays).toBe(0);
+  });
+});
+
+describe("groupStrictChallenges", () => {
+  const sameDay = (overrides: Partial<StrictChallenge>): StrictChallenge =>
+    challenge({ startDayKey: "2026-03-03", ...overrides });
+
+  it("groups rows that share a groupId, oldest commitment first", () => {
+    const a1 = sameDay({ id: "a1", groupId: "g1", createdAt: 10 });
+    const a2 = sameDay({
+      id: "a2",
+      dhikrId: "alhamdulillah",
+      groupId: "g1",
+      createdAt: 11,
+    });
+    const b1 = sameDay({
+      id: "b1",
+      dhikrId: "subhanallahi-wa-bihamdihi",
+      groupId: "g2",
+      createdAt: 5,
+    });
+    const solo = sameDay({ id: "s1", createdAt: 20 });
+
+    const groups = groupStrictChallenges([a1, b1, a2, solo]);
+    expect(groups.map((group) => group.id)).toEqual(["g2", "g1", "s1"]);
+    expect(groups[1].rows.map((row) => row.id)).toEqual(["a1", "a2"]);
+    expect(groups[2].rows.map((row) => row.id)).toEqual(["s1"]);
+  });
+
+  it("keeps a legacy row without groupId as its own group", () => {
+    const groups = groupStrictChallenges([challenge()]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].id).toBe("c1");
+  });
+
+  it("derives group status: any broken breaks, all complete finishes", () => {
+    // Shared window 2026-03-01..07; NOW is 2026-03-03, so days 1-2 are
+    // the judgeable past days.
+    const m1 = challenge({ id: "m1", dailyTarget: 100 });
+    const m2 = challenge({
+      id: "m2",
+      dhikrId: "alhamdulillah",
+      dailyTarget: 50,
+      streamId: streamIdFor("m2"),
+    });
+    const hitBothDays = (target: number, stream: string): PracticeEvent[] => [
+      ev(target, at(3, 1, 9), stream),
+      ev(target, at(3, 2, 9), stream),
+    ];
+    const group = {
+      id: "g1",
+      rows: [m1, m2],
+      derived: [
+        deriveStrictChallenge(m1, hitBothDays(100, STRICT_CHALLENGE_QUEST_ID), NOW),
+        deriveStrictChallenge(m2, hitBothDays(50, streamIdFor("m2")), NOW),
+      ],
+    };
+    expect(deriveChallengeGroup(group)).toBe("active");
+
+    const missedOnce = {
+      ...group,
+      derived: [
+        group.derived[0],
+        // m2 counted nothing: day 1 missed, so the commitment is broken.
+        deriveStrictChallenge(m2, [], NOW),
+      ],
+    };
+    expect(deriveChallengeGroup(missedOnce)).toBe("broken");
+
+    const f1 = challenge({ id: "f1" });
+    const f2 = challenge({
+      id: "f2",
+      dhikrId: "alhamdulillah",
+      streamId: streamIdFor("f2"),
+    });
+    const sevenDays = (target: number, stream: string): PracticeEvent[] =>
+      Array.from({ length: 7 }, (_, index) => ev(target, at(3, index + 1, 9), stream));
+    const finished = {
+      id: "g2",
+      rows: [f1, f2],
+      derived: [
+        deriveStrictChallenge(f1, sevenDays(100, STRICT_CHALLENGE_QUEST_ID), at(3, 8, 9)),
+        deriveStrictChallenge(f2, sevenDays(100, streamIdFor("f2")), at(3, 8, 9)),
+      ],
+    };
+    expect(deriveChallengeGroup(finished)).toBe("complete");
   });
 });
 

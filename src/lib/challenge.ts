@@ -48,7 +48,7 @@ export const MAX_CHALLENGE_DAYS = 365;
 
 /** Product presets; 30 days is the recommended commitment. */
 export const CHALLENGE_TARGET_PRESETS = [100, 500] as const;
-export const CHALLENGE_DURATION_PRESETS = [7, 30, 40] as const;
+export const CHALLENGE_DURATION_PRESETS = [7, 14, 30, 40, 90] as const;
 export const RECOMMENDED_DURATION_DAYS = 30;
 
 export type StrictStatus = "active" | "complete" | "broken";
@@ -159,6 +159,60 @@ export function deriveStrictChallenge(
  */
 export function isActiveChallenge(derived: DerivedStrictChallenge): boolean {
   return derived.status === "active" || derived.status === "complete";
+}
+
+/**
+ * A Challenge as the user sees it: one commitment that may carry several
+ * amals. Rows sharing a groupId were created by one setup and share a
+ * window; legacy and single-amal rows stand alone.
+ */
+export interface ChallengeGroup {
+  /** The shared groupId, or the solo row's own id. */
+  id: string;
+  rows: StrictChallenge[];
+  derived: DerivedStrictChallenge[];
+}
+
+/** True when the commitment carries more than one amal. */
+export const isMultiAmalGroup = (group: ChallengeGroup): boolean =>
+  group.rows.length > 1;
+
+/**
+ * Groups challenge rows into user-facing commitments, oldest first. Row
+ * order inside a group follows creation order (the setup order).
+ */
+export function groupStrictChallenges(
+  challenges: ReadonlyArray<StrictChallenge>,
+): ChallengeGroup[] {
+  const groups = new Map<string, StrictChallenge[]>();
+  for (const challenge of challenges) {
+    const key = challenge.groupId ?? challenge.id;
+    const rows = groups.get(key);
+    if (rows) rows.push(challenge);
+    else groups.set(key, [challenge]);
+  }
+  const list = [...groups.values()];
+  list.sort(
+    (a, b) => Math.min(...a.map((row) => row.createdAt)) - Math.min(...b.map((row) => row.createdAt)),
+  );
+  return list.map((rows) => ({
+    id: rows[0].groupId ?? rows[0].id,
+    rows,
+    derived: [],
+  }));
+}
+
+/**
+ * Group status from its rows: one broken amal breaks the commitment,
+ * all amals complete finishes it, otherwise it is still active. The
+ * rows share a window, so day and streak figures read from any row.
+ */
+export function deriveChallengeGroup(
+  group: ChallengeGroup,
+): StrictStatus {
+  if (group.derived.some((entry) => entry.status === "broken")) return "broken";
+  if (group.derived.every((entry) => entry.status === "complete")) return "complete";
+  return "active";
 }
 
 /**

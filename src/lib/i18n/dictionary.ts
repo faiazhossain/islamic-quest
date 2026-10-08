@@ -131,15 +131,22 @@ export const EN = {
   regularPracticeDesc:
     "Every quest complete. A daily Amal keeps the rhythm - at your own pace.",
 
-  // Simple Challenge (a personal commitment: 1 amal, 1 daily target,
-  // 1 duration. Product terms "Simple Challenge" / "Challenge" / "streak"
-  // stay in English where natural. A day counts only when the target is
-  // met - but copy stays calm, never punitive.)
+  // Simple Challenge (a personal commitment: one or more amals, each
+  // with a daily target, one duration. Product terms "Simple Challenge" /
+  // "Challenge" / "streak" stay in English where natural. A day counts
+  // only when the target is met - but copy stays calm, never punitive.)
   strictTitle: "Simple Challenge",
   strictTagline: "A small daily habit, a commitment to yourself!",
   strictRules:
     "The rule here is simple - meet the target and the day counts. Miss a day and you start over, but all your past records stay in the app.",
-  strictChooseAmal: "Which amal will you do?",
+  strictChooseAmals: "Choose your amals",
+  strictAmalsSelected: (n: string) => `${n} selected`,
+  strictAmalsDaily: (n: string) => `${n} amals daily:`,
+  strictTodayAmalsDone: (done: string, total: string) =>
+    `${done} / ${total} amals done today`,
+  strictGroupAmals: (n: string) => `${n} amals`,
+  strictParallelNote:
+    "This challenge will run alongside your current one.",
   strictDailyTarget: "How many per day?",
   strictDuration: "How many days?",
   strictCustom: "Custom",
@@ -157,7 +164,7 @@ export const EN = {
   strictMissedOn: (date: string) => `${date} wasn't completed`,
   strictCompleteTitle: "Simple Challenge complete",
   strictCompleteBody: (n: string) => `${n}-day commitment finished.`,
-  strictNewChallenge: "Start another challenge",
+  strictNewChallenge: "New challenge",
   strictEnd: "End challenge",
   strictEndConfirmTitle: "End this challenge?",
   strictEndConfirmBody:
@@ -512,7 +519,12 @@ export const BN: Copy = {
   strictTagline: "প্রতিদিনের একটি ছোট্ট অভ্যাস, নিজের সাথে একটা commitment!",
   strictRules:
     "এখানে নিয়ম একদম সহজ—টার্গেট পূরণ হলেই দিন কাউন্ট হবে। কোনোদিন মিস হয়ে গেলে নতুন করে শুরু করতে হবে, তবে আপনার আগের সব রেকর্ড অ্যাপে থেকে যাব।",
-  strictChooseAmal: "কোন আমলটা করবেন?",
+  strictChooseAmals: "আপনার Challenge বেছে নিন",
+  strictAmalsSelected: (n) => `${n}টি আমল selected`,
+  strictAmalsDaily: (n) => `${n}টি আমল প্রতিদিন:`,
+  strictTodayAmalsDone: (done, total) => `আজ ${done}/${total}টি আমল সম্পন্ন`,
+  strictGroupAmals: (n) => `${n}টি আমল`,
+  strictParallelNote: "এটি আপনার চলমান Challenge-এর পাশাপাশি চলবে।",
   strictDailyTarget: "প্রতিদিন কতবার?",
   strictDuration: "কতদিন চালাবেন?",
   strictCustom: "কাস্টম",
@@ -530,7 +542,7 @@ export const BN: Copy = {
   strictMissedOn: (date) => `${date} সম্পূর্ণ হয়নি`,
   strictCompleteTitle: "Simple Challenge সম্পন্ন",
   strictCompleteBody: (n) => `${n} দিনের commitment শেষ হয়েছে।`,
-  strictNewChallenge: "আরেকটা Challenge শুরু করুন",
+  strictNewChallenge: "নতুন Challenge",
   strictEnd: "Challenge শেষ করুন",
   strictEndConfirmTitle: "Challenge শেষ করবেন?",
   strictEndConfirmBody:

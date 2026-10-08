@@ -51,6 +51,12 @@ export interface StrictChallenge {
    * pre-multi-challenge legacy rows, which read the shared reserved id.
    */
   streamId?: string;
+  /**
+   * Groups rows created together by one setup: a multi-amal Challenge is
+   * one commitment with one window, carried by several rows (one per
+   * amal). Absent on legacy and single-amal rows, which stand alone.
+   */
+  groupId?: string;
 }
 
 export class AmalynDb extends Dexie {

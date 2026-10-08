@@ -9,7 +9,12 @@ import {
 } from "react";
 import { StarMark } from "@/components/star-mark";
 import { Stat } from "@/components/stat";
-import { deriveStrictChallenge } from "@/lib/challenge";
+import {
+  deriveChallengeGroup,
+  deriveStrictChallenge,
+  groupStrictChallenges,
+  type DerivedStrictChallenge,
+} from "@/lib/challenge";
 import { getDhikr } from "@/lib/content";
 import { listStrictChallenges } from "@/lib/db/challenges";
 import { formatCount } from "@/lib/format";
@@ -22,6 +27,12 @@ import {
 import { selectHomeView, type DailyAmal, type HomeView } from "@/lib/home";
 import type { StrictChallenge } from "@/lib/db/db";
 import type { PracticeEvent, PracticeStats } from "@/lib/practice";
+
+/** One challenge row with its derivation, inside a group. */
+interface StrictEntry {
+  challenge: StrictChallenge;
+  derived: DerivedStrictChallenge;
+}
 
 export default function HomePage() {
   const copy = useCopy();
@@ -70,16 +81,31 @@ export default function HomePage() {
     [progress, events, now, lang],
   );
 
-  // One row per active challenge; finished and broken commitments live
-  // on /challenge, and with none active the invitation row returns.
-  const activeChallenges =
+  // One row per active commitment (a multi-amal commitment is one row);
+  // finished and broken ones live on /challenge, and with none active
+  // the invitation row returns.
+  const activeChallengeGroups =
     events && now > 0
-      ? challenges
-          .map((challenge) => ({
-            challenge,
-            derived: deriveStrictChallenge(challenge, events, now),
-          }))
-          .filter((entry) => entry.derived.status === "active")
+      ? groupStrictChallenges(challenges)
+          .map((group) => {
+            const byId = new Map(
+              challenges.map((challenge) => [challenge.id, challenge]),
+            );
+            const entries: StrictEntry[] = group.rows.map((row) => ({
+              challenge: byId.get(row.id) ?? row,
+              derived: deriveStrictChallenge(
+                byId.get(row.id) ?? row,
+                events,
+                now,
+              ),
+            }));
+            return {
+              entries,
+              status: deriveChallengeGroup({ ...group, derived: entries.map((entry) => entry.derived) }),
+            };
+          })
+          .filter((group) => group.status === "active")
+          .map((group) => group.entries)
       : [];
 
   return (
@@ -109,16 +135,15 @@ export default function HomePage() {
             name={view.name}
             target={view.target}
           />
-          {activeChallenges.length > 0 ? (
-            activeChallenges.map((entry) => (
+          {activeChallengeGroups.length > 0 ? (
+            activeChallengeGroups.map((entries) => (
               <StrictRow
-                key={entry.challenge.id}
-                challenge={entry.challenge}
-                derived={entry.derived}
+                key={entries[0].challenge.groupId ?? entries[0].challenge.id}
+                entries={entries}
               />
             ))
           ) : (
-            <StrictRow challenge={null} derived={null} />
+            <StrictRow entries={null} />
           )}
           <HowItWorks />
         </div>
@@ -172,17 +197,16 @@ export default function HomePage() {
               order utilities put the full-width strip back below the hero
               row on desktop, where the journey link fills the hero's right
               column. */}
-          {activeChallenges.length > 0 ? (
-            activeChallenges.map((entry) => (
+          {activeChallengeGroups.length > 0 ? (
+            activeChallengeGroups.map((entries) => (
               <StrictRow
-                key={entry.challenge.id}
-                challenge={entry.challenge}
-                derived={entry.derived}
+                key={entries[0].challenge.groupId ?? entries[0].challenge.id}
+                entries={entries}
                 className="lg:order-3 lg:mt-0"
               />
             ))
           ) : (
-            <StrictRow challenge={null} derived={null} className="lg:order-3 lg:mt-0" />
+            <StrictRow entries={null} className="lg:order-3 lg:mt-0" />
           )}
 
           <Link
@@ -214,13 +238,13 @@ export default function HomePage() {
 /**
  * The Simple Challenge entry: home's clear second tier - louder than a
  * nav row, quieter than the quest hero. One row renders per active
- * challenge, the amal name as the title; a dial tells the commitment's
- * state at a glance (arc = place in the window, center = streak) and the
- * tone follows the status calmly, never punitively: gold while running,
- * jade when today's amal or the whole challenge is done, quiet danger
- * after a missed day. Always rendered so the challenge stays reachable
- * before the first one is ever started; with none active, a dashed dial
- * around a plus is the invitation.
+ * commitment; a multi-amal commitment keeps its one-row shape with the
+ * amal count as the title. A dial tells the commitment's state at a
+ * glance (arc = place in the window, center = streak) and the tone
+ * follows the status calmly, never punitively: gold while running, jade
+ * when today's amals are done. Always rendered so the challenge stays
+ * reachable before the first one is ever started; with none active, a
+ * dashed dial around a plus is the invitation.
  */
 type StrictTone = "accent" | "jade" | "danger" | "idle";
 
@@ -242,12 +266,10 @@ const DIAL_TONE_CLASSES: Record<StrictTone, string> = {
 };
 
 function StrictRow({
-  challenge,
-  derived,
+  entries,
   className = "",
 }: {
-  challenge: StrictChallenge | null;
-  derived: ReturnType<typeof deriveStrictChallenge> | null;
+  entries: StrictEntry[] | null;
   className?: string;
 }) {
   const copy = useCopy();
@@ -256,43 +278,50 @@ function StrictRow({
   let tone: StrictTone = "idle";
   let dashed = true;
   let percent = 0;
-  // With several challenges running, the amal name is what tells the rows
+  let streak: number | null = null;
+  // With several commitments running, the title is what tells the rows
   // apart; the invitation row keeps the product name.
   let title = copy.strictTitle;
   let line = copy.strictTagline;
-  if (challenge && derived) {
+  if (entries && entries.length > 0) {
     dashed = false;
-    const dhikr = getDhikr(challenge.dhikrId);
-    title = dhikr ? localized(dhikr.names, lang) : copy.strictTitle;
-    if (derived.status === "complete") {
-      tone = "jade";
-      percent = 100;
-      line = copy.strictCompleteTitle;
-    } else if (derived.status === "broken") {
-      tone = "danger";
-      percent =
-        challenge.durationDays > 0
-          ? (derived.streakDays / challenge.durationDays) * 100
-          : 0;
-      line = copy.strictStreak(formatCount(derived.streakDays, lang));
+    const first = entries[0];
+    const challenge = first.challenge;
+    const derived = first.derived;
+    streak = derived.streakDays;
+    if (entries.length === 1) {
+      const dhikr = getDhikr(challenge.dhikrId);
+      title = dhikr ? localized(dhikr.names, lang) : copy.strictTitle;
     } else {
-      percent =
-        challenge.durationDays > 0
-          ? (derived.dayNumber / challenge.durationDays) * 100
-          : 0;
-      if (derived.todayComplete) {
-        tone = "jade";
-        line = copy.strictTodayComplete;
-      } else {
-        tone = "accent";
-        line = `${formatCount(derived.todayCount, lang)} / ${formatCount(
-            challenge.dailyTarget,
-            lang,
-          )} · ${copy.strictDayProgress(
-            formatCount(derived.dayNumber, lang),
-            formatCount(challenge.durationDays, lang),
-          )}`;
-      }
+      title = copy.strictGroupAmals(formatCount(entries.length, lang));
+    }
+    // Only active commitments reach this row; the day is the headline.
+    percent =
+      challenge.durationDays > 0
+        ? (derived.dayNumber / challenge.durationDays) * 100
+        : 0;
+    const doneToday = entries.filter((entry) => entry.derived.todayComplete);
+    if (doneToday.length === entries.length) {
+      tone = "jade";
+      line = copy.strictTodayComplete;
+    } else if (entries.length === 1) {
+      tone = "accent";
+      line = `${formatCount(derived.todayCount, lang)} / ${formatCount(
+          challenge.dailyTarget,
+          lang,
+        )} · ${copy.strictDayProgress(
+          formatCount(derived.dayNumber, lang),
+          formatCount(challenge.durationDays, lang),
+        )}`;
+    } else {
+      tone = "accent";
+      line = `${copy.strictTodayAmalsDone(
+        formatCount(doneToday.length, lang),
+        formatCount(entries.length, lang),
+      )} · ${copy.strictDayProgress(
+        formatCount(derived.dayNumber, lang),
+        formatCount(challenge.durationDays, lang),
+      )}`;
     }
   }
 
@@ -306,9 +335,9 @@ function StrictRow({
         className={`shrink-0 ${DIAL_TONE_CLASSES[tone]}`}
       >
         <ChallengeDial percent={percent} dashed={dashed}>
-          {challenge && derived ? (
+          {streak !== null ? (
             <span className="text-[13px] font-semibold leading-none tabular-nums">
-              {formatCount(derived.streakDays, lang)}
+              {formatCount(streak, lang)}
             </span>
           ) : null}
         </ChallengeDial>
