@@ -1,10 +1,10 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
+import { streamIdFor } from "../challenge";
 import { db } from "./db";
 import {
   createStrictChallenge,
   deleteStrictChallenge,
-  getLatestStrictChallenge,
   listStrictChallenges,
 } from "./challenges";
 
@@ -12,8 +12,8 @@ beforeEach(async () => {
   await db.challenges.clear();
 });
 
-describe("strict challenge store", () => {
-  it("creates, lists, and returns the latest challenge", async () => {
+describe("challenge store", () => {
+  it("creates concurrent challenges, each with its own stream", async () => {
     const first = await createStrictChallenge({
       dhikrId: "subhanallah",
       dailyTarget: 100,
@@ -32,11 +32,13 @@ describe("strict challenge store", () => {
       first.id,
       second.id,
     ]);
-    expect((await getLatestStrictChallenge())?.id).toBe(second.id);
+    for (const challenge of all) {
+      expect(challenge.streamId).toBe(streamIdFor(challenge.id));
+    }
+    expect(first.streamId).not.toBe(second.streamId);
   });
 
-  it("returns undefined with no challenges", async () => {
-    expect(await getLatestStrictChallenge()).toBeUndefined();
+  it("returns an empty list with no challenges", async () => {
     expect(await listStrictChallenges()).toEqual([]);
   });
 
@@ -59,6 +61,6 @@ describe("strict challenge store", () => {
       now: 1_000,
     });
     await deleteStrictChallenge(challenge.id);
-    expect(await getLatestStrictChallenge()).toBeUndefined();
+    expect(await listStrictChallenges()).toEqual([]);
   });
 });

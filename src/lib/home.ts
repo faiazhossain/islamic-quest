@@ -5,7 +5,7 @@
  */
 import { dhikrForQuest, publicQuests, type Quest } from "./content";
 import { suggestedQuest } from "./content/journey";
-import { STRICT_CHALLENGE_QUEST_ID } from "./challenge";
+import { sumQuestDhikr } from "./challenge";
 import type { Lang } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { dayStartOf } from "./format";
@@ -126,15 +126,9 @@ export function selectHomeView(input: HomeInput): HomeView {
           todayCount,
         },
         stats: derivePracticeStats(events, now),
-        // Quest-labeled total: Strict Challenge counts are worship but not
-        // quest progress, so the reserved id stays out of this figure.
-        totalDhikr: [...progress.values()].reduce(
-          (sum, entry) =>
-            entry.questId === STRICT_CHALLENGE_QUEST_ID
-              ? sum
-              : sum + entry.count,
-          0,
-        ),
+        // Quest-labeled total: challenge counts (legacy and per-challenge
+        // streams alike) are worship but not quest progress.
+        totalDhikr: sumQuestDhikr(progress.values()),
         todayTotal,
         completedCount: completed.length,
         questTotal: publicQuests().length,

@@ -2,13 +2,13 @@ import { db } from "./db";
 import type { StrictChallenge } from "./db";
 import { newId } from "./events";
 import { localDayKey } from "../format";
+import { streamIdFor } from "../challenge";
 
 /**
- * Strict Challenge definitions live in their own local-first store.
+ * Simple Challenge definitions live in their own local-first store.
  * Counts are ordinary events (see challenge.ts); this store holds only
- * the commitment. One active challenge at a time is enforced at creation:
- * callers derive the latest challenge first and only offer creation when
- * no live commitment exists.
+ * the commitments. Several challenges may run at once - each is fully
+ * independent, and every new row gets its own event stream at creation.
  */
 
 export async function createStrictChallenge(input: {
@@ -17,21 +17,18 @@ export async function createStrictChallenge(input: {
   durationDays: number;
   now: number;
 }): Promise<StrictChallenge> {
+  const id = newId();
   const challenge: StrictChallenge = {
-    id: newId(),
+    id,
     dhikrId: input.dhikrId,
     dailyTarget: input.dailyTarget,
     durationDays: input.durationDays,
     startDayKey: localDayKey(input.now),
     createdAt: input.now,
+    streamId: streamIdFor(id),
   };
   await db.challenges.add(challenge);
   return challenge;
-}
-
-export async function getLatestStrictChallenge(): Promise<StrictChallenge | undefined> {
-  const all = await listStrictChallenges();
-  return all[all.length - 1];
 }
 
 export async function listStrictChallenges(): Promise<StrictChallenge[]> {

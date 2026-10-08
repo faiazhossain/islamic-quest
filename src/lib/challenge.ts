@@ -1,25 +1,45 @@
 /**
- * Pure derivations for the Strict Challenge: one amal, one daily target,
- * one duration. Counts live in the append-only event log under the
- * reserved strict-challenge quest id; the persisted challenge row is only
- * the commitment itself. Everything here rebuilds from the event log
- * alone - status is derived, never stored, so a restored backup or a
- * synced device reconstructs the same truth.
+ * Pure derivations for the Simple Challenge: one amal, one daily target,
+ * one duration. Several challenges can run at once; each counts into its
+ * own append-only event stream, so their days never cross-contaminate.
+ * The persisted challenge row is only the commitment itself. Everything
+ * here rebuilds from the event log alone - status is derived, never
+ * stored, so a restored backup or a synced device reconstructs the same
+ * truth.
  *
  * Strictness is the feature: a day counts only when its net count reaches
  * the daily target, and one missed day ends the challenge. The UI must
  * present that calmly, never punitively.
  */
-import type { StrictChallenge } from "./db/db";
+import type { QuestProgress, StrictChallenge } from "./db/db";
 import { dayKeyOrdinal, dayStartOf, localDayKey } from "./format";
 import type { PracticeEvent } from "./practice";
 
 /**
- * Challenge counts ride the ordinary increment/undo event stream under
- * this reserved, non-catalog quest id (accepted by event-validation), so
+ * Challenge counts ride ordinary increment/undo event streams under
+ * reserved, non-catalog quest ids (accepted by event-validation), so
  * challenge taps stay fully separate from quest progress.
  */
 export const STRICT_CHALLENGE_QUEST_ID = "strict-challenge";
+
+/**
+ * Each challenge counts into its own stream: "<reserved id>:<challenge id>".
+ * The suffix charset matches the challenge-id validation in
+ * event-validation.ts, so an event that passes import always passes the
+ * server too.
+ */
+export const CHALLENGE_STREAM_PATTERN = /^strict-challenge:[A-Za-z0-9-]{1,64}$/;
+
+export const streamIdFor = (challengeId: string): string =>
+  `${STRICT_CHALLENGE_QUEST_ID}:${challengeId}`;
+
+/** True for the legacy shared stream and every per-challenge stream. */
+export const isChallengeStreamId = (questId: string): boolean =>
+  questId === STRICT_CHALLENGE_QUEST_ID || CHALLENGE_STREAM_PATTERN.test(questId);
+
+/** Resolves the event stream a challenge reads and writes. */
+export const challengeStreamId = (challenge: StrictChallenge): string =>
+  challenge.streamId ?? STRICT_CHALLENGE_QUEST_ID;
 
 export const MIN_CHALLENGE_TARGET = 1;
 export const MAX_CHALLENGE_TARGET = 10_000;
@@ -78,9 +98,8 @@ export function deriveStrictChallenge(
   events: ReadonlyArray<PracticeEvent>,
   now: number,
 ): DerivedStrictChallenge {
-  const strictEvents = events.filter(
-    (event) => event.questId === STRICT_CHALLENGE_QUEST_ID,
-  );
+  const streamId = challengeStreamId(challenge);
+  const strictEvents = events.filter((event) => event.questId === streamId);
 
   const dayTotals = new Map<string, number>();
   for (const event of strictEvents) {
@@ -135,29 +154,24 @@ export function deriveStrictChallenge(
 }
 
 /**
- * Terminal check for the one-active-at-a-time rule: only a challenge
- * whose window is still live and unbroken blocks creating another.
+ * True while a commitment is still live: an active window, or a finished
+ * one the user has not yet restarted from.
  */
 export function isActiveChallenge(derived: DerivedStrictChallenge): boolean {
   return derived.status === "active" || derived.status === "complete";
 }
 
 /**
- * The strictTodayCount selector, shared with Home: today's net count for
- * the challenge, independent of any quest progress.
+ * Quest-labeled dhikr total: challenge counts (legacy shared stream and
+ * every per-challenge stream) are worship but not quest progress, so
+ * their rows stay out of this figure.
  */
-export function strictTodayCount(
-  events: ReadonlyArray<PracticeEvent>,
-  now: number,
+export function sumQuestDhikr(
+  progress: Iterable<QuestProgress>,
 ): number {
-  return Math.max(
-    0,
-    events.reduce(
-      (sum, event) =>
-        event.questId === STRICT_CHALLENGE_QUEST_ID && event.at >= dayStartOf(now)
-          ? sum + event.delta
-          : sum,
-      0,
-    ),
-  );
+  let total = 0;
+  for (const entry of progress) {
+    if (!isChallengeStreamId(entry.questId)) total += entry.count;
+  }
+  return total;
 }

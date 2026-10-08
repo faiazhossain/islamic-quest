@@ -1,5 +1,12 @@
 import { DHIKR, QUESTS } from "./content";
-import { MIN_CHALLENGE_DAYS, MIN_CHALLENGE_TARGET, STRICT_CHALLENGE_QUEST_ID, MAX_CHALLENGE_DAYS, MAX_CHALLENGE_TARGET } from "./challenge";
+import {
+  MAX_CHALLENGE_DAYS,
+  MAX_CHALLENGE_TARGET,
+  MIN_CHALLENGE_DAYS,
+  MIN_CHALLENGE_TARGET,
+  isChallengeStreamId,
+  streamIdFor,
+} from "./challenge";
 import type { ProgressEventType } from "./db/db";
 import type { SyncEvent } from "./sync-merge";
 
@@ -7,11 +14,12 @@ import type { SyncEvent } from "./sync-merge";
  * The sync event contract, shared by the server route and the local
  * import flow. One definition here means an event that passes import is
  * guaranteed to pass the server, and vice versa - a malformed row can
- * never wedge sync into a permanent 400.
+ * never wedge sync into a permanent 400. Catalog quest ids are listed
+ * here; challenge stream ids (the reserved shared id and each
+ * challenge's own stream) are accepted by pattern via isChallengeStreamId.
  */
 export const KNOWN_QUEST_IDS: ReadonlySet<string> = new Set([
   ...QUESTS.map((quest) => quest.id),
-  STRICT_CHALLENGE_QUEST_ID,
 ]);
 
 const KNOWN_TYPES: readonly ProgressEventType[] = [
@@ -61,7 +69,10 @@ export function isValidEvent(candidate: unknown, now: number): candidate is Sync
     return false;
   }
   if (!KNOWN_TYPES.includes(event.type as ProgressEventType)) return false;
-  if (typeof event.questId !== "string" || !KNOWN_QUEST_IDS.has(event.questId)) {
+  if (
+    typeof event.questId !== "string" ||
+    !(KNOWN_QUEST_IDS.has(event.questId) || isChallengeStreamId(event.questId))
+  ) {
     return false;
   }
   // Membership test against a numbers-only list; the cast is the check.
@@ -122,6 +133,13 @@ const KNOWN_DHIKR_IDS: ReadonlySet<string> = new Set(
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+/**
+ * Challenge-id charset: deliberately identical to the stream-id suffix in
+ * CHALLENGE_STREAM_PATTERN, so a challenge that passes this check can
+ * never produce a stream id the event contract rejects.
+ */
+const CHALLENGE_ID_PATTERN = /^[A-Za-z0-9-]{1,64}$/;
+
 /** A challenge definition as it travels inside a version-2 backup. */
 export interface StrictChallengeBackup {
   id: string;
@@ -130,17 +148,15 @@ export interface StrictChallengeBackup {
   durationDays: number;
   startDayKey: string;
   createdAt: number;
+  /** Canonical per-challenge stream; absent on pre-multi-challenge rows. */
+  streamId?: string;
 }
 
 /** Validates one raw challenge row; same all-or-nothing rule as events. */
 function parseChallenge(raw: unknown): StrictChallengeBackup | null {
   if (typeof raw !== "object" || raw === null) return null;
   const row = raw as Record<string, unknown>;
-  if (
-    typeof row.id !== "string" ||
-    row.id.length === 0 ||
-    row.id.length > 64
-  ) {
+  if (typeof row.id !== "string" || !CHALLENGE_ID_PATTERN.test(row.id)) {
     return null;
   }
   if (typeof row.dhikrId !== "string" || !KNOWN_DHIKR_IDS.has(row.dhikrId)) {
@@ -179,6 +195,15 @@ function parseChallenge(raw: unknown): StrictChallengeBackup | null {
   ) {
     return null;
   }
+  // The stream id is canonical when present: a backup row may only point
+  // at its own stream, never at another challenge's counts.
+  let streamId: string | undefined;
+  if (row.streamId !== undefined) {
+    if (typeof row.streamId !== "string" || row.streamId !== streamIdFor(row.id)) {
+      return null;
+    }
+    streamId = row.streamId;
+  }
   return {
     id: row.id,
     dhikrId: row.dhikrId,
@@ -186,6 +211,7 @@ function parseChallenge(raw: unknown): StrictChallengeBackup | null {
     durationDays: days,
     startDayKey: row.startDayKey,
     createdAt: row.createdAt,
+    ...(streamId !== undefined ? { streamId } : {}),
   };
 }
 

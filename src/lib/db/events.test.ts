@@ -1,5 +1,6 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
+import { streamIdFor } from "../challenge";
 import { db } from "./db";
 import { dayStartOf } from "../format";
 import {
@@ -61,6 +62,18 @@ describe("event log", () => {
     const all = await getAllProgress();
     expect(all.get("a")?.count).toBe(2);
     expect(all.get("b")?.count).toBe(1);
+  });
+
+  it("keeps per-challenge stream ids isolated in the cache", async () => {
+    const first = streamIdFor("c1");
+    const second = streamIdFor("c2");
+    await recordIncrement(first);
+    await recordIncrement(first);
+    await recordIncrement(second);
+
+    expect((await getProgress(first))?.count).toBe(2);
+    expect((await getProgress(second))?.count).toBe(1);
+    expect(await getProgress("strict-challenge")).toBeUndefined();
   });
 
   it("rebuilds progress from events alone", async () => {

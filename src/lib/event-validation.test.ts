@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { streamIdFor } from "./challenge";
 import {
   MAX_AGE_MS,
   MAX_BATCH,
@@ -43,6 +44,35 @@ describe("parseEvents", () => {
     expect(
       parseEvents([{ ...strict, type: "undo", delta: -1 }], NOW),
     ).toEqual([{ ...strict, type: "undo", delta: -1 }]);
+  });
+
+  it("accepts per-challenge stream ids like any quest", () => {
+    const first = { ...valid, questId: streamIdFor("c1") };
+    expect(parseEvents([first], NOW)).toEqual([first]);
+    const undo = { ...first, type: "undo" as const, delta: -1 };
+    expect(parseEvents([undo], NOW)).toEqual([undo]);
+  });
+
+  it("rejects malformed challenge stream ids", () => {
+    for (const questId of [
+      "strict-challenge:",
+      "strict-challenge:a b",
+      `strict-challenge:${"x".repeat(65)}`,
+      "Strict-Challenge:c1",
+      "strict-challenge-extra:c1",
+      "challenge:c1",
+    ]) {
+      expect(parseEvents([{ ...valid, questId }], NOW)).toBeNull();
+    }
+  });
+
+  it("keeps batches all-or-nothing on a bad stream id", () => {
+    expect(
+      parseEvents(
+        [valid, { ...valid, id: "e2", questId: "strict-challenge:" }],
+        NOW,
+      ),
+    ).toBeNull();
   });
 
   it("rejects ids that are missing or oversized", () => {
@@ -162,6 +192,83 @@ describe("parseImportEnvelope", () => {
     expect(parseImportEnvelope(v2({ ...base, startDayKey: "2026-13-01" }))).toBeNull();
     expect(parseImportEnvelope(v2({ ...base, id: "" }))).toBeNull();
     expect(parseImportEnvelope(v2("challenge"))).toBeNull();
+  });
+
+  it("accepts canonical per-challenge stream ids on challenge rows", () => {
+    const row = {
+      id: "c1",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 1000,
+      streamId: streamIdFor("c1"),
+    };
+    const streamEvent = { ...freshEvent, questId: streamIdFor("c1") };
+    const result = parseImportEnvelope({
+      app: "amalyn",
+      version: 2,
+      events: [streamEvent],
+      challenges: [row],
+    });
+    expect(result).toEqual({
+      events: [streamEvent],
+      challenges: [row],
+    });
+  });
+
+  it("rejects challenge rows pointing at another challenge's stream", () => {
+    const base = {
+      id: "c1",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 1000,
+    };
+    const v2 = (challenge: unknown) => ({
+      app: "amalyn",
+      version: 2,
+      events: [freshEvent],
+      challenges: [challenge],
+    });
+    expect(
+      parseImportEnvelope(v2({ ...base, streamId: streamIdFor("other") })),
+    ).toBeNull();
+    expect(parseImportEnvelope(v2({ ...base, streamId: 5 }))).toBeNull();
+  });
+
+  it("round-trips a mixed set of legacy and stream challenges", () => {
+    const legacy = {
+      id: "c0",
+      dhikrId: "subhanallah",
+      dailyTarget: 100,
+      durationDays: 30,
+      startDayKey: "2026-03-01",
+      createdAt: Date.now() - 3000,
+    };
+    const streamed = (id: string) => ({
+      id,
+      dhikrId: "alhamdulillah",
+      dailyTarget: 500,
+      durationDays: 7,
+      startDayKey: "2026-03-02",
+      createdAt: Date.now() - 1000,
+      streamId: streamIdFor(id),
+    });
+    const events = [
+      freshEvent,
+      { ...freshEvent, id: "e2", questId: streamIdFor("a1") },
+      { ...freshEvent, id: "e3", questId: streamIdFor("b2") },
+    ];
+    const challenges = [legacy, streamed("a1"), streamed("b2")];
+    const result = parseImportEnvelope({
+      app: "amalyn",
+      version: 2,
+      events,
+      challenges,
+    });
+    expect(result).toEqual({ events, challenges });
   });
 
   it("rejects envelopes whose events fail the sync contract", () => {

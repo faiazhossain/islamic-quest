@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   STRICT_CHALLENGE_QUEST_ID,
+  challengeStreamId,
   deriveStrictChallenge,
   isActiveChallenge,
-  strictTodayCount,
+  isChallengeStreamId,
+  streamIdFor,
+  sumQuestDhikr,
 } from "./challenge";
-import type { StrictChallenge } from "./db/db";
+import type { QuestProgress, StrictChallenge } from "./db/db";
 import type { PracticeEvent } from "./practice";
 
 /** Local noon on 2026-03-03 - day 3 of the fixture challenge. */
@@ -123,9 +126,94 @@ describe("deriveStrictChallenge", () => {
     const derived = deriveStrictChallenge(challenge(), events, NOW);
     expect(derived.todayCount).toBe(100);
     expect(derived.todayComplete).toBe(true);
-    expect(strictTodayCount(events, NOW)).toBe(100);
-    // Viewed from day 2, only day-2-and-later events sit in "today" - the
-    // day-1 taps stay out.
-    expect(strictTodayCount([ev(90, at(3, 2, 9)), ev(50, at(3, 1, 9))], at(3, 2, 12))).toBe(90);
+  });
+
+  it("falls back to the legacy shared stream when streamId is absent", () => {
+    expect(challengeStreamId(challenge())).toBe(STRICT_CHALLENGE_QUEST_ID);
+    expect(challengeStreamId(challenge({ streamId: streamIdFor("c1") }))).toBe(
+      streamIdFor("c1"),
+    );
+  });
+});
+
+describe("concurrent challenges", () => {
+  const sameDay = (overrides: Partial<StrictChallenge>): StrictChallenge =>
+    challenge({ startDayKey: "2026-03-03", ...overrides });
+
+  it("keeps concurrent challenges' counts fully separate", () => {
+    const one = sameDay({ id: "c1", streamId: streamIdFor("c1") });
+    const two = sameDay({
+      id: "c2",
+      dhikrId: "alhamdulillah",
+      dailyTarget: 500,
+      streamId: streamIdFor("c2"),
+    });
+    const events = [
+      ev(40, at(3, 3, 8), streamIdFor("c1")),
+      ev(60, at(3, 3, 11), streamIdFor("c1")),
+      ev(90, at(3, 3, 10), streamIdFor("c2")),
+      // The legacy shared stream reaches neither new-stream challenge.
+      ev(100, at(3, 3, 10), STRICT_CHALLENGE_QUEST_ID),
+    ];
+    const first = deriveStrictChallenge(one, events, NOW);
+    expect(first.todayCount).toBe(100);
+    expect(first.todayComplete).toBe(true);
+    expect(first.status).toBe("active");
+    const second = deriveStrictChallenge(two, events, NOW);
+    expect(second.todayCount).toBe(90);
+    expect(second.todayComplete).toBe(false);
+    expect(second.status).toBe("active");
+  });
+
+  it("a missed day breaks only its own challenge", () => {
+    const one = challenge({ id: "c1", streamId: streamIdFor("c1") });
+    const two = challenge({
+      id: "c2",
+      dhikrId: "alhamdulillah",
+      dailyTarget: 500,
+      streamId: streamIdFor("c2"),
+    });
+    // Challenge one completed days 1-2; challenge two counted nothing.
+    const events = [
+      ev(100, at(3, 1, 9), streamIdFor("c1")),
+      ev(100, at(3, 2, 9), streamIdFor("c1")),
+    ];
+    const first = deriveStrictChallenge(one, events, NOW);
+    expect(first.status).toBe("active");
+    expect(first.streakDays).toBe(2);
+    const second = deriveStrictChallenge(two, events, NOW);
+    expect(second.status).toBe("broken");
+    expect(second.missedDayKey).toBe("2026-03-01");
+    expect(second.streakDays).toBe(0);
+  });
+});
+
+describe("isChallengeStreamId", () => {
+  it("accepts the legacy stream and well-formed per-challenge streams", () => {
+    expect(isChallengeStreamId("strict-challenge")).toBe(true);
+    expect(isChallengeStreamId(streamIdFor("c1"))).toBe(true);
+    expect(isChallengeStreamId("strict-challenge:0123456789abcdef-xyz")).toBe(true);
+  });
+
+  it("rejects look-alikes and junk", () => {
+    expect(isChallengeStreamId("strict-challenge:")).toBe(false);
+    expect(isChallengeStreamId("strict-challenge:a b")).toBe(false);
+    expect(isChallengeStreamId(`strict-challenge:${"x".repeat(65)}`)).toBe(false);
+    expect(isChallengeStreamId("Strict-Challenge:c1")).toBe(false);
+    expect(isChallengeStreamId("strict-challenge-extra:c1")).toBe(false);
+    expect(isChallengeStreamId("subhanallah-100")).toBe(false);
+  });
+});
+
+describe("sumQuestDhikr", () => {
+  it("counts catalog rows and skips every challenge stream", () => {
+    const rows: QuestProgress[] = [
+      { questId: "subhanallah-100", count: 120, updatedAt: 0 },
+      { questId: "alhamdulillah-33", count: 8, updatedAt: 0 },
+      { questId: STRICT_CHALLENGE_QUEST_ID, count: 500, updatedAt: 0 },
+      { questId: streamIdFor("c1"), count: 40, updatedAt: 0 },
+      { questId: streamIdFor("c2"), count: 7, updatedAt: 0 },
+    ];
+    expect(sumQuestDhikr(rows)).toBe(128);
   });
 });

@@ -30,10 +30,11 @@ export interface QuestProgress {
 }
 
 /**
- * A Strict Challenge definition: one amal, one daily target, one duration.
- * Local-first by design - only its counts (increment/undo events under the
- * reserved strict-challenge quest id) sync; status is derived on read, so
- * the persisted row is just the commitment itself.
+ * A Simple Challenge definition: one amal, one daily target, one duration.
+ * Several can run at once, each fully independent. Local-first by design -
+ * only its counts (increment/undo events under the challenge's own event
+ * stream) sync; status is derived on read, so the persisted row is just
+ * the commitment itself.
  */
 export interface StrictChallenge {
   /** Client-generated uuid. */
@@ -45,6 +46,11 @@ export interface StrictChallenge {
   /** Local "YYYY-MM-DD" of day 1; derivation is DST-safe from this key. */
   startDayKey: string;
   createdAt: number;
+  /**
+   * Quest id of the event stream this challenge counts into. Absent on
+   * pre-multi-challenge legacy rows, which read the shared reserved id.
+   */
+  streamId?: string;
 }
 
 export class AmalynDb extends Dexie {

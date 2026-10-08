@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DHIKR, getDhikr } from "@/lib/content";
 import {
@@ -9,14 +9,14 @@ import {
   MAX_CHALLENGE_DAYS,
   MAX_CHALLENGE_TARGET,
   RECOMMENDED_DURATION_DAYS,
-  STRICT_CHALLENGE_QUEST_ID,
+  challengeStreamId,
   deriveStrictChallenge,
   type DerivedStrictChallenge,
 } from "@/lib/challenge";
 import {
   createStrictChallenge,
   deleteStrictChallenge,
-  getLatestStrictChallenge,
+  listStrictChallenges,
 } from "@/lib/db/challenges";
 import { getPracticeEvents, recordIncrement, recordUndo } from "@/lib/db/events";
 import { formatCount, formatShortDate, localDayKey } from "@/lib/format";
@@ -28,53 +28,56 @@ import type { StrictChallenge } from "@/lib/db/db";
 const dayKeyMs = (key: string): number =>
   new Date(`${key}T12:00:00`).getTime();
 
-interface Loaded {
-  challenge: StrictChallenge | null;
-  derived: DerivedStrictChallenge | null;
-  now: number;
+interface ChallengeEntry {
+  challenge: StrictChallenge;
+  derived: DerivedStrictChallenge;
 }
 
 export default function ChallengePage() {
   const copy = useCopy();
-  const [loaded, setLoaded] = useState<Loaded | null>(null);
-  const [restartFrom, setRestartFrom] = useState<StrictChallenge | null>(null);
-  const [confirmEnd, setConfirmEnd] = useState(false);
+  const [entries, setEntries] = useState<ChallengeEntry[] | null>(null);
+  const [now, setNow] = useState(0);
+  const [restartFromId, setRestartFromId] = useState<string | null>(null);
+  const [confirmEndId, setConfirmEndId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const reload = useCallback(async () => {
-    const [challenge, events] = await Promise.all([
-      getLatestStrictChallenge(),
+    const [challenges, events] = await Promise.all([
+      listStrictChallenges(),
       getPracticeEvents(),
     ]);
     const now = Date.now();
-    setLoaded({
-      challenge: challenge ?? null,
-      derived: challenge
-        ? deriveStrictChallenge(challenge, events, now)
-        : null,
-      now,
-    });
+    // One instant for every derivation, so the whole stack describes the
+    // same moment.
+    setEntries(
+      challenges.map((challenge) => ({
+        challenge,
+        derived: deriveStrictChallenge(challenge, events, now),
+      })),
+    );
+    setNow(now);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [challenge, events] = await Promise.all([
-          getLatestStrictChallenge(),
+        const [challenges, events] = await Promise.all([
+          listStrictChallenges(),
           getPracticeEvents(),
         ]);
         if (!cancelled) {
           const now = Date.now();
-          setLoaded({
-            challenge: challenge ?? null,
-            derived: challenge
-              ? deriveStrictChallenge(challenge, events, now)
-              : null,
-            now,
-          });
+          setEntries(
+            challenges.map((challenge) => ({
+              challenge,
+              derived: deriveStrictChallenge(challenge, events, now),
+            })),
+          );
+          setNow(now);
         }
       } catch {
-        if (!cancelled) setLoaded({ challenge: null, derived: null, now: 0 });
+        if (!cancelled) setEntries([]);
       }
     })();
     return () => {
@@ -83,47 +86,84 @@ export default function ChallengePage() {
   }, []);
 
   const startRestart = async () => {
-    if (!restartFrom) return;
-    await deleteStrictChallenge(restartFrom.id).catch(() => {});
-    setRestartFrom(null);
+    if (restartFromId === null) return;
+    await deleteStrictChallenge(restartFromId).catch(() => {});
+    setRestartFromId(null);
     await reload();
   };
 
   let body: React.ReactNode;
-  if (loaded === null) {
+  if (entries === null) {
     body = (
       <div className="mt-8 h-64 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
     );
-  } else if (restartFrom) {
+  } else if (entries.length === 0) {
+    body = <CreateChallenge onCreated={() => void reload()} />;
+  } else {
+    // Oldest commitment first: the stack reads in the order the
+    // commitments were made.
+    const active = entries.filter((entry) => entry.derived.status === "active");
+    const terminal = entries.filter((entry) => entry.derived.status !== "active");
+    const delayFor = (index: number) => 80 + index * 60;
     body = (
       <>
-        <CreateChallenge prefill={restartFrom} onCreated={startRestart} />
-        <button
-          onClick={() => setRestartFrom(null)}
-          className="mx-auto mt-4 block text-xs font-medium text-ink-3 transition-colors hover:text-ink"
-        >
-          {copy.strictKeep}
-        </button>
+        {active.map((entry, index) => (
+          <TodayCard
+            key={entry.challenge.id}
+            challenge={entry.challenge}
+            derived={entry.derived}
+            delayMs={delayFor(index)}
+            onEnd={() => setConfirmEndId(entry.challenge.id)}
+          />
+        ))}
+        {terminal.map((entry, index) =>
+          entry.challenge.id === restartFromId ? (
+            <Fragment key={entry.challenge.id}>
+              <CreateChallenge prefill={entry.challenge} onCreated={startRestart} />
+              <button
+                onClick={() => setRestartFromId(null)}
+                className="mx-auto mt-4 block text-xs font-medium text-ink-3 transition-colors hover:text-ink"
+              >
+                {copy.strictKeep}
+              </button>
+            </Fragment>
+          ) : (
+            <TerminalCard
+              key={entry.challenge.id}
+              challenge={entry.challenge}
+              derived={entry.derived}
+              now={now}
+              delayMs={delayFor(active.length + index)}
+              onRestart={() => setRestartFromId(entry.challenge.id)}
+            />
+          ),
+        )}
+        {creating ? (
+          <>
+            <CreateChallenge
+              onCreated={() => {
+                setCreating(false);
+                void reload();
+              }}
+            />
+            <button
+              onClick={() => setCreating(false)}
+              className="mx-auto mt-4 block text-xs font-medium text-ink-3 transition-colors hover:text-ink"
+            >
+              {copy.strictKeep}
+            </button>
+          </>
+        ) : (
+          restartFromId === null && (
+            <button
+              onClick={() => setCreating(true)}
+              className="mx-auto mt-6 block text-xs font-medium text-accent transition-colors hover:text-accent-hover"
+            >
+              {copy.strictNewChallenge}
+            </button>
+          )
+        )}
       </>
-    );
-  } else if (loaded.challenge === null || loaded.derived === null) {
-    body = <CreateChallenge onCreated={() => void reload()} />;
-  } else if (loaded.derived.status === "active") {
-    body = (
-      <TodayCard
-        challenge={loaded.challenge}
-        derived={loaded.derived}
-        onEnd={() => setConfirmEnd(true)}
-      />
-    );
-  } else {
-    body = (
-      <TerminalCard
-        challenge={loaded.challenge}
-        derived={loaded.derived}
-        now={loaded.now}
-        onRestart={() => setRestartFrom(loaded.challenge)}
-      />
     );
   }
 
@@ -143,22 +183,21 @@ export default function ChallengePage() {
 
       {body}
 
-      {loaded?.challenge && (
-        <ConfirmDialog
-          open={confirmEnd}
-          onCancel={() => setConfirmEnd(false)}
-          onConfirm={async () => {
-            setConfirmEnd(false);
-            await deleteStrictChallenge(loaded.challenge!.id).catch(() => {});
-            await reload();
-          }}
-          title={copy.strictEndConfirmTitle}
-          description={copy.strictEndConfirmBody}
-          confirmLabel={copy.strictEndConfirm}
-          cancelLabel={copy.strictKeep}
-          danger
-        />
-      )}
+      <ConfirmDialog
+        open={confirmEndId !== null}
+        onCancel={() => setConfirmEndId(null)}
+        onConfirm={async () => {
+          const id = confirmEndId;
+          setConfirmEndId(null);
+          if (id !== null) await deleteStrictChallenge(id).catch(() => {});
+          await reload();
+        }}
+        title={copy.strictEndConfirmTitle}
+        description={copy.strictEndConfirmBody}
+        confirmLabel={copy.strictEndConfirm}
+        cancelLabel={copy.strictKeep}
+        danger
+      />
     </div>
   );
 }
@@ -360,10 +399,12 @@ const isPresetDuration = (value: number): boolean =>
 function TodayCard({
   challenge,
   derived,
+  delayMs = 80,
   onEnd,
 }: {
   challenge: StrictChallenge;
   derived: DerivedStrictChallenge;
+  delayMs?: number;
   onEnd: () => void;
 }) {
   const copy = useCopy();
@@ -372,23 +413,25 @@ function TodayCard({
   const sound = useSettings((state) => state.sound);
 
   const [today, setToday] = useState(derived.todayCount);
+  const [pulse, setPulse] = useState(0);
   const todayRef = useRef(today);
 
-  const add = (amount: number) => {
+  // One tap, one count - the same rule as the quest counter. Persistence
+  // is fire-and-forget; the local count is the UI's truth.
+  const tap = () => {
     if (haptics) navigator.vibrate?.(8);
     if (sound) playTick();
-    todayRef.current += amount;
+    todayRef.current += 1;
     setToday(todayRef.current);
-    for (let i = 0; i < amount; i += 1) {
-      void recordIncrement(STRICT_CHALLENGE_QUEST_ID).catch(() => {});
-    }
+    setPulse((value) => value + 1);
+    void recordIncrement(challengeStreamId(challenge)).catch(() => {});
   };
 
   const undo = () => {
     if (todayRef.current <= 0) return;
     todayRef.current -= 1;
     setToday(todayRef.current);
-    void recordUndo(STRICT_CHALLENGE_QUEST_ID).catch(() => {});
+    void recordUndo(challengeStreamId(challenge)).catch(() => {});
   };
 
   const done = today >= challenge.dailyTarget;
@@ -397,9 +440,11 @@ function TodayCard({
     Math.round((today / challenge.dailyTarget) * 100),
     100,
   );
+  const dhikr = getDhikr(challenge.dhikrId);
+  const name = dhikr ? localized(dhikr.names, lang) : "";
 
   return (
-    <section className="rise mt-8 [animation-delay:80ms]">
+    <section className="rise mt-8" style={{ animationDelay: `${delayMs}ms` }}>
       <div className="rounded-3xl border border-line bg-surface p-6">
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
@@ -412,9 +457,7 @@ function TodayCard({
             )}
           </p>
         </div>
-        <p className="mt-3 font-display text-xl text-ink">
-          {localized(getDhikr(challenge.dhikrId)?.names ?? { en: "" }, lang)}
-        </p>
+        <p className="mt-3 font-display text-xl text-ink">{name}</p>
 
         {done ? (
           <>
@@ -433,45 +476,64 @@ function TodayCard({
           </>
         ) : (
           <>
-            <p className="mt-4 font-display text-[2rem] text-ink">
-              {formatCount(shown, lang)}{" "}
-              <span className="text-lg text-ink-3">
-                / {formatCount(challenge.dailyTarget, lang)}
-              </span>
-            </p>
-            <div
-              className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"
-              role="progressbar"
-              aria-valuenow={percent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={copy.strictTodayProgressAria}
+            <button
+              onPointerDown={(event) => {
+                // Only the primary pointer counts: a second simultaneous
+                // finger (or a resting palm) must not inflate the count.
+                if (event.isPrimary) tap();
+              }}
+              onClick={(event) => {
+                // Keyboard activation arrives as click with detail 0;
+                // pointer taps are already handled above.
+                if (event.detail === 0) tap();
+              }}
+              aria-label={copy.countAria(
+                name,
+                formatCount(today, lang),
+                formatCount(challenge.dailyTarget, lang),
+                copy.todaySuffix,
+              )}
+              className="mt-2 flex w-full touch-manipulation select-none flex-col items-center gap-4 rounded-2xl px-2 py-6 focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-accent"
             >
+              <span
+                key={pulse}
+                className={`font-display text-[clamp(3.5rem,18vw,5.5rem)] leading-none tracking-tight text-ink [font-variant-numeric:tabular-nums] ${
+                  pulse > 0 ? "count-pulse" : ""
+                }`}
+                aria-hidden="true"
+              >
+                {formatCount(shown, lang)}
+              </span>
+              <span className="text-sm text-ink-3">
+                {copy.ofTarget(formatCount(challenge.dailyTarget, lang))}
+              </span>
               <div
-                className="h-full rounded-full bg-accent transition-[width]"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <div className="mt-5 flex gap-3">
-              {[1, 10, 100].map((amount) => (
-                <button
-                  key={amount}
-                  onClick={() => add(amount)}
-                  className={`h-14 flex-1 rounded-2xl font-semibold transition active:translate-y-px ${
-                    amount === 1
-                      ? "bg-accent text-on-accent hover:bg-accent-hover"
-                      : "border border-line bg-surface-2 text-ink hover:bg-surface"
-                  }`}
-                >
-                  +{amount}
-                </button>
-              ))}
-            </div>
+                className="h-1.5 w-44 overflow-hidden rounded-full bg-surface-2"
+                role="progressbar"
+                aria-valuenow={percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={copy.strictTodayProgressAria}
+              >
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-150"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <span
+                className={`text-xs text-ink-3 transition-opacity duration-500 ${
+                  today > 0 ? "opacity-0" : "opacity-100"
+                }`}
+                aria-hidden={today > 0}
+              >
+                {copy.tapToCount}
+              </span>
+            </button>
             <button
               onClick={undo}
               disabled={today <= 0}
               aria-label={copy.undoCountAria}
-              className="mx-auto mt-3 block rounded-full px-4 py-1.5 text-xs font-medium text-ink-3 transition-colors hover:text-ink disabled:opacity-40"
+              className="mx-auto -mt-2 block rounded-full px-4 py-1.5 text-xs font-medium text-ink-3 transition-colors hover:text-ink disabled:opacity-40"
             >
               −1
             </button>
@@ -493,11 +555,13 @@ function TerminalCard({
   challenge,
   derived,
   now,
+  delayMs = 80,
   onRestart,
 }: {
   challenge: StrictChallenge;
   derived: DerivedStrictChallenge;
   now: number;
+  delayMs?: number;
   onRestart: () => void;
 }) {
   const copy = useCopy();
@@ -505,7 +569,7 @@ function TerminalCard({
   const complete = derived.status === "complete";
 
   return (
-    <section className="rise mt-8 [animation-delay:80ms]">
+    <section className="rise mt-8" style={{ animationDelay: `${delayMs}ms` }}>
       <div className="rounded-3xl border border-line bg-surface p-6 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           {complete ? copy.strictCompleteTitle : copy.strictTitle}

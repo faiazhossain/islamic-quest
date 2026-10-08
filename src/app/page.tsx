@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { StarMark } from "@/components/star-mark";
 import { Stat } from "@/components/stat";
 import { deriveStrictChallenge } from "@/lib/challenge";
 import { getDhikr } from "@/lib/content";
-import { getLatestStrictChallenge } from "@/lib/db/challenges";
+import { listStrictChallenges } from "@/lib/db/challenges";
 import { formatCount } from "@/lib/format";
 import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
@@ -23,29 +28,29 @@ export default function HomePage() {
   const lang = useLang();
   const [progress, setProgress] = useState<Map<string, QuestProgress> | null>(null);
   const [events, setEvents] = useState<PracticeEvent[] | null>(null);
-  const [challenge, setChallenge] = useState<StrictChallenge | null>(null);
+  const [challenges, setChallenges] = useState<StrictChallenge[]>([]);
   const [now, setNow] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [map, log, latestChallenge] = await Promise.all([
+        const [map, log, challengeRows] = await Promise.all([
           getAllProgress(),
           getPracticeEvents(),
-          getLatestStrictChallenge().catch(() => undefined),
+          listStrictChallenges().catch(() => []),
         ]);
         if (!cancelled) {
           setProgress(map);
           setEvents(log);
-          setChallenge(latestChallenge ?? null);
+          setChallenges(challengeRows);
           setNow(Date.now());
         }
       } catch {
         if (!cancelled) {
           setProgress(new Map());
           setEvents([]);
-          setChallenge(null);
+          setChallenges([]);
           setNow(Date.now());
         }
       }
@@ -65,10 +70,17 @@ export default function HomePage() {
     [progress, events, now, lang],
   );
 
-  const strict =
-    challenge && events
-      ? { challenge, derived: deriveStrictChallenge(challenge, events, now) }
-      : null;
+  // One row per active challenge; finished and broken commitments live
+  // on /challenge, and with none active the invitation row returns.
+  const activeChallenges =
+    events && now > 0
+      ? challenges
+          .map((challenge) => ({
+            challenge,
+            derived: deriveStrictChallenge(challenge, events, now),
+          }))
+          .filter((entry) => entry.derived.status === "active")
+      : [];
 
   return (
     <div className="flex flex-1 flex-col">
@@ -97,10 +109,17 @@ export default function HomePage() {
             target={view.target}
           />
           <HowItWorks />
-          <StrictRow
-            challenge={strict?.challenge ?? null}
-            derived={strict?.derived ?? null}
-          />
+          {activeChallenges.length > 0 ? (
+            activeChallenges.map((entry) => (
+              <StrictRow
+                key={entry.challenge.id}
+                challenge={entry.challenge}
+                derived={entry.derived}
+              />
+            ))
+          ) : (
+            <StrictRow challenge={null} derived={null} />
+          )}
         </div>
       ) : (
         <div className="flex flex-col lg:mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
@@ -148,9 +167,26 @@ export default function HomePage() {
             </section>
           )}
 
+          {/* Mobile reads hero -> challenge strip -> journey nav; the lg
+              order utilities put the full-width strip back below the hero
+              row on desktop, where the journey link fills the hero's right
+              column. */}
+          {activeChallenges.length > 0 ? (
+            activeChallenges.map((entry) => (
+              <StrictRow
+                key={entry.challenge.id}
+                challenge={entry.challenge}
+                derived={entry.derived}
+                className="lg:order-3 lg:mt-0"
+              />
+            ))
+          ) : (
+            <StrictRow challenge={null} derived={null} className="lg:order-3 lg:mt-0" />
+          )}
+
           <Link
             href="/journey"
-            className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:240ms] lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:180ms]"
+            className="rise mt-5 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:300ms] lg:order-2 lg:col-span-5 lg:col-start-8 lg:mt-0 lg:[animation-delay:180ms]"
           >
             <span className="min-w-0">
               <span className="block text-sm text-ink">{copy.viewJourney}</span>
@@ -164,11 +200,6 @@ export default function HomePage() {
               <Chevron />
             </span>
           </Link>
-
-          <StrictRow
-            challenge={strict?.challenge ?? null}
-            derived={strict?.derived ?? null}
-          />
         </div>
       )}
 
@@ -180,55 +211,186 @@ export default function HomePage() {
 }
 
 /**
- * The Strict Challenge entry row: quieter than the quest experience by
- * design - one line of status, one destination. Always rendered so the
- * challenge stays reachable before the first one is ever started; with no
- * challenge yet, the tagline is the invitation.
+ * The Simple Challenge entry: home's clear second tier - louder than a
+ * nav row, quieter than the quest hero. One row renders per active
+ * challenge, the amal name as the title; a dial tells the commitment's
+ * state at a glance (arc = place in the window, center = streak) and the
+ * tone follows the status calmly, never punitively: gold while running,
+ * jade when today's amal or the whole challenge is done, quiet danger
+ * after a missed day. Always rendered so the challenge stays reachable
+ * before the first one is ever started; with none active, a dashed dial
+ * around a plus is the invitation.
  */
+type StrictTone = "accent" | "jade" | "danger" | "idle";
+
+/* Whole literals so Tailwind's scanner sees every tone's classes. */
+const STRIP_TONE_CLASSES: Record<StrictTone, string> = {
+  accent:
+    "border-accent/30 bg-accent/[0.05] hover:bg-accent/[0.1] active:bg-accent/[0.1]",
+  jade: "border-jade/30 bg-jade/[0.05] hover:bg-jade/[0.1] active:bg-jade/[0.1]",
+  danger:
+    "border-danger/30 bg-danger/[0.05] hover:bg-danger/[0.1] active:bg-danger/[0.1]",
+  idle: "border-line bg-surface hover:bg-surface-2 active:bg-surface-2",
+};
+
+const DIAL_TONE_CLASSES: Record<StrictTone, string> = {
+  accent: "text-accent",
+  jade: "text-jade",
+  danger: "text-danger",
+  idle: "text-accent",
+};
+
 function StrictRow({
   challenge,
   derived,
+  className = "",
 }: {
   challenge: StrictChallenge | null;
   derived: ReturnType<typeof deriveStrictChallenge> | null;
+  className?: string;
 }) {
   const copy = useCopy();
   const lang = useLang();
 
+  let tone: StrictTone = "idle";
+  let dashed = true;
+  let percent = 0;
+  // With several challenges running, the amal name is what tells the rows
+  // apart; the invitation row keeps the product name.
+  let title = copy.strictTitle;
   let line = copy.strictTagline;
   if (challenge && derived) {
+    dashed = false;
+    const dhikr = getDhikr(challenge.dhikrId);
+    title = dhikr ? localized(dhikr.names, lang) : copy.strictTitle;
     if (derived.status === "complete") {
+      tone = "jade";
+      percent = 100;
       line = copy.strictCompleteTitle;
     } else if (derived.status === "broken") {
+      tone = "danger";
+      percent =
+        challenge.durationDays > 0
+          ? (derived.streakDays / challenge.durationDays) * 100
+          : 0;
       line = copy.strictStreak(formatCount(derived.streakDays, lang));
     } else {
-      const dhikr = getDhikr(challenge.dhikrId);
-      const name = dhikr ? localized(dhikr.names, lang) : "";
-      line = derived.todayComplete
-        ? `${name} · ${copy.strictTodayComplete}`
-        : `${name} · ${formatCount(derived.todayCount, lang)} / ${formatCount(
+      percent =
+        challenge.durationDays > 0
+          ? (derived.dayNumber / challenge.durationDays) * 100
+          : 0;
+      if (derived.todayComplete) {
+        tone = "jade";
+        line = copy.strictTodayComplete;
+      } else {
+        tone = "accent";
+        line = `${formatCount(derived.todayCount, lang)} / ${formatCount(
             challenge.dailyTarget,
             lang,
           )} · ${copy.strictDayProgress(
             formatCount(derived.dayNumber, lang),
             formatCount(challenge.durationDays, lang),
           )}`;
+      }
     }
   }
 
   return (
     <Link
       href="/challenge"
-      className="rise col-span-12 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-2 [animation-delay:300ms]"
+      className={`rise col-span-12 mt-5 flex items-center gap-4 rounded-2xl border px-4 py-4 transition-colors [animation-delay:240ms] ${className} ${STRIP_TONE_CLASSES[tone]}`}
     >
-      <span className="min-w-0">
-        <span className="block text-sm text-ink">{copy.strictTitle}</span>
-        <span className="mt-0.5 block truncate text-xs text-ink-3">{line}</span>
+      <span
+        aria-hidden="true"
+        className={`shrink-0 ${DIAL_TONE_CLASSES[tone]}`}
+      >
+        <ChallengeDial percent={percent} dashed={dashed}>
+          {challenge && derived ? (
+            <span className="text-[13px] font-semibold leading-none tabular-nums">
+              {formatCount(derived.streakDays, lang)}
+            </span>
+          ) : null}
+        </ChallengeDial>
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm text-ink">{title}</span>
+        <span className="mt-0.5 block truncate text-xs text-ink-2">{line}</span>
       </span>
       <span aria-hidden="true" className="text-ink-3">
         <Chevron />
       </span>
     </Link>
+  );
+}
+
+/**
+ * The commitment dial: the ring's arc is the challenge window's progress
+ * and the center slot holds the live streak. Purely decorative - the
+ * strip's text states the same facts for assistive tech. Dashed (no
+ * challenge yet), the ring circles a plus: a commitment waiting to be
+ * made.
+ */
+function ChallengeDial({
+  percent,
+  dashed = false,
+  children,
+}: {
+  percent: number;
+  dashed?: boolean;
+  children?: ReactNode;
+}) {
+  const radius = 20.5;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(Math.max(percent, 0), 100);
+  return (
+    <span className="relative block h-12 w-12">
+      <svg
+        viewBox="0 0 48 48"
+        fill="none"
+        aria-hidden="true"
+        className="h-full w-full -rotate-90"
+      >
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          className="opacity-[0.15]"
+          {...(dashed ? { strokeDasharray: "1.5 5.5" } : {})}
+        />
+        {!dashed && clamped > 0 && (
+          <circle
+            cx="24"
+            cy="24"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - clamped / 100)}
+          />
+        )}
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center">
+        {children ?? (
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            className="h-4 w-4"
+          >
+            <path
+              d="M8 3.5v9M3.5 8h9"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
+      </span>
+    </span>
   );
 }
 

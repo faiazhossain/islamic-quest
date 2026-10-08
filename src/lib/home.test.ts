@@ -105,6 +105,20 @@ describe("selectHomeView", () => {
     expect(view.stats.daysPracticed).toBe(0);
   });
 
+  it("keeps every challenge stream out of the quest-labeled total", () => {
+    const all = publicQuests();
+    const progress = new Map([
+      ...all.map((quest) =>
+        entry(quest.id, { count: 2, completedAt: 50, updatedAt: 50 }),
+      ),
+      entry("strict-challenge", { count: 500, updatedAt: 60 }),
+      entry("strict-challenge:c1", { count: 40, updatedAt: 60 }),
+    ]);
+    const view = selectHomeView({ progress, events: [], now: NOW });
+    if (view.kind !== "all-complete") throw new Error("expected all-complete");
+    expect(view.totalDhikr).toBe(all.length * 2);
+  });
+
   it("derives the daily quest's count from today's events only", () => {
     const all = publicQuests();
     const progress = new Map(

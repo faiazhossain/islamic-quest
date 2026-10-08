@@ -10,7 +10,7 @@ import {
   trackStages,
   type StageId,
 } from "@/lib/content/journey";
-import { STRICT_CHALLENGE_QUEST_ID } from "@/lib/challenge";
+import { sumQuestDhikr } from "@/lib/challenge";
 import { formatCount, formatShortDate } from "@/lib/format";
 import { localized, useCopy, useLang } from "@/lib/i18n";
 import {
@@ -113,12 +113,9 @@ export default function JourneyPage() {
   }
 
   const hasAnyProgress = (progress?.size ?? 0) > 0;
-  // Quest-labeled total: Strict Challenge counts stay out by design.
-  const totalDhikr = [...(progress?.values() ?? [])].reduce(
-    (sum, entry) =>
-      entry.questId === STRICT_CHALLENGE_QUEST_ID ? sum : sum + entry.count,
-    0,
-  );
+  // Quest-labeled total: challenge counts (legacy and per-challenge
+  // streams alike) stay out by design.
+  const totalDhikr = sumQuestDhikr(progress?.values() ?? []);
   // The lit path runs through every milestone - and, once each quest has
   // been discovered, through the continuation point itself.
   const litLength = journeyComplete ? completed.length + 1 : completed.length;
