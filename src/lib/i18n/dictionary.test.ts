@@ -88,7 +88,7 @@ describe("UI dictionary", () => {
   });
 
   it("interpolates without leaking placeholders into Bangla", () => {
-    expect(BN.questsComplete("৩", "২০")).toContain("২০");
+    expect(BN.questsCompleteOf("৩", "২০")).toContain("২০");
     expect(BN.daysInARow("৫")).toContain("৫");
     expect(EN.dayCount("1")).toContain("day");
   });

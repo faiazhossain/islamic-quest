@@ -134,6 +134,11 @@ export default function ChallengePage() {
           {copy.strictTitle}
         </h1>
         <p className="mt-1 text-sm text-ink-2">{copy.strictTagline}</p>
+        {/* The rule stated up front: strictness must never be learned by
+            breaking it. */}
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-3">
+          {copy.strictRules}
+        </p>
       </header>
 
       {body}

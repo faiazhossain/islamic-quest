@@ -41,11 +41,8 @@ export const EN = {
   greeting: "As-salamu alaykum.",
   todayLine: (n: string) => `Today: ${n} dhikr. Your Journey is waiting.`,
   nextStep: "Next step",
-  journeyGrows: "Your journey grows with every quest you complete.",
   chooseQuest: "Choose a quest",
   viewJourney: "View your Journey",
-  questsComplete: (done: string, total: string) =>
-    `${done} / ${total} quests complete`,
   questsCompleteOf: (done: string, total: string) =>
     `${done} of ${total} quests complete`,
   freeForever: "Free forever. No ads, no account needed.",
@@ -57,22 +54,23 @@ export const EN = {
   todayCountLine: (n: string) => `Today: ${n}x`,
   todaysAmalProgressAria: "Today's Amal progress",
   practiceNow: "Practice now",
+  startThisQuest: "Start this quest",
   yourProgress: "Your progress",
   daysPracticed: "Days practiced",
   statTotal: "Total",
-  statBest: "Best",
+  statBest: "Best run",
   dayCount: (n: string) => `${n} ${n === "1" ? "day" : "days"}`,
   daysInARow: (n: string) =>
     `${n} ${n === "1" ? "day" : "days"} in a row`,
   firstQuest: "First quest",
   firstQuestBody:
-    "Pick a quest, count with intention, and watch your journey of light grow. Everything stays on your device.",
+    "Pick a quest, count with intention, and watch your journey of light grow.",
   beginSuggested: "Begin with this quest",
   orChooseAnother: "or choose another",
   firstVisit: "First visit?",
   howAmalynWorks: "How Amalyn works",
   howItWorksIntro:
-    "Amalyn turns daily dhikr into a gentle journey: each quest gives your remembrance a beginning, a rhythm, and a visible path.",
+    "Each quest gives your remembrance a beginning, a rhythm, and a visible path.",
   howStep1Title: "Choose a quest",
   howStep1Body:
     "Pick a dhikr with a target, like 33 or 100. Every quest shows the Arabic, its meaning, and its source, so you always know what you are reciting.",
@@ -81,7 +79,7 @@ export const EN = {
     "A calm, fullscreen counter: tap to count, undo anytime. It works fully offline, and your practice stays private on your device.",
   howStep3Title: "Watch your Journey grow",
   howStep3Body:
-    "Reaching the target extends your path of light. Completing a quest is a milestone, not an ending - the Amal stays with you, ready to practice any day.",
+    "Reaching the target extends your path of light. Completing a quest is a milestone, not an ending - the Amal, the practice itself, stays with you, ready any day.",
   noStreaks:
     "No streaks to break, no points, no pressure - and no finish line. Just your practice, at your pace.",
 
@@ -92,6 +90,7 @@ export const EN = {
   preparingQuests: "Quests are being prepared with care.",
   verificationEmpty:
     "Every dhikr is verified against authentic sources before it appears here. Please check back soon, in shaa Allah.",
+  noCategoryQuests: "No quests in this category yet - try another filter.",
   filterAria: "Filter quests by category",
   completeBadge: "Complete",
 
@@ -136,6 +135,8 @@ export const EN = {
   // when the target is met - but copy stays calm, never punitive.)
   strictTitle: "Strict Challenge",
   strictTagline: "One amal. Every day. A commitment to yourself.",
+  strictRules:
+    "Strict means strict: a day counts only when its target is met, and one missed day ends the challenge. Your counts stay in your history either way.",
   strictChooseAmal: "Which amal will you do?",
   strictDailyTarget: "How many per day?",
   strictDuration: "How many days?",
@@ -152,7 +153,6 @@ export const EN = {
   strictStart: "Start the challenge",
   strictMissedYesterday: "Yesterday wasn't completed",
   strictMissedOn: (date: string) => `${date} wasn't completed`,
-  strictRestart: "Start over",
   strictCompleteTitle: "Strict Challenge complete",
   strictCompleteBody: (n: string) => `${n}-day commitment finished.`,
   strictNewChallenge: "Start another challenge",
@@ -167,7 +167,7 @@ export const EN = {
 
   // Quest detail
   exploreBack: "Explore",
-  questLabel: "Quest",
+  questLabel: "Target",
   guidanceLabel: "Guidance",
   seeHadith: (n: string) => `See the hadith (${n})`,
   sourceLabel: "Source",
@@ -199,7 +199,7 @@ export const EN = {
   // Completion
   questComplete: "Quest complete",
   amalStaysInJourney: "This Amal stays part of your Journey.",
-  nextQuest: (name: string, n: string) => `Next: ${name} × ${n}`,
+  nextQuest: (name: string, n: string) => `Next: ${name} ${n}x`,
   shareMilestone: "Share this milestone",
   backHome: "Back home",
 
@@ -207,8 +207,8 @@ export const EN = {
   shareTitle: "Share milestone",
   backAria: "Back",
   cardTheme: "Card theme",
-  shareThemeNight: "night",
-  shareThemeDawn: "dawn",
+  shareThemeNight: "Night",
+  shareThemeDawn: "Dawn",
   showCountOnCard: "Show the count on the card",
   shareOrSave: "Share or save card",
   cardPrivacy:
@@ -278,13 +278,14 @@ export const EN = {
   offlineWillSync: "You are offline - will sync later.",
   syncUnavailable: "Sync is not available right now.",
   syncPrivacy:
-    "Your progress syncs automatically when online. Only event data (counts and quests) is stored — under a pseudonymous id, never your email — and never personal notes or content.",
+    "When you're online, your counts and quests back up automatically. They're stored under a random ID — never your name or email — and nothing else ever leaves your device.",
   syncNow: "Sync now",
   signOut: "Sign out",
+  signOutHint: "Signing out keeps everything on this device.",
   deleteServerCopy: "Delete my server copy",
   deleteConfirmTitle: "Delete your server copy?",
   deleteConfirmBody:
-    "Your synced events are removed from the server. Progress on this device stays untouched.",
+    "Your backed-up counts and quests are removed from the server. Everything on this device stays untouched.",
   deleteConfirm: "Delete server copy",
   deleteCancel: "Keep it",
 
@@ -313,15 +314,11 @@ export const EN = {
   versionFooter: (v: string) => `Amalyn v${v} - made with care for the Ummah.`,
 
   // Support
-  supportFree: "Amalyn is completely free. There are no ads, no subscriptions, and no paid features — nothing is locked, ever.",
-  hadiyaBefore: "If you personally wish to support this work, you may give a ",
+  supportIntroBefore:
+    "Amalyn is completely free — nothing is locked, ever. If you wish to support this work, you may give a ",
   hadiyaWord: "Hadiya",
-  hadiyaAfter:
-    " — a voluntary gift. It is never required and never asked of you during your practice.",
-  hadiyaBox:
-    "A Hadiya unlocks nothing, because nothing needs unlocking. It does not change your quests, your journey, or your experience in any way.",
-  supportHelps:
-    "Support helps with keeping the app online, verifying its religious content, and keeping it free for everyone.",
+  supportIntroAfter:
+    " — a voluntary gift. It is never required, never asked of you during your practice, and changes nothing about your experience. Support helps keep the app online, its content verified, and Amalyn free for everyone.",
   giveHadiya: "Give a Hadiya",
   supportHadithHeading: "The Prophet ﷺ and the Hadiya",
   seeMoreHadith: (n: string) => `More hadith (${n})`,
@@ -345,13 +342,12 @@ export const EN = {
     "Optional. Nothing personal is shared - only that a Hadiya was sent.",
   hadiyaThanks:
     "JazakAllahu khayran. Your Hadiya encourages this work - may Allah accept it.",
-  supportFooter: "Amalyn remains fully usable with or without it.",
 
   // Feedback
   feedbackLink: "Send feedback",
   feedbackTitle: "Feedback",
   feedbackIntro:
-    "Assalamu alaykum. Amalyn is a small, sincere effort - and no matter how carefully it is built, a mistake can still slip in: a hadith text, a translation, a source reference, or anything else you see here. If something looks off, please tell me. Pointing out a mistake is a real help to everyone who uses Amalyn, and your honest feedback shapes what comes next. Every message reaches me directly, and I read each one.",
+    "Amalyn is a small, sincere effort - no matter how carefully it is built, a mistake can slip in. Every message reaches me directly, and I read each one.",
   feedbackMistakeTitle: "Report a mistake",
   feedbackMistakeHint:
     "A wrong hadith text, translation, or reference - or anything else that looks off",
@@ -419,10 +415,8 @@ export const BN: Copy = {
   greeting: "আসসালামু আলাইকুম।",
   todayLine: (n) => `আজ ${n} জিকির হয়েছে। জার্নি আপনার অপেক্ষায়।`,
   nextStep: "পরবর্তী ধাপ",
-  journeyGrows: "প্রতিটি Quest সম্পন্ন করার সঙ্গে আপনার জার্নি বাড়তে থাকে।",
   chooseQuest: "Quest বেছে নিন",
   viewJourney: "জার্নি দেখুন",
-  questsComplete: (done, total) => `${total}টির মধ্যে ${done}টি Quest সম্পন্ন`,
   questsCompleteOf: (done, total) => `${total}টির মধ্যে ${done}টি Quest সম্পন্ন`,
   freeForever: "চিরদিনের জন্য ফ্রি। কোনো বিজ্ঞাপন নেই, অ্যাকাউন্টেরও দরকার নেই।",
   currentQuest: "চলমান Quest",
@@ -433,21 +427,22 @@ export const BN: Copy = {
   todayCountLine: (n) => `আজ: ${n}x`,
   todaysAmalProgressAria: "আজকের আমলের অগ্রগতি",
   practiceNow: "আমল শুরু করুন",
+  startThisQuest: "এই Quest শুরু করুন",
   yourProgress: "আপনার অগ্রগতি",
   daysPracticed: "আমলের দিন",
   statTotal: "মোট",
-  statBest: "সর্বোচ্চ",
+  statBest: "সর্বোচ্চ টানা",
   dayCount: (n) => `${n} দিন`,
   daysInARow: (n) => `টানা ${n} দিন`,
   firstQuest: "প্রথম Quest",
   firstQuestBody:
-    "একটি Quest বেছে নিন, মন দিয়ে জিকির করুন—আর দেখুন, ধীরে ধীরে আপনার Journey of Light এগিয়ে যাচ্ছে। আপনার সব Data আপনার Device-এই থাকে।",
+    "একটি Quest বেছে নিন, মন দিয়ে জিকির করুন—আর দেখুন, ধীরে ধীরে আপনার Journey of Light এগিয়ে যাচ্ছে।",
   beginSuggested: "এই Quest দিয়েই শুরু করুন",
   orChooseAnother: "অথবা অন্যটি বেছে নিন",
   firstVisit: "প্রথমবার আসছেন?",
   howAmalynWorks: "Amalyn কীভাবে কাজ করে",
   howItWorksIntro:
-    "Amalyn আপনার প্রতিদিনের জিকিরকে একটা সহজ, শান্ত Journey-তে সাজায়। প্রতিটি Quest আপনাকে একটা লক্ষ্য দেয়, জিকির করার একটা ছন্দ দেয়, আর আপনার এগিয়ে যাওয়াটা চোখের সামনে দেখায়।",
+    "প্রতিটি Quest আপনার জিকিরকে দেয় একটা শুরু, একটা ছন্দ, আর চোখের সামনে এগিয়ে চলা একটা পথ।",
   howStep1Title: "একটি Quest বেছে নিন",
   howStep1Body:
     "আপনার পছন্দের একটি জিকির আর তার লক্ষ্য বেছে নিন—যেমন ৩৩ বা ১০০ বার। প্রতিটি Quest-এ আরবি, অর্থ ও সূত্র দেওয়া থাকে, তাই আপনি কী পড়ছেন সেটা সবসময়ই জানতে পারবেন।",
@@ -466,11 +461,12 @@ export const BN: Copy = {
   preparingQuests: "Quest-গুলো যত্নের সঙ্গে প্রস্তুত হচ্ছে।",
   verificationEmpty:
     "প্রতিটি জিকির নির্ভরযোগ্য সূত্রে যাচাই করেই এখানে আসে। ইন শা আল্লাহ, খুব শিগগিরই আবার দেখা হবে।",
+  noCategoryQuests: "এই ক্যাটাগরিতে এখনো কোনো Quest নেই - অন্য একটি বেছে নিন।",
   filterAria: "ক্যাটাগরি অনুযায়ী Quest ফিল্টার করুন",
   completeBadge: "সম্পন্ন",
 
   journeyTitle: "জার্নি",
-  pathOfLight: "Journey of Light।",
+  pathOfLight: "Journey of Light",
   journeyEmptyTitle: "প্রথম Quest দিয়েই পথ শুরু হয়।",
   journeyEmptyBody: "প্রতিটি সম্পন্ন Quest এই পথে একটি আলো যোগ করে।",
   statDays: "দিন",
@@ -502,6 +498,8 @@ export const BN: Copy = {
 
   strictTitle: "Strict Challenge",
   strictTagline: "একটা আমল। প্রতিদিন। নিজের সাথে একটা commitment।",
+  strictRules:
+    "Strict মানেই strict - টার্গেট পূরণ হলেই দিন গোনা হয়, আর একটি দিন বাদ পড়লেই Challenge শেষ। তবে আপনার সব গণনা ইতিহাসে থেকেই যাবে।",
   strictChooseAmal: "কোন আমলটা করবেন?",
   strictDailyTarget: "প্রতিদিন কতবার?",
   strictDuration: "কতদিন চালাবেন?",
@@ -518,7 +516,6 @@ export const BN: Copy = {
   strictStart: "Challenge শুরু করুন",
   strictMissedYesterday: "গতকাল সম্পূর্ণ হয়নি",
   strictMissedOn: (date) => `${date} সম্পূর্ণ হয়নি`,
-  strictRestart: "নতুন করে শুরু করুন",
   strictCompleteTitle: "Strict Challenge সম্পন্ন",
   strictCompleteBody: (n) => `${n} দিনের commitment শেষ হয়েছে।`,
   strictNewChallenge: "আরেকটা Challenge শুরু করুন",
@@ -532,7 +529,7 @@ export const BN: Copy = {
   strictDurationInputAria: "নিজের দিনসংখ্যা",
 
   exploreBack: "Quest",
-  questLabel: "Quest",
+  questLabel: "টার্গেট",
   guidanceLabel: "নির্দেশনা",
   seeHadith: (n) => `হাদিস দেখুন (${n})`,
   sourceLabel: "সূত্র",
@@ -560,7 +557,7 @@ export const BN: Copy = {
 
   questComplete: "Quest সম্পন্ন",
   amalStaysInJourney: "এই আমল আপনার জার্নির অংশ থেকে যাবে।",
-  nextQuest: (name, n) => `পরবর্তী: ${name} × ${n}`,
+  nextQuest: (name, n) => `পরবর্তী: ${name} ${n}x`,
   shareMilestone: "এই অর্জন শেয়ার করুন",
   backHome: "হোমে ফিরুন",
 
@@ -635,13 +632,14 @@ export const BN: Copy = {
   offlineWillSync: "আপনি অফলাইনে আছেন - পরে সিঙ্ক হবে।",
   syncUnavailable: "সিঙ্ক এখন পাওয়া যাচ্ছে না।",
   syncPrivacy:
-    "অনলাইনে এলে অগ্রগতি নিজে থেকেই সিঙ্ক হয়। শুধু ইভেন্ট ডেটা (গণনা ও Quest) জমা থাকে - একটি গোপন আইডির অধীনে, ইমেইল কখনো নয় - আর কোনো ব্যক্তিগত নোট বা কনটেন্ট কখনোই নয়।",
+    "অনলাইনে এলে আপনার গণনা আর Quest নিজে থেকেই ব্যাকআপ হয়। সব জমা থাকে একটি গোপন আইডির অধীনে - আপনার নাম বা ইমেইল কখনোই নয় - আর আপনার ডিভাইস থেকে এর বাইরে আর কিছুই যায় না।",
   syncNow: "এখন সিঙ্ক করুন",
   signOut: "সাইন আউট",
+  signOutHint: "সাইন আউট করলেও সবকিছু এই ডিভাইসেই থাকবে।",
   deleteServerCopy: "সার্ভার কপি মুছে দিন",
   deleteConfirmTitle: "সার্ভার কপি মুছে ফেলা হবে?",
   deleteConfirmBody:
-    "সিঙ্ক করা ইভেন্টগুলো সার্ভার থেকে মুছে যাবে। এই ডিভাইসের অগ্রগতি অক্ষত থাকবে।",
+    "ব্যাকআপ করা গণনা ও Quest সার্ভার থেকে মুছে যাবে। এই ডিভাইসের সবকিছু অক্ষত থাকবে।",
   deleteConfirm: "সার্ভার কপি মুছে ফেলুন",
   deleteCancel: "রেখে দিন",
 
@@ -668,16 +666,11 @@ export const BN: Copy = {
   ],
   versionFooter: (v) => `Amalyn v${v} - উম্মাহর জন্য যত্নে তৈরি।`,
 
-  supportFree:
-    "Amalyn সম্পূর্ণ ফ্রি। এখানে বিজ্ঞাপন নেই, সাবস্ক্রিপশন নেই, পেইড ফিচার নেই - কিছুই কখনো লক করা হয় না।",
-  hadiyaBefore: "নিজে ইচ্ছা হলে আপনি এই কাজের জন্য ",
+  supportIntroBefore:
+    "Amalyn সম্পূর্ণ ফ্রি - কিছুই কখনো লক করা হয় না। নিজে ইচ্ছা হলে আপনি এই কাজের জন্য ",
   hadiyaWord: "হাদিয়া",
-  hadiyaAfter:
-    " দিতে পারেন - একটি স্বেচ্ছায় দেওয়া উপহার। এটি কখনো বাধ্যতামূলক নয়, আর আমলের মাঝে কখনো চাওয়াও হয় না।",
-  hadiyaBox:
-    "হাদিয়া কিছুই আনলক করে না - কারণ আনলক করার মতো কিছু নেইই। এটি আপনার Quest, জার্নি বা অভিজ্ঞতার কোনো কিছুই বদলায় না।",
-  supportHelps:
-    "আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
+  supportIntroAfter:
+    " দিতে পারেন - একটি স্বেচ্ছায় দেওয়া উপহার। এটি কখনো বাধ্যতামূলক নয়, আমলের মাঝে কখনো চাওয়াও হয় না, আর আপনার অভিজ্ঞতার কোনো কিছুই বদলায় না। আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
   giveHadiya: "হাদিয়া দিন",
   supportHadithHeading: "রাসূলুল্লাহ (সা.) এবং হাদিয়া",
   seeMoreHadith: (n) => `আরও হাদিস (${n})`,
@@ -701,12 +694,11 @@ export const BN: Copy = {
     "ঐচ্ছিক। কোনো ব্যক্তিগত তথ্য যায় না - শুধু একটি হাদিয়া পাঠানো হয়েছে জানানো হয়।",
   hadiyaThanks:
     "জাযাকাল্লাহু খাইরান। আপনার হাদিয়া এই কাজকে উৎসাহিত করে - আল্লাহ যেন এটি কবুল করেন।",
-  supportFooter: "হাদিয়া থাকুক বা না থাকুক, Amalyn সম্পূর্ণ ব্যবহারযোগ্য।",
 
   feedbackLink: "মতামত জানান",
   feedbackTitle: "মতামত",
   feedbackIntro:
-    "আসসালামু আলাইকুম। Amalyn একটি ছোট, আন্তরিক চেষ্টা - যতই যত্ন নেওয়া হোক, কোথাও ভুল থেকে যেতে পারে: কোনো হাদিসের লেখা, অনুবাদ, সূত্র, কিংবা অ্যাপের অন্য যেকোনো জায়গায়। কিছু ভুল চোখে পড়লে আমাকে জানান। একটি ভুল ধরিয়ে দেওয়া Amalyn ব্যবহারকারী প্রত্যেকের জন্যই আসল সাহায্য, আর আপনার অকৃপণ মতামতই সামনের পথ গড়ে দেয়। প্রতিটি বার্তা সরাসরি আমার কাছে পৌঁছায়, আর আমি প্রতিটি বার্তাই মন দিয়ে পড়ি।",
+    "Amalyn একটি ছোট, আন্তরিক চেষ্টা - যতই যত্ন নেওয়া হোক, কোথাও ভুল থেকে যেতে পারে। প্রতিটি বার্তা সরাসরি আমার কাছে পৌঁছায়, আর আমি প্রতিটি বার্তাই মন দিয়ে পড়ি।",
   feedbackMistakeTitle: "ভুল জানান",
   feedbackMistakeHint:
     "কোনো হাদিসের লেখা, অনুবাদ বা সূত্রে ভুল - কিংবা অন্য যেকোনো অসঙ্গতি",

@@ -143,6 +143,7 @@ export function AccountSection() {
           {copy.signOut}
         </button>
       </div>
+      <p className="text-xs text-ink-3">{copy.signOutHint}</p>
       <button
         onClick={() => setConfirmDelete(true)}
         disabled={busy}

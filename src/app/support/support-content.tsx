@@ -115,47 +115,18 @@ export function SupportContent() {
         </h1>
       </header>
 
-      <div className="rise mt-6 space-y-4 text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
-        <p>{copy.supportFree}</p>
-        <p>
-          {copy.hadiyaBefore}
-          <span className="font-semibold text-ink">{copy.hadiyaWord}</span>
-          {copy.hadiyaAfter}
-        </p>
-        <p className="rounded-2xl border border-line bg-surface p-4 text-ink">
-          {copy.hadiyaBox}
-        </p>
-        <p>{copy.supportHelps}</p>
-      </div>
-
-      <section
-        aria-labelledby="support-hadith-heading"
-        className="rise mt-9 [animation-delay:160ms]"
-      >
-        <h2
-          id="support-hadith-heading"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-3"
-        >
-          {copy.supportHadithHeading}
-        </h2>
-        {mainHadith && (
-          <div className="mt-3">
-            <HadithCard entry={mainHadith} />
-          </div>
-        )}
-        {moreHadith.length > 0 && (
-          <button
-            onClick={() => setSheetOpen(true)}
-            className="mt-3 flex h-11 w-full items-center justify-center rounded-2xl border border-line bg-surface text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
-          >
-            {copy.seeMoreHadith(formatCount(moreHadith.length, lang))}
-          </button>
-        )}
-      </section>
+      {/* One short paragraph carries the whole preamble: what a Hadiya is,
+          that giving is voluntary, and that nothing is locked. The hadith
+          and the personal note sit below the ways to give. */}
+      <p className="rise mt-6 text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
+        {copy.supportIntroBefore}
+        <span className="font-semibold text-ink">{copy.hadiyaWord}</span>
+        {copy.supportIntroAfter}
+      </p>
 
       <section
         aria-labelledby="support-give-heading"
-        className="rise mt-9 [animation-delay:240ms]"
+        className="rise mt-9 [animation-delay:160ms]"
       >
         <h2
           id="support-give-heading"
@@ -260,7 +231,34 @@ export function SupportContent() {
         </div>
       </section>
 
-      <p className="rise mt-9 text-[15px] leading-relaxed text-ink-2 [animation-delay:320ms]">
+      {/* The religious context sits below the ways to give: it enriches the
+          decision but is never required reading before the action. */}
+      <section
+        aria-labelledby="support-hadith-heading"
+        className="rise mt-9 [animation-delay:240ms]"
+      >
+        <h2
+          id="support-hadith-heading"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-3"
+        >
+          {copy.supportHadithHeading}
+        </h2>
+        {mainHadith && (
+          <div className="mt-3">
+            <HadithCard entry={mainHadith} />
+          </div>
+        )}
+        {moreHadith.length > 0 && (
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="mt-3 flex h-11 w-full items-center justify-center rounded-2xl border border-line bg-surface text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-2"
+          >
+            {copy.seeMoreHadith(formatCount(moreHadith.length, lang))}
+          </button>
+        )}
+      </section>
+
+      <p className="rise mt-9 text-[15px] leading-relaxed text-ink-2 [animation-delay:300ms]">
         {copy.hadiyaDua}
       </p>
 
@@ -291,10 +289,6 @@ export function SupportContent() {
           </svg>
         </Link>
       </section>
-
-      <p className="rise mt-auto pb-2 pt-10 text-center text-xs text-ink-3 [animation-delay:400ms]">
-        {copy.supportFooter}
-      </p>
 
       <SupportHadithSheet
         open={sheetOpen}

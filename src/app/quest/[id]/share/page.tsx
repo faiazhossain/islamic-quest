@@ -415,18 +415,23 @@ export default function SharePage() {
                 {copy.cardTheme}
               </p>
               <div className="mt-2 flex gap-2">
-                {(["night", "dawn"] as const).map((option) => (
+                {(
+                  [
+                    ["night", copy.shareThemeNight],
+                    ["dawn", copy.shareThemeDawn],
+                  ] as const
+                ).map(([option, label]) => (
                   <button
                     key={option}
                     onClick={() => setTheme(option)}
                     aria-pressed={theme === option}
-                    className={`h-10 flex-1 rounded-xl border text-sm font-medium capitalize transition-colors active:opacity-70 ${
+                    className={`h-10 flex-1 rounded-xl border text-sm font-medium transition-colors active:opacity-70 ${
                       theme === option
                         ? "border-accent bg-accent text-on-accent"
                         : "border-line bg-surface text-ink-2 hover:text-ink"
                     }`}
                   >
-                    {option}
+                    {label}
                   </button>
                 ))}
               </div>

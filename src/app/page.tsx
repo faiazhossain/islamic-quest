@@ -97,9 +97,10 @@ export default function HomePage() {
             target={view.target}
           />
           <HowItWorks />
-          {strict && (
-            <StrictRow challenge={strict.challenge} derived={strict.derived} />
-          )}
+          <StrictRow
+            challenge={strict?.challenge ?? null}
+            derived={strict?.derived ?? null}
+          />
         </div>
       ) : (
         <div className="flex flex-col lg:mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
@@ -131,14 +132,11 @@ export default function HomePage() {
                 <p className="mt-1 text-sm text-ink-2">
                   {formatCount(view.target, lang)}x
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-ink-2">
-                  {copy.journeyGrows}
-                </p>
                 <Link
                   href={`/quest/${view.questId}`}
                   className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
                 >
-                  {copy.beginSuggested}
+                  {copy.startThisQuest}
                 </Link>
                 <Link
                   href="/explore"
@@ -158,7 +156,7 @@ export default function HomePage() {
               <span className="block text-sm text-ink">{copy.viewJourney}</span>
               {view.kind === "all-complete" && (
                 <span className="mt-0.5 block text-xs text-ink-3">
-                  {copy.questsComplete(formatCount(view.completedCount, lang), formatCount(view.questTotal, lang))}
+                  {copy.questsCompleteOf(formatCount(view.completedCount, lang), formatCount(view.questTotal, lang))}
                 </span>
               )}
             </span>
@@ -167,7 +165,10 @@ export default function HomePage() {
             </span>
           </Link>
 
-          {strict && <StrictRow challenge={strict.challenge} derived={strict.derived} />}
+          <StrictRow
+            challenge={strict?.challenge ?? null}
+            derived={strict?.derived ?? null}
+          />
         </div>
       )}
 
@@ -180,35 +181,39 @@ export default function HomePage() {
 
 /**
  * The Strict Challenge entry row: quieter than the quest experience by
- * design - one line of status, one destination.
+ * design - one line of status, one destination. Always rendered so the
+ * challenge stays reachable before the first one is ever started; with no
+ * challenge yet, the tagline is the invitation.
  */
 function StrictRow({
   challenge,
   derived,
 }: {
-  challenge: StrictChallenge;
-  derived: ReturnType<typeof deriveStrictChallenge>;
+  challenge: StrictChallenge | null;
+  derived: ReturnType<typeof deriveStrictChallenge> | null;
 }) {
   const copy = useCopy();
   const lang = useLang();
 
   let line = copy.strictTagline;
-  if (derived.status === "complete") {
-    line = copy.strictCompleteTitle;
-  } else if (derived.status === "broken") {
-    line = copy.strictStreak(formatCount(derived.streakDays, lang));
-  } else {
-    const dhikr = getDhikr(challenge.dhikrId);
-    const name = dhikr ? localized(dhikr.names, lang) : "";
-    line = derived.todayComplete
-      ? `${name} · ${copy.strictTodayComplete}`
-      : `${name} · ${formatCount(derived.todayCount, lang)} / ${formatCount(
-          challenge.dailyTarget,
-          lang,
-        )} · ${copy.strictDayProgress(
-          formatCount(derived.dayNumber, lang),
-          formatCount(challenge.durationDays, lang),
-        )}`;
+  if (challenge && derived) {
+    if (derived.status === "complete") {
+      line = copy.strictCompleteTitle;
+    } else if (derived.status === "broken") {
+      line = copy.strictStreak(formatCount(derived.streakDays, lang));
+    } else {
+      const dhikr = getDhikr(challenge.dhikrId);
+      const name = dhikr ? localized(dhikr.names, lang) : "";
+      line = derived.todayComplete
+        ? `${name} · ${copy.strictTodayComplete}`
+        : `${name} · ${formatCount(derived.todayCount, lang)} / ${formatCount(
+            challenge.dailyTarget,
+            lang,
+          )} · ${copy.strictDayProgress(
+            formatCount(derived.dayNumber, lang),
+            formatCount(challenge.durationDays, lang),
+          )}`;
+    }
   }
 
   return (

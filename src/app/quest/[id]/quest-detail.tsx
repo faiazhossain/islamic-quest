@@ -11,7 +11,6 @@ import {
   getPublicQuest,
   hadithForDhikr,
 } from "@/lib/content";
-import { REVIEW_LABEL } from "@/lib/content/review";
 import { formatCount, formatShortDate, toBnDigits } from "@/lib/format";
 import { useCopy, useLang, localized } from "@/lib/i18n";
 import {
@@ -134,9 +133,6 @@ export function QuestDetail({ questId }: { questId: string }) {
               {localized(category.name, lang)}
             </span>
           )}
-          <span className="text-[11px] text-ink-3">
-            {localized(REVIEW_LABEL[dhikr.review.status], lang)}
-          </span>
         </div>
         <h1 className="mt-3 font-display text-[2rem] leading-tight text-ink lg:text-4xl">
           {localized(dhikr.names, lang)}
