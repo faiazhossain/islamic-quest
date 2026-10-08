@@ -82,6 +82,8 @@ export const EN = {
     "Reaching the target extends your path of light. Completing a quest is a milestone, not an ending - the Amal, the practice itself, stays with you, ready any day.",
   noStreaks:
     "No streaks to break, no points, no pressure - and no finish line. Just your practice, at your pace.",
+  howChallengeBody:
+    "One amal, a daily target, and a set number of days. Meet the target each day and the streak grows - miss a day and the challenge starts over. Every count stays in your history, so trying again is always easy.",
 
   // Explore
   exploreTitle: "Explore",
@@ -325,7 +327,7 @@ export const EN = {
   // Two paragraphs via "\n\n" + pre-line rendering, dua first (mirrors bn).
   hadiyaDua:
     "Your dua is the biggest Hadiya for me. Please keep me in your dua - that alone is enough.\n\nAnd if you wish, you may also support this work with a Hadiya - a voluntary gift that encourages me to keep creating more Islamic content.",
-  wayToGive: "Ways to give",
+  wayToGive: "Send a Hadiya",
   regionHint: "Choose where you are sending your gift from.",
   regionInsideBd: "Inside Bangladesh",
   regionOutsideBd: "Outside Bangladesh",
@@ -455,6 +457,8 @@ export const BN: Copy = {
     "একটা Quest-এর লক্ষ্য পূর্ণ হলে আপনার Journey আরও একটু এগিয়ে যায়। Quest Complete করা একটা Milestone—এটাই শেষ নয়। আপনার আমল থেকে যায়, আর আপনি চাইলে যেকোনো দিন আবার জিকির করতে পারবেন।",
   noStreaks:
     "এখানে কোনো ভাঙার মতো Streak নেই, কোনো Point নেই, কোনো চাপ নেই, কোনো শেষের লাইনও নেই। শুধু আপনার আমল—আপনার নিজের গতিতে।",
+  howChallengeBody:
+    "একটা আমল, প্রতিদিনের টার্গেট, আর নির্দিষ্ট কিছু দিন। প্রতিদিন টার্গেট পূরণ হলেই streak এগিয়ে যায় - একটা দিন বাদ পড়লে Challenge নতুন করে শুরু হয়। আপনার প্রতিটি গণনা History-তে থেকে যায়, তাই আবার শুরু করা সবসময়ই সহজ।",
 
   exploreTitle: "Quest",
   exploreSubtitle: "নিজের সুবিধামতো Quest বেছে নিন।",
@@ -680,7 +684,7 @@ export const BN: Copy = {
   // Two paragraphs via "\n\n" + pre-line rendering, dua first.
   hadiyaDua:
     "আপনার দোয়াই আমার জন্য সবচেয়ে বড় হাদিয়া। দোয়ায় আমাকে মনে রাখবেন—এটুকুই আমার জন্য অনেক।\n\nআর আপনার ইচ্ছা হলে, হাদিয়ার মাধ্যমে Amalyn-এর পাশে থাকতে পারেন। আপনার হাদিয়া আমাকে আরও ইসলামিক কনটেন্ট তৈরি করে যেতে উৎসাহ দেয়। 🤍",
-  wayToGive: "হাদিয়া পাঠানোর উপায়",
+  wayToGive: "হাদিয়া পাঠান",
   regionHint: "আপনি কোথা থেকে হাদিয়া পাঠাচ্ছেন, সেটি বেছে নিন।",
   regionInsideBd: "বাংলাদেশে",
   regionOutsideBd: "বাংলাদেশের বাইরে",

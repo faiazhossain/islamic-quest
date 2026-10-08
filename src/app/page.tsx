@@ -101,14 +101,14 @@ export default function HomePage() {
       {view === null ? (
         <div className="mt-10 h-56 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
       ) : view.kind === "first-visit" ? (
-        // The explainer gets the stage on desktop: one centered column.
+        // One centered column: action first (the suggested quest), then the
+        // challenge entry, then the collapsible explainer last.
         <div className="flex flex-col lg:mx-auto lg:max-w-2xl">
           <FirstQuestCard
             questId={view.questId}
             name={view.name}
             target={view.target}
           />
-          <HowItWorks />
           {activeChallenges.length > 0 ? (
             activeChallenges.map((entry) => (
               <StrictRow
@@ -120,6 +120,7 @@ export default function HomePage() {
           ) : (
             <StrictRow challenge={null} derived={null} />
           )}
+          <HowItWorks />
         </div>
       ) : (
         <div className="flex flex-col lg:mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10 lg:gap-y-6 lg:items-start">
@@ -584,8 +585,15 @@ function FirstQuestCard({
   );
 }
 
+/**
+ * The first-visit explainer: collapsed by default so the screen opens on
+ * actions, not prose. The header row is the toggle; expanding reveals the
+ * three quest steps, the no-pressure note, and a short primer on the
+ * Simple Challenge - what it is and what happens when a day is missed.
+ */
 function HowItWorks() {
   const copy = useCopy();
+  const [open, setOpen] = useState(false);
   const steps = [
     { title: copy.howStep1Title, body: copy.howStep1Body },
     { title: copy.howStep2Title, body: copy.howStep2Body },
@@ -594,46 +602,88 @@ function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-heading"
-      className="rise mt-5 [animation-delay:180ms]"
+      className="rise mt-5 [animation-delay:300ms]"
     >
-      <div className="rounded-3xl border border-line bg-surface p-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          {copy.firstVisit}
-        </p>
-        <h2
-          id="how-it-works-heading"
-          className="mt-2 font-display text-xl text-ink"
-        >
-          {copy.howAmalynWorks}
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-2">
-          {copy.howItWorksIntro}
-        </p>
-        <ol className="mt-5 space-y-4">
-          {steps.map((step, index) => (
-            <li key={step.title} className="flex gap-3.5">
-              <span
-                aria-hidden="true"
-                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-xs font-semibold text-accent"
-              >
-                {index + 1}
+      <div className="rounded-3xl border border-line bg-surface">
+        <h2 id="how-it-works-heading">
+          <button
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-controls="how-it-works-body"
+            className="flex w-full items-center justify-between gap-3 p-6 text-left"
+          >
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                {copy.firstVisit}
               </span>
-              <div className="min-w-0">
-                <h3 className="font-display text-[15px] text-ink">
-                  {step.title}
-                </h3>
-                <p className="mt-1 text-sm leading-relaxed text-ink-2">
-                  {step.body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-3">
-          {copy.noStreaks}
-        </p>
+              <span className="mt-2 block font-display text-xl text-ink">
+                {copy.howAmalynWorks}
+              </span>
+            </span>
+            <span
+              aria-hidden="true"
+              className={`shrink-0 text-ink-3 transition-transform duration-200 ${
+                open ? "rotate-180" : ""
+              }`}
+            >
+              <CollapseChevron />
+            </span>
+          </button>
+        </h2>
+        {open && (
+          <div id="how-it-works-body" className="px-6 pb-6">
+            <p className="text-sm leading-relaxed text-ink-2">
+              {copy.howItWorksIntro}
+            </p>
+            <ol className="mt-5 space-y-4">
+              {steps.map((step, index) => (
+                <li key={step.title} className="flex gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-xs font-semibold text-accent"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-display text-[15px] text-ink">
+                      {step.title}
+                    </h3>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-2">
+                      {step.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-3">
+              {copy.noStreaks}
+            </p>
+            <div className="mt-4 border-t border-line pt-4">
+              <h3 className="font-display text-[15px] text-ink">
+                {copy.strictTitle}
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-ink-2">
+                {copy.howChallengeBody}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
+  );
+}
+
+function CollapseChevron() {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 6 8 10.5 12.5 6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

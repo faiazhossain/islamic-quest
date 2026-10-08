@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DHIKR, getDhikr } from "@/lib/content";
 import {
@@ -9,7 +10,6 @@ import {
   MAX_CHALLENGE_DAYS,
   MAX_CHALLENGE_TARGET,
   RECOMMENDED_DURATION_DAYS,
-  challengeStreamId,
   deriveStrictChallenge,
   type DerivedStrictChallenge,
 } from "@/lib/challenge";
@@ -18,11 +18,9 @@ import {
   deleteStrictChallenge,
   listStrictChallenges,
 } from "@/lib/db/challenges";
-import { getPracticeEvents, recordIncrement, recordUndo } from "@/lib/db/events";
+import { getPracticeEvents } from "@/lib/db/events";
 import { formatCount, formatShortDate, localDayKey } from "@/lib/format";
 import { localized, useCopy, useLang } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import { playTick } from "@/lib/tick";
 import type { StrictChallenge } from "@/lib/db/db";
 
 const dayKeyMs = (key: string): number =>
@@ -392,9 +390,9 @@ const isPresetDuration = (value: number): boolean =>
   (CHALLENGE_DURATION_PRESETS as readonly number[]).includes(value);
 
 /**
- * Today is the whole feature: target, progress, remaining, day. The local
- * count is the UI's truth (mirroring the quest counter); every tap's write
- * is fire-and-forget, and the derivation refreshes on the next load.
+ * Today at a glance: target, progress, day - and the way in. Counting
+ * itself lives in the fullscreen counter (/challenge/[id]/count), the
+ * same worship moment as the quest counter; this card is the overview.
  */
 function TodayCard({
   challenge,
@@ -409,35 +407,10 @@ function TodayCard({
 }) {
   const copy = useCopy();
   const lang = useLang();
-  const haptics = useSettings((state) => state.haptics);
-  const sound = useSettings((state) => state.sound);
 
-  const [today, setToday] = useState(derived.todayCount);
-  const [pulse, setPulse] = useState(0);
-  const todayRef = useRef(today);
-
-  // One tap, one count - the same rule as the quest counter. Persistence
-  // is fire-and-forget; the local count is the UI's truth.
-  const tap = () => {
-    if (haptics) navigator.vibrate?.(8);
-    if (sound) playTick();
-    todayRef.current += 1;
-    setToday(todayRef.current);
-    setPulse((value) => value + 1);
-    void recordIncrement(challengeStreamId(challenge)).catch(() => {});
-  };
-
-  const undo = () => {
-    if (todayRef.current <= 0) return;
-    todayRef.current -= 1;
-    setToday(todayRef.current);
-    void recordUndo(challengeStreamId(challenge)).catch(() => {});
-  };
-
-  const done = today >= challenge.dailyTarget;
-  const shown = Math.min(today, challenge.dailyTarget);
+  const done = derived.todayComplete;
   const percent = Math.min(
-    Math.round((today / challenge.dailyTarget) * 100),
+    Math.round((derived.todayCount / challenge.dailyTarget) * 100),
     100,
   );
   const dhikr = getDhikr(challenge.dhikrId);
@@ -462,81 +435,45 @@ function TodayCard({
         {done ? (
           <>
             <p className="mt-4 font-display text-[2rem] text-jade">
-              {formatCount(shown, lang)} /{" "}
+              {formatCount(challenge.dailyTarget, lang)} /{" "}
               {formatCount(challenge.dailyTarget, lang)}
             </p>
             <p className="mt-2 text-sm font-semibold text-jade">
               {copy.strictTodayComplete}
             </p>
+            {/* The derivation already includes today once its target is
+                met, so the streak shows as-is - no offset needed. */}
             <p className="mt-1 text-sm text-ink-2">
-              {copy.strictStreak(
-                formatCount(derived.streakDays + 1, lang),
-              )}
+              {copy.strictStreak(formatCount(derived.streakDays, lang))}
             </p>
           </>
         ) : (
           <>
-            <button
-              onPointerDown={(event) => {
-                // Only the primary pointer counts: a second simultaneous
-                // finger (or a resting palm) must not inflate the count.
-                if (event.isPrimary) tap();
-              }}
-              onClick={(event) => {
-                // Keyboard activation arrives as click with detail 0;
-                // pointer taps are already handled above.
-                if (event.detail === 0) tap();
-              }}
-              aria-label={copy.countAria(
-                name,
-                formatCount(today, lang),
-                formatCount(challenge.dailyTarget, lang),
-                copy.todaySuffix,
-              )}
-              className="mt-2 flex w-full touch-manipulation select-none flex-col items-center gap-4 rounded-2xl px-2 py-6 focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-accent"
+            <p className="mt-4 font-display text-[2rem] text-ink">
+              {formatCount(derived.todayCount, lang)}{" "}
+              <span className="text-lg text-ink-3">
+                / {formatCount(challenge.dailyTarget, lang)}
+              </span>
+            </p>
+            <div
+              className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"
+              role="progressbar"
+              aria-valuenow={percent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={copy.strictTodayProgressAria}
             >
-              <span
-                key={pulse}
-                className={`font-display text-[clamp(3.5rem,18vw,5.5rem)] leading-none tracking-tight text-ink [font-variant-numeric:tabular-nums] ${
-                  pulse > 0 ? "count-pulse" : ""
-                }`}
-                aria-hidden="true"
-              >
-                {formatCount(shown, lang)}
-              </span>
-              <span className="text-sm text-ink-3">
-                {copy.ofTarget(formatCount(challenge.dailyTarget, lang))}
-              </span>
               <div
-                className="h-1.5 w-44 overflow-hidden rounded-full bg-surface-2"
-                role="progressbar"
-                aria-valuenow={percent}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label={copy.strictTodayProgressAria}
-              >
-                <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-150"
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-              <span
-                className={`text-xs text-ink-3 transition-opacity duration-500 ${
-                  today > 0 ? "opacity-0" : "opacity-100"
-                }`}
-                aria-hidden={today > 0}
-              >
-                {copy.tapToCount}
-              </span>
-            </button>
-            <button
-              onClick={undo}
-              disabled={today <= 0}
-              aria-label={copy.undoCountAria}
-              className="mx-auto -mt-2 block rounded-full px-4 py-1.5 text-xs font-medium text-ink-3 transition-colors hover:text-ink disabled:opacity-40"
+                className="h-full rounded-full bg-accent transition-[width] duration-150"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <Link
+              href={`/challenge/${challenge.id}/count`}
+              className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-accent font-semibold text-on-accent transition hover:bg-accent-hover active:translate-y-px"
             >
-              −1
-            </button>
+              {copy.practiceNow}
+            </Link>
           </>
         )}
       </div>

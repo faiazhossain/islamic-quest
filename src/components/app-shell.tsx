@@ -12,7 +12,8 @@ import { SyncManager } from "./sync-manager";
  * Focus routes (counter, completion, share) render without any navigation
  * so nothing competes with the worship moment.
  */
-const FOCUS_ROUTE = /^\/quest\/[^/]+\/(count|complete|share)$/;
+const FOCUS_ROUTE =
+  /^\/(quest\/[^/]+\/(count|complete|share)|challenge\/[^/]+\/count)$/;
 
 /**
  * Phone-first shell: one centered column with fixed bottom navigation on
