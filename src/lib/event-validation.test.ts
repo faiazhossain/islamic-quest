@@ -37,7 +37,7 @@ describe("parseEvents", () => {
     expect(parseEvents([{ ...valid, delta: 5 }], NOW)).toBeNull();
   });
 
-  it("accepts the reserved Strict Challenge stream like any quest", () => {
+  it("accepts the reserved daily-challenge stream like any quest", () => {
     const strict = { ...valid, questId: "strict-challenge" };
     expect(parseEvents([strict], NOW)).toEqual([strict]);
     expect(

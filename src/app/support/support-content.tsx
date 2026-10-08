@@ -115,10 +115,12 @@ export function SupportContent() {
         </h1>
       </header>
 
-      {/* One short paragraph carries the whole preamble: what a Hadiya is,
-          that giving is voluntary, and that nothing is locked. The hadith
-          and the personal note sit below the ways to give. */}
-      <p className="rise mt-6 text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
+      {/* The preamble carries the whole pitch: nothing is locked, giving a
+          Hadiya is voluntary, and support keeps the app online. Blank lines
+          in the copy split it into paragraphs; the highlighted word stays
+          mid-preamble. The hadith and the personal note sit below the ways
+          to give. */}
+      <p className="rise mt-6 whitespace-pre-line text-[15px] leading-relaxed text-ink-2 [animation-delay:80ms]">
         {copy.supportIntroBefore}
         <span className="font-semibold text-ink">{copy.hadiyaWord}</span>
         {copy.supportIntroAfter}
@@ -258,7 +260,7 @@ export function SupportContent() {
         )}
       </section>
 
-      <p className="rise mt-9 text-[15px] leading-relaxed text-ink-2 [animation-delay:300ms]">
+      <p className="rise mt-9 whitespace-pre-line text-[15px] leading-relaxed text-ink-2 [animation-delay:300ms]">
         {copy.hadiyaDua}
       </p>
 

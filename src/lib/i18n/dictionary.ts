@@ -129,14 +129,14 @@ export const EN = {
   regularPracticeDesc:
     "Every quest complete. A daily Amal keeps the rhythm - at your own pace.",
 
-  // Strict Challenge (a personal commitment: 1 amal, 1 daily target,
-  // 1 duration. Product terms "Strict Challenge" / "Challenge" / "streak"
-  // stay in English where natural. Strict means strict - a day counts only
-  // when the target is met - but copy stays calm, never punitive.)
-  strictTitle: "Strict Challenge",
-  strictTagline: "One amal. Every day. A commitment to yourself.",
+  // Simple Challenge (a personal commitment: 1 amal, 1 daily target,
+  // 1 duration. Product terms "Simple Challenge" / "Challenge" / "streak"
+  // stay in English where natural. A day counts only when the target is
+  // met - but copy stays calm, never punitive.)
+  strictTitle: "Simple Challenge",
+  strictTagline: "A small daily habit, a commitment to yourself!",
   strictRules:
-    "Strict means strict: a day counts only when its target is met, and one missed day ends the challenge. Your counts stay in your history either way.",
+    "The rule here is simple - meet the target and the day counts. Miss a day and you start over, but all your past records stay in the app.",
   strictChooseAmal: "Which amal will you do?",
   strictDailyTarget: "How many per day?",
   strictDuration: "How many days?",
@@ -145,21 +145,21 @@ export const EN = {
   strictTimes: (n: string) => `${n} times`,
   strictDayProgress: (day: string, total: string) => `Day ${day} / ${total}`,
   strictPerDay: (n: string) => `${n} per day`,
-  strictToday: "Today's Strict",
-  strictTodayComplete: "Today's Strict complete",
+  strictToday: "Today's amal",
+  strictTodayComplete: "Today's amal complete",
   strictStreak: (n: string) => `${n}-day streak`,
   strictTodayProgressAria: "Today's challenge progress",
-  strictYourChallenge: "Your Strict Challenge",
+  strictYourChallenge: "Your Simple Challenge",
   strictStart: "Start the challenge",
   strictMissedYesterday: "Yesterday wasn't completed",
   strictMissedOn: (date: string) => `${date} wasn't completed`,
-  strictCompleteTitle: "Strict Challenge complete",
+  strictCompleteTitle: "Simple Challenge complete",
   strictCompleteBody: (n: string) => `${n}-day commitment finished.`,
   strictNewChallenge: "Start another challenge",
   strictEnd: "End challenge",
   strictEndConfirmTitle: "End this challenge?",
   strictEndConfirmBody:
-    "Your counts stay in your history, but the challenge itself will close.",
+    "Ending the challenge keeps everything you have done in your history. Only this challenge stops moving forward.",
   strictEndConfirm: "End it",
   strictKeep: "Keep going",
   strictTargetInputAria: "Custom daily target",
@@ -496,10 +496,10 @@ export const BN: Copy = {
   regularPracticeDesc:
     "সব Quest সম্পন্ন। প্রতিদিনের একটি আমল ছন্দ ধরে রাখে - নিজের গতিতে।",
 
-  strictTitle: "Strict Challenge",
-  strictTagline: "একটা আমল। প্রতিদিন। নিজের সাথে একটা commitment।",
+  strictTitle: "Simple Challenge",
+  strictTagline: "প্রতিদিনের একটি ছোট্ট অভ্যাস, নিজের সাথে একটা commitment!",
   strictRules:
-    "Strict মানেই strict - টার্গেট পূরণ হলেই দিন গোনা হয়, আর একটি দিন বাদ পড়লেই Challenge শেষ। তবে আপনার সব গণনা ইতিহাসে থেকেই যাবে।",
+    "এখানে নিয়ম একদম সহজ—টার্গেট পূরণ হলেই দিন কাউন্ট হবে। কোনোদিন মিস হয়ে গেলে নতুন করে শুরু করতে হবে, তবে আপনার আগের সব রেকর্ড অ্যাপে থেকে যাব।",
   strictChooseAmal: "কোন আমলটা করবেন?",
   strictDailyTarget: "প্রতিদিন কতবার?",
   strictDuration: "কতদিন চালাবেন?",
@@ -508,21 +508,21 @@ export const BN: Copy = {
   strictTimes: (n) => `${n} বার`,
   strictDayProgress: (day, total) => `দিন ${day} / ${total}`,
   strictPerDay: (n) => `${n} বার প্রতিদিন`,
-  strictToday: "আজকের Strict",
-  strictTodayComplete: "আজকের Strict complete",
+  strictToday: "আজকের আমল",
+  strictTodayComplete: "আজকের আমল complete",
   strictStreak: (n) => `${n} দিনের streak`,
   strictTodayProgressAria: "আজকের Challenge অগ্রগতি",
-  strictYourChallenge: "আপনার Strict Challenge",
+  strictYourChallenge: "আপনার Simple Challenge",
   strictStart: "Challenge শুরু করুন",
   strictMissedYesterday: "গতকাল সম্পূর্ণ হয়নি",
   strictMissedOn: (date) => `${date} সম্পূর্ণ হয়নি`,
-  strictCompleteTitle: "Strict Challenge সম্পন্ন",
+  strictCompleteTitle: "Simple Challenge সম্পন্ন",
   strictCompleteBody: (n) => `${n} দিনের commitment শেষ হয়েছে।`,
   strictNewChallenge: "আরেকটা Challenge শুরু করুন",
   strictEnd: "Challenge শেষ করুন",
   strictEndConfirmTitle: "Challenge শেষ করবেন?",
   strictEndConfirmBody:
-    "আপনার গণনা ইতিহাসে থাকবে, তবে Challenge-টি বন্ধ হয়ে যাবে।",
+    "Challenge শেষ করলে আপনার করা সব আমল History-তে থেকে যাবে। শুধু এই Challenge-টা আর এগোবে না।",
   strictEndConfirm: "শেষ করুন",
   strictKeep: "চালিয়ে যান",
   strictTargetInputAria: "নিজের দৈনিক টার্গেট",
@@ -666,16 +666,19 @@ export const BN: Copy = {
   ],
   versionFooter: (v) => `Amalyn v${v} - উম্মাহর জন্য যত্নে তৈরি।`,
 
+  // Paragraph breaks inside the preamble ride on "\n\n" + pre-line
+  // rendering; the highlighted word stays between the two halves.
   supportIntroBefore:
-    "Amalyn সম্পূর্ণ ফ্রি - কিছুই কখনো লক করা হয় না। নিজে ইচ্ছা হলে আপনি এই কাজের জন্য ",
+    "Amalyn সবার জন্য, সম্পূর্ণ ফ্রি। এখানে কোনো কিছু Lock করা নেই, আর কোনো কিছু ব্যবহার করতে আপনাকে কখনো টাকা দিতে হবে না।\n\nতবে Amalyn আপনার ভালো লাগলে, আপনার ইচ্ছায় ",
   hadiyaWord: "হাদিয়া",
   supportIntroAfter:
-    " দিতে পারেন - একটি স্বেচ্ছায় দেওয়া উপহার। এটি কখনো বাধ্যতামূলক নয়, আমলের মাঝে কখনো চাওয়াও হয় না, আর আপনার অভিজ্ঞতার কোনো কিছুই বদলায় না। আপনার সাপোর্ট অ্যাপটি অনলাইনে রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য ফ্রি রাখতে সাহায্য করে।",
+    " দিতে পারেন। এটা একান্তই আপনার ইচ্ছা—কোনো বাধ্যবাধকতা নেই। আমল করার সময়ও আমরা আপনাকে হাদিয়ার কথা মনে করিয়ে দেব না।\n\nআপনার এই ছোট্ট Support Amalyn-কে Online রাখতে, ধর্মীয় বিষয়বস্তু যাচাই করতে এবং সবার জন্য Free রাখতে সাহায্য করবে। 🤍",
   giveHadiya: "হাদিয়া দিন",
   supportHadithHeading: "রাসূলুল্লাহ (সা.) এবং হাদিয়া",
   seeMoreHadith: (n) => `আরও হাদিস (${n})`,
+  // Two paragraphs via "\n\n" + pre-line rendering, dua first.
   hadiyaDua:
-    "আপনার হাদিয়া আমাকে আরও ইসলামিক কনটেন্ট তৈরির কাজ চালিয়ে যেতে সত্যিই উৎসাহিত করে। সত্যিই ইচ্ছা হলে তবেই দিন - নইলে আপনার দোয়াই আমার জন্য সর্ববৃহৎ হাদিয়া। আপনার দোয়ায় আমাকে রাখুন - এটুকুই আমার জন্য যথেষ্ট।",
+    "আপনার দোয়াই আমার জন্য সবচেয়ে বড় হাদিয়া। দোয়ায় আমাকে মনে রাখবেন—এটুকুই আমার জন্য অনেক।\n\nআর আপনার ইচ্ছা হলে, হাদিয়ার মাধ্যমে Amalyn-এর পাশে থাকতে পারেন। আপনার হাদিয়া আমাকে আরও ইসলামিক কনটেন্ট তৈরি করে যেতে উৎসাহ দেয়। 🤍",
   wayToGive: "হাদিয়া পাঠানোর উপায়",
   regionHint: "আপনি কোথা থেকে হাদিয়া পাঠাচ্ছেন, সেটি বেছে নিন।",
   regionInsideBd: "বাংলাদেশে",
