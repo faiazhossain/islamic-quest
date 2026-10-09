@@ -79,17 +79,17 @@ describe("selectHomeView", () => {
     expect(view.questId).toBe(expected?.id);
   });
 
-  it("keeps next-quest at 19 of 20 complete", () => {
+  it("keeps next-quest until one quest is left", () => {
     const all = publicQuests();
     const progress = new Map(
-      all.slice(0, 19).map((quest) =>
+      all.slice(0, all.length - 1).map((quest) =>
         entry(quest.id, { count: 1, completedAt: 50, updatedAt: 50 }),
       ),
     );
     expectKind(selectHomeView({ progress, events: [], now: NOW }), "next-quest");
   });
 
-  it("transitions to the lifelong-practice state at 20 of 20", () => {
+  it("transitions to the lifelong-practice state when every quest is complete", () => {
     const all = publicQuests();
     const progress = new Map(
       all.map((quest) =>
@@ -98,8 +98,8 @@ describe("selectHomeView", () => {
     );
     const view = selectHomeView({ progress, events: [], now: NOW });
     if (view.kind !== "all-complete") throw new Error("expected all-complete");
-    expect(view.completedCount).toBe(20);
-    expect(view.questTotal).toBe(20);
+    expect(view.completedCount).toBe(all.length);
+    expect(view.questTotal).toBe(all.length);
     expect(all.some((quest) => quest.id === view.daily.questId)).toBe(true);
     expect(view.daily.todayCount).toBe(0);
     expect(view.stats.daysPracticed).toBe(0);

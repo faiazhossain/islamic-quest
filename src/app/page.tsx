@@ -15,10 +15,9 @@ import {
   groupStrictChallenges,
   type DerivedStrictChallenge,
 } from "@/lib/challenge";
-import { getDhikr } from "@/lib/content";
 import { listStrictChallenges } from "@/lib/db/challenges";
 import { formatCount } from "@/lib/format";
-import { localized, useCopy, useLang } from "@/lib/i18n";
+import { useCopy, useLang } from "@/lib/i18n";
 import {
   getAllProgress,
   getPracticeEvents,
@@ -81,10 +80,11 @@ export default function HomePage() {
     [progress, events, now, lang],
   );
 
-  // One row per active commitment (a multi-amal commitment is one row);
-  // finished and broken ones live on /challenge, and with none active
-  // the invitation row returns.
-  const activeChallengeGroups =
+  // Home shows ONE Challenge row no matter how many commitments run: the
+  // row aggregates every active group's state and hands off to /challenge,
+  // where the full list lives. Finished and broken ones live on /challenge
+  // only, and with none active the invitation row returns.
+  const activeEntries: StrictEntry[] =
     events && now > 0
       ? groupStrictChallenges(challenges)
           .map((group) => {
@@ -105,7 +105,7 @@ export default function HomePage() {
             };
           })
           .filter((group) => group.status === "active")
-          .map((group) => group.entries)
+          .flatMap((group) => group.entries)
       : [];
 
   return (
@@ -135,13 +135,8 @@ export default function HomePage() {
             name={view.name}
             target={view.target}
           />
-          {activeChallengeGroups.length > 0 ? (
-            activeChallengeGroups.map((entries) => (
-              <StrictRow
-                key={entries[0].challenge.groupId ?? entries[0].challenge.id}
-                entries={entries}
-              />
-            ))
+          {activeEntries.length > 0 ? (
+            <StrictRow entries={activeEntries} />
           ) : (
             <StrictRow entries={null} />
           )}
@@ -197,14 +192,8 @@ export default function HomePage() {
               order utilities put the full-width strip back below the hero
               row on desktop, where the journey link fills the hero's right
               column. */}
-          {activeChallengeGroups.length > 0 ? (
-            activeChallengeGroups.map((entries) => (
-              <StrictRow
-                key={entries[0].challenge.groupId ?? entries[0].challenge.id}
-                entries={entries}
-                className="lg:order-3 lg:mt-0"
-              />
-            ))
+          {activeEntries.length > 0 ? (
+            <StrictRow entries={activeEntries} className="lg:order-3 lg:mt-0" />
           ) : (
             <StrictRow entries={null} className="lg:order-3 lg:mt-0" />
           )}
@@ -237,14 +226,16 @@ export default function HomePage() {
 
 /**
  * The Simple Challenge entry: home's clear second tier - louder than a
- * nav row, quieter than the quest hero. One row renders per active
- * commitment; a multi-amal commitment keeps its one-row shape with the
- * amal count as the title. A dial tells the commitment's state at a
- * glance (arc = place in the window, center = streak) and the tone
- * follows the status calmly, never punitively: gold while running, jade
- * when today's amals are done. Always rendered so the challenge stays
- * reachable before the first one is ever started; with none active, a
- * dashed dial around a plus is the invitation.
+ * nav row, quieter than the quest hero. Always a SINGLE row named
+ * "Challenge", whatever is running: the subtitle aggregates every active
+ * commitment (how many run, how much of today is done); the full list of
+ * started challenges lives on /challenge, one tap away. A dial tells the
+ * aggregated state at a glance (arc = average place in the windows,
+ * center = best live streak) and the tone follows the status calmly,
+ * never punitively: gold while running, jade when today's amals are all
+ * done. Always rendered so the challenge stays reachable before the
+ * first one is ever started; with none active, a dashed dial around a
+ * plus is the invitation.
  */
 type StrictTone = "accent" | "jade" | "danger" | "idle";
 
@@ -279,48 +270,55 @@ function StrictRow({
   let dashed = true;
   let percent = 0;
   let streak: number | null = null;
-  // With several commitments running, the title is what tells the rows
-  // apart; the invitation row keeps the product name.
-  let title = copy.strictTitle;
+  // The single row always carries the product name; the subtitle carries
+  // the aggregated facts.
+  const title = copy.strictTitle;
   let line = copy.strictTagline;
   if (entries && entries.length > 0) {
     dashed = false;
-    const first = entries[0];
-    const challenge = first.challenge;
-    const derived = first.derived;
-    streak = derived.streakDays;
-    if (entries.length === 1) {
-      const dhikr = getDhikr(challenge.dhikrId);
-      title = dhikr ? localized(dhikr.names, lang) : copy.strictTitle;
-    } else {
-      title = copy.strictGroupAmals(formatCount(entries.length, lang));
-    }
-    // Only active commitments reach this row; the day is the headline.
-    percent =
+    streak = Math.max(...entries.map((entry) => entry.derived.streakDays));
+    // Dial: average place in the window across commitments.
+    const percents = entries.map(({ challenge, derived }) =>
       challenge.durationDays > 0
         ? (derived.dayNumber / challenge.durationDays) * 100
-        : 0;
+        : 0,
+    );
+    percent = percents.reduce((sum, value) => sum + value, 0) / percents.length;
     const doneToday = entries.filter((entry) => entry.derived.todayComplete);
+    const commitmentIds = new Set(
+      entries.map(({ challenge }) => challenge.groupId ?? challenge.id),
+    );
+    const singleCommitment = commitmentIds.size === 1;
+    const first = entries[0];
     if (doneToday.length === entries.length) {
       tone = "jade";
-      line = copy.strictTodayComplete;
-    } else if (entries.length === 1) {
+      line =
+        commitmentIds.size > 1
+          ? `${copy.strictChallengesRunning(formatCount(commitmentIds.size, lang))} · ${copy.strictTodayComplete}`
+          : copy.strictTodayComplete;
+    } else if (singleCommitment) {
       tone = "accent";
-      line = `${formatCount(derived.todayCount, lang)} / ${formatCount(
-          challenge.dailyTarget,
-          lang,
-        )} · ${copy.strictDayProgress(
-          formatCount(derived.dayNumber, lang),
-          formatCount(challenge.durationDays, lang),
-        )}`;
+      line =
+        entries.length === 1
+          ? `${formatCount(first.derived.todayCount, lang)} / ${formatCount(
+              first.challenge.dailyTarget,
+              lang,
+            )} · ${copy.strictDayProgress(
+              formatCount(first.derived.dayNumber, lang),
+              formatCount(first.challenge.durationDays, lang),
+            )}`
+          : `${copy.strictTodayAmalsDone(
+              formatCount(doneToday.length, lang),
+              formatCount(entries.length, lang),
+            )} · ${copy.strictDayProgress(
+              formatCount(first.derived.dayNumber, lang),
+              formatCount(first.challenge.durationDays, lang),
+            )}`;
     } else {
       tone = "accent";
-      line = `${copy.strictTodayAmalsDone(
+      line = `${copy.strictChallengesRunning(formatCount(commitmentIds.size, lang))} · ${copy.strictTodayAmalsDone(
         formatCount(doneToday.length, lang),
         formatCount(entries.length, lang),
-      )} · ${copy.strictDayProgress(
-        formatCount(derived.dayNumber, lang),
-        formatCount(challenge.durationDays, lang),
       )}`;
     }
   }

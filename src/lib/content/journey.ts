@@ -30,6 +30,10 @@ const STAGES: JourneyStage[] = [
       "alhamdulillah-33",
       "allahu-akbar-33",
       "sayyid-ul-istighfar-33",
+      // Gentle one-time duas first: a single recitation is a real start.
+      "bismika-allahumma-amutu-wa-ahya-1",
+      "rabbi-inni-lima-anzalta-1",
+      "inna-lillahi-wa-inna-ilayhi-rajion-1",
     ],
   },
   {
@@ -44,6 +48,15 @@ const STAGES: JourneyStage[] = [
       "la-ilaha-illallah-100",
       "sayyid-ul-istighfar-100",
       "salawat-ibrahimiyya-100",
+      // First-tier duas.
+      "hasbunallahu-wa-nimal-wakil-1",
+      "audhu-min-hammi-wal-hazan-1",
+      "audhu-bikalimatillah-it-tammat-1",
+      "ayat-al-kursi-1",
+      "bismillahilladhi-la-yadurru-1",
+      "allahumma-inni-asaluka-alhuda-1",
+      "rabbana-atina-fid-dunya-1",
+      "rabbir-hamhuma-1",
     ],
   },
   {
@@ -54,11 +67,38 @@ const STAGES: JourneyStage[] = [
       "la-ilaha-illallah-500",
       "astaghfirullah-500",
       "salawat-ibrahimiyya-500",
+      // Second-tier duas.
+      "bismika-allahumma-amutu-wa-ahya-3",
+      "rabbi-inni-lima-anzalta-3",
+      "inna-lillahi-wa-inna-ilayhi-rajion-3",
+      "hasbunallahu-wa-nimal-wakil-3",
+      "audhu-min-hammi-wal-hazan-3",
+      "audhu-bikalimatillah-it-tammat-3",
+      "ayat-al-kursi-3",
+      "bismillahilladhi-la-yadurru-3",
+      "allahumma-inni-asaluka-alhuda-3",
+      "rabbana-atina-fid-dunya-3",
+      "rabbir-hamhuma-3",
     ],
   },
   {
     id: "abundance",
-    questIds: ["astaghfirullah-1000", "salawat-ibrahimiyya-1000"],
+    questIds: [
+      "astaghfirullah-1000",
+      "salawat-ibrahimiyya-1000",
+      // Third-tier duas.
+      "bismika-allahumma-amutu-wa-ahya-7",
+      "rabbi-inni-lima-anzalta-7",
+      "inna-lillahi-wa-inna-ilayhi-rajion-7",
+      "hasbunallahu-wa-nimal-wakil-7",
+      "audhu-min-hammi-wal-hazan-7",
+      "audhu-bikalimatillah-it-tammat-7",
+      "ayat-al-kursi-7",
+      "bismillahilladhi-la-yadurru-7",
+      "allahumma-inni-asaluka-alhuda-7",
+      "rabbana-atina-fid-dunya-7",
+      "rabbir-hamhuma-7",
+    ],
   },
 ];
 

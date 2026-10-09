@@ -30,4 +30,12 @@ export const CATEGORIES: Category[] = [
       bn: "আল্লাহকে স্মরণের কথা",
     },
   },
+  {
+    id: "dua",
+    name: { en: "Dua", bn: "দোয়া" },
+    description: {
+      en: "Supplications taught in the Quran and Sunnah",
+      bn: "কুরআন ও সুন্নাহতে শেখানো দোয়া",
+    },
+  },
 ];

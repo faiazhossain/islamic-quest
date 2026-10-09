@@ -58,15 +58,16 @@ describe("UI dictionary", () => {
       const value = entry.slice(entry.indexOf("=") + 1);
       // Deliberate Latin exceptions: the brand, the host, a login
       // provider whose name users read in Latin, payment brands users
-      // read in Latin (bKash, EBL, Visa), and the product nouns "Quest"
-      // and "Simple Challenge", which stay English in Bangla copy
-      // (terminology map). Product terms like "Challenge" also appear
-      // inside Bengali phrases; those strings still carry Bengali
-      // script, so they pass the check.
+      // read in Latin (bKash, EBL, Visa), and the product nouns "Quest",
+      // "Simple Challenge", and the standalone "Challenge" pill, which
+      // stay English in Bangla copy (terminology map). Product terms
+      // like "Challenge" also appear inside Bengali phrases; those
+      // strings still carry Bengali script, so they pass the check.
       if (
         /amalyn|sunnah|ihadis|google|emailplaceholder|pathoflight|bkash|ebl|visa/i.test(path) ||
         /English/.test(value) ||
         value === "Quest" ||
+        value === "Challenge" ||
         value === "Simple Challenge"
       ) {
         continue;

@@ -238,9 +238,16 @@ export default function CountPage() {
         aria-label={copy.countAria(localized(dhikr.names, lang), formatCount(count, lang), formatCount(quest.target, lang), dailyFrame ? copy.todaySuffix : "")}
         className="relative flex flex-1 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
-        <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
-          {dhikr.arabic}
-        </span>
+        {/* The amal itself, readable while reciting: Arabic first, then the
+            transliteration and the words' meaning in the reader's language.
+            Long texts scroll inside this block — taps here still count, but
+            scroll gestures must not (see the pointer pair below). */}
+        <DuaText
+          arabic={dhikr.arabic}
+          transliteration={dhikr.transliteration}
+          meaning={localized(dhikr.meaning, lang)}
+          onTap={tap}
+        />
         <span
           key={pulse}
           className={`font-display text-[clamp(4.5rem,24vw,7.5rem)] leading-none tracking-tight text-ink [font-variant-numeric:tabular-nums] ${
@@ -333,6 +340,62 @@ export default function CountPage() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The recitation text inside the tap surface. The whole counter button
+ * counts on pointerdown for instant rhythm; this block is the one place
+ * that must differ — long duas need to scroll, and a scroll gesture must
+ * never inflate the count. So it stops the down-propagation and counts
+ * itself only when the gesture ends where it started (a tap, not a
+ * scroll). Keyboard activation still arrives via the outer click.
+ */
+const TAP_SLOP_PX = 10;
+
+function DuaText({
+  arabic,
+  transliteration,
+  meaning,
+  onTap,
+}: {
+  arabic: string;
+  transliteration: string;
+  meaning: string;
+  onTap: () => void;
+}) {
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  return (
+    <span
+      className="flex max-h-[38dvh] flex-col items-center gap-1.5 self-stretch overflow-y-auto px-1"
+      onPointerDown={(event) => {
+        if (!event.isPrimary) return;
+        startRef.current = { x: event.clientX, y: event.clientY };
+        // Keep the scroll gesture from counting at the outer button.
+        event.stopPropagation();
+      }}
+      onPointerUp={(event) => {
+        const start = startRef.current;
+        startRef.current = null;
+        if (!event.isPrimary || !start) return;
+        const moved =
+          Math.abs(event.clientX - start.x) + Math.abs(event.clientY - start.y);
+        if (moved <= TAP_SLOP_PX) onTap();
+      }}
+      onPointerCancel={() => {
+        startRef.current = null;
+      }}
+    >
+      <span
+        className="font-arabic text-[clamp(1.3rem,5.2vw,1.75rem)] leading-[1.9] text-ink"
+        dir="rtl"
+        lang="ar"
+      >
+        {arabic}
+      </span>
+      <span className="text-xs italic text-ink-3">{transliteration}</span>
+      <span className="text-sm leading-relaxed text-ink-2">{meaning}</span>
+    </span>
   );
 }
 

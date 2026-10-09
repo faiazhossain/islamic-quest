@@ -402,4 +402,188 @@ narratorBn: "আওস ইবনে আওস (রাঃ)",
       verifiedAt: "2026-10-06",
     },
   },
+
+  /*
+   * Expansion batch (2026-10-08). Same pipeline as the dhikr batch:
+   * every reference, Arabic matn, and grading below was read from a
+   * fetched sunnah.com page; Bangla translations appear ONLY where the
+   * verbatim iHadis text was confirmed — entries without verified
+   * iHadis Bangla ship English-only, per the HadithEntry contract.
+   * English renderings are composed for Amalyn, faithful to the cited
+   * text.
+   */
+  {
+    id: "worry-grief-refuge-bukhari-6369",
+    dhikrIds: ["audhu-min-hammi-wal-hazan"],
+    theme: "prophets-practice",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْجُبْنِ وَالْبُخْلِ، وَضَلَعِ الدَّيْنِ، وَغَلَبَةِ الرِّجَالِ",
+    translation: {
+      en: "The Prophet ﷺ used to say: O Allah, I seek refuge in You from worry and grief, from incapacity and laziness, from cowardice and miserliness, from the burden of debt, and from being overpowered by men.",
+      bn: "নবী (ﷺ) বলতেন : হে আল্লাহ! নিশ্চয়ই আমি আপনার কাছে আশ্রয় চাই- দুশ্চিন্তা, পেরেশানি, অক্ষমতা, অলসতা, কাপুরুষতা, কৃপণতা, ঋণভার ও মানুষের প্রভাবাধীন হওয়া থেকে।",
+    },
+    narrator: "Anas bin Malik",
+    narratorBn: "আনাস (রাঃ)",
+    collection: "Sahih al-Bukhari",
+    reference: "6369",
+    sourceUrl: "https://sunnah.com/bukhari:6369",
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/bukhari:6369", "https://ihadis.com/bukhari/hadith/6369"],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "bedtime-bismika-bukhari-6324",
+    dhikrIds: ["bismika-allahumma-amutu-wa-ahya"],
+    theme: "occasion",
+    arabic:
+      "إِذَا أَرَادَ أَنْ يَنَامَ قَالَ ‏\"‏ بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا ‏\"‏",
+    translation: {
+      en: "When the Prophet ﷺ went to bed, he would say: In Your name, O Allah, I die and I live.",
+      bn: "নবী (ﷺ) যখন ঘুমাতে চাইতেন, তখন বলতেনঃ \"হে আল্লাহ! আমি আপনার নামেই মরি এবং জীবিত হই।\"",
+    },
+    narrator: "Hudhayfa",
+    narratorBn: "হুজাইফা (রাঃ)",
+    collection: "Sahih al-Bukhari",
+    reference: "6324",
+    sourceUrl: "https://sunnah.com/bukhari:6324",
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/bukhari:6324", "https://ihadis.com/bukhari/hadith/6324"],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "huda-tuqa-afafa-ghina-muslim-2721",
+    dhikrIds: ["allahumma-inni-asaluka-alhuda"],
+    theme: "prophets-practice",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى",
+    translation: {
+      en: "The Prophet ﷺ used to supplicate: O Allah, I ask You for guidance, taqwa, chastity, and self-sufficiency.",
+    },
+    narrator: "Abdullah (Ibn Mas'ud)",
+    collection: "Sahih Muslim",
+    reference: "2721",
+    sourceUrl: "https://sunnah.com/muslim:2721a",
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/muslim:2721a"],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "kalimatillah-tammat-protection-muslim-2708",
+    dhikrIds: ["audhu-bikalimatillah-it-tammat"],
+    theme: "occasion",
+    arabic:
+      "إِذَا نَزَلَ أَحَدُكُمْ مَنْزِلاً فَلْيَقُلْ أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ ‏.‏ فَإِنَّهُ لاَ يَضُرُّهُ شَىْءٌ حَتَّى يَرْتَحِلَ مِنْهُ",
+    translation: {
+      en: "The Prophet ﷺ said: When one of you stops at a place, let him say: I seek refuge in the perfect words of Allah from the evil of what He created — nothing will harm him until he departs from that place. A man later told the Prophet ﷺ he had been stung by a scorpion during the night; he replied: Had you said when evening came, \"I seek refuge in the perfect words of Allah from the evil of what He created,\" it would not have harmed you.",
+    },
+    narrator: "Khaulah bint Hakim; Abu Huraira",
+    collection: "Sahih Muslim",
+    reference: "2708",
+    sourceUrl: "https://sunnah.com/muslim:2708b",
+    review: {
+      status: "verified",
+      verifiedSources: [
+        "https://sunnah.com/muslim:2708b",
+        "https://sunnah.com/muslim:2709a",
+      ],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "bismillah-three-times-protection-abudawud-5088",
+    dhikrIds: ["bismillahilladhi-la-yadurru"],
+    theme: "occasion",
+    arabic:
+      "مَنْ قَالَ بِسْمِ اللَّهِ الَّذِي لاَ يَضُرُّ مَعَ اسْمِهِ شَىْءٌ فِي الأَرْضِ وَلاَ فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ ثَلاَثَ مَرَّاتٍ لَمْ تُصِبْهُ فَجْأَةُ بَلاَءٍ حَتَّى يُصْبِحَ وَمَنْ قَالَهَا حِينَ يُصْبِحُ ثَلاَثَ مَرَّاتٍ لَمْ تُصِبْهُ فَجْأَةُ بَلاَءٍ حَتَّى يُمْسِيَ",
+    translation: {
+      en: "The Prophet ﷺ said: Whoever says three times, In the name of Allah, with whose name nothing on earth or in heaven can cause harm; He is the All-Hearing, the All-Knowing — will not be struck by sudden affliction until morning. And whoever says it three times in the morning will not be struck by sudden affliction until evening.",
+    },
+    narrator: "Uthman ibn Affan",
+    collection: "Sunan Abi Dawud",
+    reference: "5088",
+    grade: "Sahih (Al-Albani)",
+    sourceUrl: "https://sunnah.com/abudawud:5088",
+    note: {
+      en: "Parallel: Jami at-Tirmidhi 3388 (Hasan, Darussalam).",
+      bn: "সমতুল্য: জামে তিরমিজী ৩৩৮৮ (হাসান, দারুসসালাম)।",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: [
+        "https://sunnah.com/abudawud:5088",
+        "https://sunnah.com/tirmidhi:3388",
+      ],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "ayat-al-kursi-before-sleep-bukhari-2311",
+    dhikrIds: ["ayat-al-kursi"],
+    theme: "occasion",
+    arabic:
+      "إِذَا أَوَيْتَ إِلَى فِرَاشِكَ فَاقْرَأْ آيَةَ الْكُرْسِيِّ ‏{‏اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَىُّ الْقَيُّومُ‏}‏ حَتَّى تَخْتِمَ الآيَةَ، فَإِنَّكَ لَنْ يَزَالَ عَلَيْكَ مِنَ اللَّهِ حَافِظٌ وَلاَ يَقْرَبَنَّكَ شَيْطَانٌ حَتَّى تُصْبِحَ",
+    translation: {
+      en: "The Prophet ﷺ said: When you go to your bed, recite Ayat al-Kursi — Allah, there is no god but He, the Ever-Living, the Sustainer — until you complete the verse. A guardian from Allah will then remain over you, and no devil will come near you until morning.",
+    },
+    narrator: "Abu Huraira",
+    collection: "Sahih al-Bukhari",
+    reference: "2311",
+    sourceUrl: "https://sunnah.com/bukhari:2311",
+    note: {
+      en: "The Arabic above is the Prophet's ﷺ command within the longer night-guard narration.",
+      bn: "ওপরের আরবি অংশটি দীর্ঘ রাতের প্রহরীর ঘটনার মধ্যে রাসূলুল্লাহ (সা.)-এর নির্দেশবাক্য।",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/bukhari:2311"],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "hasbunallah-ibrahim-fire-bukhari-4564",
+    dhikrIds: ["hasbunallahu-wa-nimal-wakil"],
+    theme: "occasion",
+    arabic:
+      "كَانَ آخِرَ قَوْلِ إِبْرَاهِيمَ حِينَ أُلْقِيَ فِي النَّارِ حَسْبِيَ اللَّهُ وَنِعْمَ الْوَكِيلُ",
+    translation: {
+      en: "Ibrahim's (as) last words when he was thrown into the fire were: Sufficient for me is Allah, and He is the best Disposer of affairs.",
+    },
+    narrator: "Ibn Abbas",
+    collection: "Sahih al-Bukhari",
+    reference: "4564",
+    sourceUrl: "https://sunnah.com/bukhari:4564",
+    note: {
+      en: "Cited in the Prophetic Commentary on Quran 3:173, where the believers said the same words.",
+      bn: "কুরআন ৩:১৭৩-এর প্রবাচিক ব্যাখ্যায় উদ্ধৃত, যেখানে মুমিনরাও একই কথা বলেছিলেন।",
+    },
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/bukhari:4564"],
+      verifiedAt: "2026-10-08",
+    },
+  },
+  {
+    id: "istirja-calamity-muslim-918",
+    dhikrIds: ["inna-lillahi-wa-inna-ilayhi-rajion"],
+    theme: "occasion",
+    arabic:
+      "مَا مِنْ مُسْلِمٍ تُصِيبُهُ مُصِيبَةٌ فَيَقُولُ مَا أَمَرَهُ اللَّهُ إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ اللَّهُمَّ أْجُرْنِي فِي مُصِيبَتِي وَأَخْلِفْ لِي خَيْرًا مِنْهَا ‏.‏ إِلاَّ أَخْلَفَ اللَّهُ لَهُ خَيْرًا مِنْهَا",
+    translation: {
+      en: "The Prophet ﷺ said: No Muslim is struck by an affliction and then says what Allah has commanded — We belong to Allah, and to Him we return; O Allah, reward me for my affliction and give me better than it in exchange — without Allah giving him better than it. Umm Salama said she said this at Abu Salama's death, and Allah gave her better.",
+    },
+    narrator: "Umm Salama",
+    collection: "Sahih Muslim",
+    reference: "918",
+    sourceUrl: "https://sunnah.com/muslim:918",
+    review: {
+      status: "verified",
+      verifiedSources: ["https://sunnah.com/muslim:918", "https://ihadis.com/muslim/12"],
+      verifiedAt: "2026-10-08",
+    },
+  },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DHIKR, getDhikr } from "@/lib/content";
@@ -57,6 +58,7 @@ function buildGroupViews(
 
 export default function ChallengePage() {
   const copy = useCopy();
+  const router = useRouter();
   const [views, setViews] = useState<ChallengeGroupView[] | null>(null);
   const [now, setNow] = useState(0);
   const [restartFromGroupId, setRestartFromGroupId] = useState<string | null>(
@@ -65,8 +67,42 @@ export default function ChallengePage() {
   const [confirmEndGroupId, setConfirmEndGroupId] = useState<string | null>(
     null,
   );
-  const [creating, setCreating] = useState(false);
+  const [creatingTapped, setCreating] = useState(false);
+  const [prefillDhikrId, setPrefillDhikrId] = useState<string | null>(() => {
+    // Deep link: /challenge?amal=<dhikrId> opens setup with that amal
+    // preselected (e.g. arriving from Explore). Read via window.location
+    // rather than useSearchParams so the page stays statically
+    // prerenderable (Next 16 CSR-bailout). Lazy read, then strip the
+    // param so a refresh or back-navigation doesn't reopen setup. Safe
+    // against hydration mismatch: the page renders a skeleton until the
+    // challenge list loads, so this state never changes prerendered HTML.
+    if (typeof window === "undefined") return null;
+    const id = new URLSearchParams(window.location.search).get("amal");
+    if (!id || !getDhikr(id)) return null;
+    window.history.replaceState(null, "", "/challenge");
+    return id;
+  });
   const setupRef = useRef<HTMLDivElement | null>(null);
+  // A deep-linked prefill opens setup even without the tap.
+  const creating = creatingTapped || prefillDhikrId !== null;
+
+  const clearSetup = () => {
+    setCreating(false);
+    setPrefillDhikrId(null);
+  };
+
+  // A challenge begun from a deep link (arriving from a quest or Explore)
+  // goes straight into its fullscreen counter; one started from the list
+  // stays here, where the new card appears in the stack.
+  const handleCreated = (created: StrictChallenge[]) => {
+    const deepLinked = prefillDhikrId !== null;
+    clearSetup();
+    if (deepLinked && created.length > 0) {
+      router.push(`/challenge/${created[0].id}/count`);
+    } else {
+      void load();
+    }
+  };
 
   // The inline setup opens below the stack; bring it into view so the
   // commitment being made is immediately on screen.
@@ -128,7 +164,12 @@ export default function ChallengePage() {
       <div className="mt-8 h-64 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
     );
   } else if (views.length === 0) {
-    body = <ChallengeSetup onCreated={() => void load()} />;
+    body = (
+      <ChallengeSetup
+        prefillDhikrId={prefillDhikrId ?? undefined}
+        onCreated={handleCreated}
+      />
+    );
   } else {
     // Oldest commitment first: the stack reads in the order the
     // commitments were made.
@@ -173,11 +214,9 @@ export default function ChallengePage() {
           <div ref={setupRef}>
             <ChallengeSetup
               parallel={hasActive}
-              onCreated={() => {
-                setCreating(false);
-                void load();
-              }}
-              onCancel={() => setCreating(false)}
+              prefillDhikrId={prefillDhikrId ?? undefined}
+              onCreated={handleCreated}
+              onCancel={clearSetup}
             />
           </div>
         ) : (
@@ -236,24 +275,29 @@ export default function ChallengePage() {
  * The setup screen: the commitment made before it starts. One screen,
  * no wizard - the amals (one or many, each with its own daily target),
  * the duration, then the summary. `prefill` carries a previous
- * commitment's shape for restarts; `parallel` notes an already-running
+ * commitment's shape for restarts; `prefillDhikrId` preselects one amal
+ * (deep link from Explore); `parallel` notes an already-running
  * challenge this one will sit beside.
  */
 function ChallengeSetup({
   prefill,
+  prefillDhikrId,
   parallel = false,
   onCreated,
   onCancel,
 }: {
   prefill?: StrictChallenge[];
+  prefillDhikrId?: string;
   parallel?: boolean;
-  onCreated: () => void;
+  onCreated: (created: StrictChallenge[]) => void;
   onCancel?: () => void;
 }) {
   const copy = useCopy();
   const lang = useLang();
   const [targets, setTargets] = useState<Record<string, number>>(() => {
-    if (!prefill) return {};
+    if (!prefill) {
+      return prefillDhikrId ? { [prefillDhikrId]: CHALLENGE_TARGET_PRESETS[0] } : {};
+    }
     return Object.fromEntries(
       prefill.map((row) => [row.dhikrId, row.dailyTarget]),
     );
@@ -304,14 +348,14 @@ function ChallengeSetup({
   const start = async () => {
     setBusy(true);
     try {
-      await createStrictChallenges(
+      const created = await createStrictChallenges(
         selected.map((dhikr) => ({
           dhikrId: dhikr.id,
           dailyTarget: targets[dhikr.id],
         })),
         { durationDays: days, now: Date.now() },
       );
-      onCreated();
+      onCreated(created);
     } finally {
       setBusy(false);
     }
@@ -821,6 +865,14 @@ function TerminalCard({
         >
           {copy.strictNewChallenge}
         </button>
+        {complete && (
+          <Link
+            href={`/challenge/${group.id}/share`}
+            className="mt-4 block text-xs font-semibold text-accent transition-colors hover:text-accent-hover"
+          >
+            {copy.strictSeeShareCard}
+          </Link>
+        )}
       </div>
     </section>
   );

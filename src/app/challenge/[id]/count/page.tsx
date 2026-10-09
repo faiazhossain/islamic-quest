@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StarMark } from "@/components/star-mark";
-import { challengeStreamId, deriveStrictChallenge } from "@/lib/challenge";
+import {
+  challengeStreamId,
+  deriveStrictChallenge,
+  groupStrictChallenges,
+} from "@/lib/challenge";
 import { getDhikr } from "@/lib/content";
 import { listStrictChallenges } from "@/lib/db/challenges";
 import { getPracticeEvents, recordIncrement, recordUndo } from "@/lib/db/events";
@@ -68,6 +72,10 @@ export default function ChallengeCountPage() {
   const [count, setCount] = useState(0);
   const [ready, setReady] = useState(false);
   const [done, setDone] = useState(false);
+  // True when finishing today's target finishes the whole commitment: the
+  // last day of the window, with every sibling amal settled. The done
+  // overlay then offers the milestone share card.
+  const [completingGroup, setCompletingGroup] = useState(false);
   const [pulse, setPulse] = useState(0);
   const [note, setNote] = useState<string | null>(null);
 
@@ -109,6 +117,28 @@ export default function ChallengeCountPage() {
           if (derived.todayCount / row.dailyTarget >= milestone.fraction) {
             seenMilestones.current.add(milestone.fraction);
           }
+        }
+        // Does today's last count complete the whole commitment? The final
+        // day of the window, with every sibling amal already settled (done
+        // for today, or already complete). The share page re-validates
+        // authoritatively; this only decides whether the overlay offers it.
+        const group = groupStrictChallenges(challenges).find((entry) =>
+          entry.rows.some((entryRow) => entryRow.id === row.id),
+        );
+        if (group) {
+          const byId = new Map(challenges.map((entry) => [entry.id, entry]));
+          const others = group.rows
+            .filter((entryRow) => entryRow.id !== row.id)
+            .map((entryRow) =>
+              deriveStrictChallenge(byId.get(entryRow.id) ?? entryRow, events, Date.now()),
+            );
+          const finalDay = derived.dayNumber === row.durationDays;
+          const othersSettled = others.every(
+            (entry) =>
+              entry.status === "complete" ||
+              (entry.status === "active" && entry.todayComplete),
+          );
+          setCompletingGroup(finalDay && othersSettled);
         }
         setChallenge(row);
         setDayNumber(derived.dayNumber);
@@ -238,9 +268,18 @@ export default function ChallengeCountPage() {
         )}
         className="relative flex flex-1 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-3xl px-6 focus-visible:outline-2 focus-visible:outline-offset-[-10px] focus-visible:outline-accent"
       >
-        <span className="font-arabic text-lg leading-relaxed text-ink-3" dir="rtl" lang="ar">
-          {dhikr?.arabic}
-        </span>
+        {/* The amal itself, readable while reciting — same treatment as
+            the quest counter: Arabic, transliteration, then the meaning
+            in the reader's language. Scroll gestures inside the block
+            must not count; taps do. */}
+        {dhikr && (
+          <DuaText
+            arabic={dhikr.arabic}
+            transliteration={dhikr.transliteration}
+            meaning={localized(dhikr.meaning, lang)}
+            onTap={tap}
+          />
+        )}
         <span
           key={pulse}
           className={`font-display text-[clamp(4.5rem,24vw,7.5rem)] leading-none tracking-tight text-ink [font-variant-numeric:tabular-nums] ${
@@ -335,9 +374,71 @@ export default function ChallengeCountPage() {
           >
             {copy.done}
           </Link>
+          {challenge && completingGroup && (
+            <Link
+              href={`/challenge/${challenge.id}/share`}
+              className="rise mt-4 block text-xs font-semibold text-accent transition-colors hover:text-accent-hover [animation-delay:480ms]"
+            >
+              {copy.strictSeeShareCard}
+            </Link>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The recitation text inside the tap surface — see the quest counter's
+ * DuaText: instant counting stays on the outer button's pointerdown,
+ * while this block counts on pointerup-within-slop so its scrollable
+ * long duas never inflate the count.
+ */
+const TAP_SLOP_PX = 10;
+
+function DuaText({
+  arabic,
+  transliteration,
+  meaning,
+  onTap,
+}: {
+  arabic: string;
+  transliteration: string;
+  meaning: string;
+  onTap: () => void;
+}) {
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  return (
+    <span
+      className="flex max-h-[38dvh] flex-col items-center gap-1.5 self-stretch overflow-y-auto px-1"
+      onPointerDown={(event) => {
+        if (!event.isPrimary) return;
+        startRef.current = { x: event.clientX, y: event.clientY };
+        // Keep the scroll gesture from counting at the outer button.
+        event.stopPropagation();
+      }}
+      onPointerUp={(event) => {
+        const start = startRef.current;
+        startRef.current = null;
+        if (!event.isPrimary || !start) return;
+        const moved =
+          Math.abs(event.clientX - start.x) + Math.abs(event.clientY - start.y);
+        if (moved <= TAP_SLOP_PX) onTap();
+      }}
+      onPointerCancel={() => {
+        startRef.current = null;
+      }}
+    >
+      <span
+        className="font-arabic text-[clamp(1.3rem,5.2vw,1.75rem)] leading-[1.9] text-ink"
+        dir="rtl"
+        lang="ar"
+      >
+        {arabic}
+      </span>
+      <span className="text-xs italic text-ink-3">{transliteration}</span>
+      <span className="text-sm leading-relaxed text-ink-2">{meaning}</span>
+    </span>
   );
 }
 

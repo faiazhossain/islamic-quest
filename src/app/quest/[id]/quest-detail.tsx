@@ -115,7 +115,7 @@ export function QuestDetail({ questId }: { questId: string }) {
   return (
     // Extra bottom padding clears the mobile action bar that sits above
     // the bottom nav (main's own padding only clears the nav itself).
-    <div className="flex flex-1 flex-col pb-24 lg:pb-0">
+    <div className="flex flex-1 flex-col pb-28 lg:pb-0">
       <div className="rise">
         <Link
           href="/explore"
@@ -192,6 +192,13 @@ export function QuestDetail({ questId }: { questId: string }) {
             >
               {startLabel}
             </button>
+            <Link
+              href={`/challenge?amal=${dhikr.id}`}
+              aria-label={copy.startChallengeAria(localized(dhikr.names, lang))}
+              className="mx-auto mt-3 block text-center text-xs font-medium text-ink-3 transition-colors hover:text-ink"
+            >
+              {copy.startChallenge}
+            </Link>
             {loaded && complete && progress?.completedAt && (
               <>
                 <p className="mt-3 text-center text-xs text-jade">
@@ -248,6 +255,13 @@ export function QuestDetail({ questId }: { questId: string }) {
           >
             {startLabel}
           </button>
+          <Link
+            href={`/challenge?amal=${dhikr.id}`}
+            aria-label={copy.startChallengeAria(localized(dhikr.names, lang))}
+            className="mt-2 block text-center text-[11px] font-medium text-ink-3 transition-colors active:opacity-60"
+          >
+            {copy.startChallenge}
+          </Link>
           {loaded && complete && progress?.completedAt && (
             <p className="mt-1.5 text-center text-[11px] text-ink-3">
               {copy.completedShortLine(formatShortDate(progress.completedAt, lang), formatCount(count, lang))}

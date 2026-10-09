@@ -14,7 +14,7 @@ import { SyncManager } from "./sync-manager";
  * so nothing competes with the worship moment.
  */
 const FOCUS_ROUTE =
-  /^\/(quest\/[^/]+\/(count|complete|share)|challenge\/[^/]+\/count)$/;
+  /^\/(quest\/[^/]+\/(count|complete|share)|challenge\/[^/]+\/(count|share))$/;
 
 /**
  * Phone-first shell: one centered column with fixed bottom navigation on

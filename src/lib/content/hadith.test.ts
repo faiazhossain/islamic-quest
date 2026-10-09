@@ -40,8 +40,12 @@ describe("hadith catalog integrity", () => {
     }
   });
 
-  it("gives every dhikr at least one hadith", () => {
+  it("gives every dhikr at least one hadith (or a Quran citation)", () => {
     for (const dhikr of DHIKR) {
+      const quranSourced = dhikr.source.collection
+        .split(";")
+        .some((part) => part.trim() === "Quran");
+      if (quranSourced) continue;
       expect(hadithForDhikr(dhikr.id).length).toBeGreaterThan(0);
     }
   });
@@ -111,7 +115,9 @@ describe("hadith Bangla verification", () => {
   it("never invents Bangla: every unverified entry is known and bounded", () => {
     // The 2026-10-07 iHadis pass verified 12 of 18 entries; the rest ship
     // English-only (with the pending note in the sheet) until the iHadis
-    // pass locates them under iHadis's Islamic Foundation numbering.
+    // pass locates them under iHadis's Islamic Foundation numbering. The
+    // 2026-10-08 expansion batch added 6 further English-only entries
+    // (7 new entries total; 2 shipped with verbatim iHadis Bangla).
     const unverified = HADITH.filter((entry) => !entry.translation.bn);
     expect(unverified.map((entry) => entry.id).sort()).toEqual([
       "four-beloved-words-muslim-2137a",
@@ -120,6 +126,13 @@ describe("hadith Bangla verification", () => {
       "salawat-ten-mercies-muslim-408",
       "tasbih-33-33-34-muslim-596a",
       "tasbih-sea-foam-muslim-597a",
+      // 2026-10-08 batch: iHadis Bangla not yet verified verbatim.
+      "ayat-al-kursi-before-sleep-bukhari-2311",
+      "bismillah-three-times-protection-abudawud-5088",
+      "huda-tuqa-afafa-ghina-muslim-2721",
+      "istirja-calamity-muslim-918",
+      "kalimatillah-tammat-protection-muslim-2708",
+      "hasbunallah-ibrahim-fire-bukhari-4564",
     ].sort());
   });
 

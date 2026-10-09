@@ -8,6 +8,7 @@ import {
   getQuest,
   publicQuests,
   QUESTS,
+  TOPICS,
 } from "./index";
 
 const BENGALI = /\p{Script=Bengali}/u;
@@ -67,6 +68,62 @@ describe("Bangla content coverage", () => {
       if (dhikr.source.note) {
         expectBn(dhikr.source.note, `dhikr ${dhikr.id} source note`);
       }
+    }
+  });
+
+  it("writes Bangla for every topic name and description", () => {
+    for (const topic of TOPICS) {
+      expectBn(topic.name, `topic ${topic.id} name`);
+      expectBn(topic.description, `topic ${topic.id} description`);
+    }
+  });
+});
+
+describe("topic integrity", () => {
+  it("only links topics that exist in the TOPICS registry", () => {
+    const topicIds = new Set(TOPICS.map((topic) => topic.id));
+    for (const dhikr of DHIKR) {
+      for (const entry of dhikr.topics ?? []) {
+        expect(
+          topicIds.has(entry.topic),
+          `dhikr ${dhikr.id} links unknown topic ${entry.topic}`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("requires cited evidence on every dua-for and occasion link", () => {
+    for (const dhikr of DHIKR) {
+      for (const entry of dhikr.topics ?? []) {
+        if (entry.link === "related") continue;
+        expect(
+          entry.evidence,
+          `dhikr ${dhikr.id} topic ${entry.topic} is ${entry.link} without evidence`,
+        ).toBeDefined();
+        if (!entry.evidence) return;
+        expectBn(
+          entry.evidence,
+          `dhikr ${dhikr.id} topic ${entry.topic} evidence`,
+        );
+      }
+    }
+  });
+
+  it("gives every dhikr at least two search aliases", () => {
+    for (const dhikr of DHIKR) {
+      expect(
+        (dhikr.searchTerms ?? []).length,
+        `dhikr ${dhikr.id} has too few searchTerms`,
+      ).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("gives every topic at least two search aliases", () => {
+    for (const topic of TOPICS) {
+      expect(
+        topic.searchTerms.length,
+        `topic ${topic.id} has too few searchTerms`,
+      ).toBeGreaterThanOrEqual(2);
     }
   });
 });

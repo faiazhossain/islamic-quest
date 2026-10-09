@@ -6,10 +6,11 @@ import { DHIKR } from "./dhikr";
 import { HADIYA_HADITH } from "./hadiya-hadith";
 import { HADITH } from "./hadith";
 import { QUESTS } from "./quests";
-import type { CategoryId, Dhikr, HadithEntry, HadithTheme, Quest } from "./types";
+import { TOPICS } from "./topics";
+import type { CategoryId, Dhikr, HadithEntry, HadithTheme, Quest, Topic, TopicId } from "./types";
 
-export { CATEGORIES, DHIKR, HADITH, HADIYA_HADITH, QUESTS };
-export type { CategoryId, Category, Dhikr, HadithEntry, HadithTheme, HadiyaHadith, Quest } from "./types";
+export { CATEGORIES, DHIKR, HADITH, HADIYA_HADITH, QUESTS, TOPICS };
+export type { CategoryId, Category, Dhikr, HadithEntry, HadithTheme, HadiyaHadith, Quest, Topic, TopicId } from "./types";
 
 const dhikrById = new Map(DHIKR.map((dhikr) => [dhikr.id, dhikr]));
 
@@ -47,6 +48,26 @@ export function isQuestPublic(quest: Quest): boolean {
 export function publicQuests(): Quest[] {
   return QUESTS.filter(isQuestPublic);
 }
+
+/**
+ * Same launch gate as isQuestPublic, applied to the amal itself. Search
+ * and any future library surface must index publicDhikr(), never the raw
+ * DHIKR array, so draft content can never surface in production.
+ */
+export function isDhikrPublic(dhikr: Dhikr): boolean {
+  return (
+    process.env.NEXT_PUBLIC_ALLOW_UNREVIEWED === "1" ||
+    process.env.NODE_ENV !== "production" ||
+    dhikr.review.status === "verified"
+  );
+}
+
+export function publicDhikr(): Dhikr[] {
+  return DHIKR.filter(isDhikrPublic);
+}
+
+export const getTopic = (id: TopicId): Topic | undefined =>
+  TOPICS.find((topic) => topic.id === id);
 
 export function questsForCategory(category: CategoryId): Quest[] {
   return publicQuests().filter((quest) => dhikrForQuest(quest).category === category);
