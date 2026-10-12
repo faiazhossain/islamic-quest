@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Amiri, Fraunces, Hanken_Grotesk, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Privacy-friendly, cookieless page-view counting (Plausible). Aggregate
@@ -41,13 +42,6 @@ const notoBengali = Noto_Sans_Bengali({
   variable: "--font-bangla",
   subsets: ["bengali"],
 });
-
-/**
- * Production origin. Resolves every relative URL in share metadata
- * (og:image, og:url) to an absolute URL, which scrapers require. Update
- * it if the app moves off its Vercel domain.
- */
-const SITE_URL = "https://amalyn.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
