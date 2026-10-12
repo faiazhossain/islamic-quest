@@ -1,0 +1,15 @@
+# Amalyn outreach seeds - paste discovery results here, then run:
+#   npm run outreach -- discover --input <this-file>
+#
+# Accepted line shapes (mixed freely):
+#   [Name](https://facebook.com/groups/slug) - optional note
+#   Name<TAB>https://facebook.com/groups/slug<TAB>optional note
+#   https://facebook.com/groups/slug
+#
+# Lines starting with # are comments. Bad lines are reported, never fatal.
+# Duplicates (any URL spelling of the same community) are dropped with the
+# surviving line number.
+
+[Example Dhikr Family](https://www.facebook.com/groups/exampledhikrfamily/about) - daily after-fajr dhikr threads seen in public preview
+Quran Consistency Circle	https://www.facebook.com/groups/quranconsist	30-day reading challenges in about text
+https://www.facebook.com/groups/dailyamalreminders

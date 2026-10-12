@@ -70,16 +70,21 @@ export default function ChallengePage() {
   const [creatingTapped, setCreating] = useState(false);
   const [prefillDhikrId, setPrefillDhikrId] = useState<string | null>(() => {
     // Deep link: /challenge?amal=<dhikrId> opens setup with that amal
-    // preselected (e.g. arriving from Explore). Read via window.location
-    // rather than useSearchParams so the page stays statically
-    // prerenderable (Next 16 CSR-bailout). Lazy read, then strip the
-    // param so a refresh or back-navigation doesn't reopen setup. Safe
-    // against hydration mismatch: the page renders a skeleton until the
+    // preselected (e.g. arriving from Explore or an outreach campaign).
+    // Read via window.location rather than useSearchParams so the page
+    // stays statically prerenderable (Next 16 CSR-bailout). Lazy read,
+    // then strip only the amal param so a refresh or back-navigation
+    // doesn't reopen setup. Campaign utm_* params survive the strip so
+    // the Plausible beacon still attributes the visit. Safe against
+    // hydration mismatch: the page renders a skeleton until the
     // challenge list loads, so this state never changes prerendered HTML.
     if (typeof window === "undefined") return null;
-    const id = new URLSearchParams(window.location.search).get("amal");
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("amal");
     if (!id || !getDhikr(id)) return null;
-    window.history.replaceState(null, "", "/challenge");
+    params.delete("amal");
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `/challenge?${query}` : "/challenge");
     return id;
   });
   const setupRef = useRef<HTMLDivElement | null>(null);

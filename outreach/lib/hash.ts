@@ -1,0 +1,33 @@
+// Deterministic hashing and seeded PRNG for dedup ids and draft
+// variation. Plain functions only (strip-types safe).
+
+import { createHash } from "node:crypto";
+
+// 32-bit FNV-1a. Not cryptographic; used for ids and seeds only.
+export function fnv1a32(input: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+// mulberry32 PRNG: tiny, deterministic, good enough for slot draws.
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Whitespace-normalized content fingerprint, used to guarantee no two
+// communities receive identical draft text.
+export function fingerprint(text: string): string {
+  return createHash("sha1")
+    .update(text.normalize("NFC").replace(/\s+/g, " ").trim())
+    .digest("hex");
+}

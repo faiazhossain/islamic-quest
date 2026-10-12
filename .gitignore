@@ -50,3 +50,8 @@ next-env.d.ts
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Community outreach store. Deliberately local-only: it holds the promotion
+# target list, drafts, and audit log. Delete this line if the repo will
+# stay private and you want the outreach history in git.
+/outreach/data/

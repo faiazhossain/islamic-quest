@@ -49,6 +49,8 @@ sign-in), `AUTH_RESEND_KEY`/`EMAIL_FROM` (magic links), `DATABASE_URL`
 | `npm test` | Vitest (event log, sync merge) |
 | `npm run icons` | Regenerate PWA icons from `src/app/icon.svg` |
 | `npm run db:push` | Apply `db/schema.sql` to `DATABASE_URL` |
+| `npm run outreach` | Community outreach CLI (see `outreach/README.md`) |
+| `npm run outreach:board` | Localhost outreach review board |
 
 ## Religious content
 
@@ -72,3 +74,6 @@ routes are never cached.
 
 - `docs/product-definition.md` - scope, flows, data model, architecture
 - `docs/tasks.md` - implementation tracker and progress log
+- `outreach/README.md` - community outreach workflow (operator tooling,
+  kept out of the app bundle; posting is always manual and evidenced)
+- `outreach/PLAYBOOK.md` - the repeatable agent research playbook

@@ -209,3 +209,58 @@ can interleave unless a dependency says otherwise.
   canonical deliberately unset at root level to avoid mislabeling child
   pages; per-quest share cards (generateMetadata) remain open as
   follow-up.
+- 2026-10-12 — Community outreach system added (beads islamic-quest-j4w,
+  pb6, vmq, yas, 825): new operator tooling under `outreach/` (kept out of
+  the app bundle) for a repeatable, auditable discovery-to-publication
+  workflow. Core: URL canonicalization/dedup, guarded status machine
+  (Meta removed the Groups API 2024-04-22, so posting is always manual
+  copy-paste; PUBLISHED requires a post URL), transparent scoring rubric
+  whose rules gate blocks unverified communities, JSONL store (atomic
+  writes, lockfile, corrupt-line quarantine), UTM campaign links synced
+  to src/lib/site.ts by test, and en/bn draft generation with a
+  fingerprint guard so no two communities get identical text. CLI +
+  localhost-only token-gated review board; operator docs in
+  outreach/README.md, agent playbook in outreach/PLAYBOOK.md. First
+  discovery run: 10 evidence-backed candidates researched (rules left
+  unknown on purpose - qualification unlocks after the operator checks
+  each group's rules). App-side: /challenge now strips only the amal
+  param on mount so campaign utm_* survive to the Plausible beacon.
+  outreach/data/ is gitignored (promotion-target list stays local).
+- 2026-10-12 — Outreach scoring v2 + second discovery run (bead
+  islamic-quest-8pg and successors): first qualification pass verified all
+  10 run-1 candidates against public /about pages (4 promotion
+  prohibitions verbatim, 2 identity mismatches, 1 relevance rejection, 3
+  rules-unavailable) with zero drafts generated. Scoring v2 rebuilt around
+  welcome evidence: explicit_permit 30 / approval_process 24 /
+  permission_required 18 / permissive 12 / anti_promo and unknown 0;
+  reach capped at 5; new contribution-path dimension (submission form 10
+  / admin approval 7 / direct contact 5); gates total>=60, topic>=10,
+  welcome>=12. Lang gains "other" for identified non-draftable languages.
+  nextTopic() regression protection for incremental research; --last-post
+  none retracts an unobservable date. Second run: 29 new verified
+  candidates (11 non-Facebook sources, 18 Facebook groups) via agent
+  research with operator spot-checks; store at 39 records / 175 events
+  with run-1 provenance intact.
+- 2026-10-12 — Outreach workflow simplified to the mission (bead
+  islamic-quest-0us, founder direction): outreach exists to spread the
+  free app and facilitate amal, not to run a marketing or feedback
+  campaign, so the follow-up and analytics machinery is gone. Removed:
+  FOLLOW_UP_DUE status + followUpAt field + `follow-up` action/--due/
+  `list --due`, UTM campaign links (campaign.ts -> link.ts builds plain
+  /challenge?amal= deep links; site.ts sync test kept), the `campaign`
+  CLI command (-> `link [--dhikr]`), funnel analytics (funnel.ts ->
+  stats.ts counts statuses only; conversion %, avg-score-by-status,
+  by-language/platform, stuck, events-7d all dropped), Plausible
+  references, and board follow-up controls. Kept: discovery/research
+  with the rules-welcome gate, guarded permission flow, en/bn drafts
+  with disclosure + fingerprint guard, publish-requires-post-URL
+  publication record (duplicate-posting guard), audit trail. Status
+  model is now DISCOVERED -> RESEARCHED -> QUALIFIED ->
+  (NEEDS_PERMISSION ->) APPROVED_FOR_OUTREACH -> PUBLISHED ->
+  COMPLETED, with REJECTED/DO_NOT_CONTACT off-ramps; no store record
+  used the removed stage (39 records verified unchanged). PLAYBOOK
+  gains an explicit "never follow up / never collect community
+  feedback (in-app feedback exists)" rule. App-side utm-param
+  passthrough on /challenge and the Plausible beacon are untouched
+  (product-level, user-directed earlier); outreach just no longer
+  emits tagged links. Full suite 320/320, tsc and eslint clean.
